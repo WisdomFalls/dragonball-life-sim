@@ -434,4 +434,3 @@ export function worldFlag(state, name) {
 export function setWorldFlag(state, name, value = true) {
   state.world.flags[name] = value;
 }
-
