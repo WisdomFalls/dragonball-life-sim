@@ -3,6 +3,7 @@
 
 import { SAVE_VERSION } from './state.js';
 import { registerRace } from '../data/races.js';
+import { ensureVisualContracts } from './visuals.js';
 
 const KEY_PREFIX = 'dbls.save.';
 const SLOTS = ['auto', 'a', 'b', 'c'];
@@ -50,10 +51,12 @@ function migrate(state, from) {
   // npc) carries its own copy specifically so it can be put back here, on
   // every load, rather than quietly reading as Earthling from now on.
   if (state.character && state.character.raceDef) registerRace(state.character.raceDef);
+  if (state.character) ensureVisualContracts(state.character, { source: 'player' });
   for (const npc of Object.values(state.npcs || {})) {
     if (npc.trust === undefined) npc.trust = 30;
     if (npc.knowledge === undefined) npc.knowledge = 1;
     if (npc.raceDef) registerRace(npc.raceDef);
+    ensureVisualContracts(npc, { source: npc.canonId ? 'canon' : 'generated' });
   }
   state.version = SAVE_VERSION;
   return state;
@@ -136,3 +139,4 @@ export function importString(text) {
     return null;
   }
 }
+
