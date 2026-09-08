@@ -40,8 +40,6 @@ test('appearance resolution selects lore-appropriate rigs for major forms', () =
   assert.equal(orange.rig.id, 'namekian:large:ready');
 });
 
-
-
 test('asset plans keep compact sprites and sheet portraits visually identical', async () => {
   const { portraitAssetPlan } = await import('../src/ui/portrait-assets.js');
   const character = {
@@ -59,7 +57,6 @@ test('asset plans keep compact sprites and sheet portraits visually identical', 
   assert.ok(sprite.layers.some((entry) => entry.key === 'accessory/scouter'));
 });
 
-
 test('asset renderer only composes complete reviewed layer sets', async () => {
   const { renderAssetPortrait } = await import('../src/ui/portrait-assets.js');
   assert.equal(renderAssetPortrait({ renderer: 'parametric-fallback' }), null);
@@ -70,7 +67,6 @@ test('asset renderer only composes complete reviewed layer sets', async () => {
   assert.match(svg, /viewBox="0 0 96 128"/);
   assert.match(svg, /data-renderer="asset"/);
 });
-
 
 test('an art pack must cover every required layer before it activates', async () => {
   const { portraitAssetPlan, requiredAssetKeys, renderAssetPortrait } = await import('../src/ui/portrait-assets.js');
@@ -84,7 +80,6 @@ test('an art pack must cover every required layer before it activates', async ()
   assert.match(renderAssetPortrait(complete, manifest), /data-slot="body"/);
 });
 
-
 test('every declared race resolves to a deliberate visual family', async () => {
   const { RACES } = await import('../src/data/races.js');
   const { bodyFamilyFor, HAIRLESS_RACES } = await import('../src/ui/appearance.js');
@@ -93,6 +88,37 @@ test('every declared race resolves to a deliberate visual family', async () => {
   assert.equal(HAIRLESS_RACES.has('vezrin'), true);
 });
 
+test('a visual profile keeps authored identity while live equipment and injuries remain authoritative', async () => {
+  const { visualProfileFor } = await import('../src/ui/appearance.js');
+  const profile = visualProfileFor({
+    id: 'npc-aurix', raceId: 'android', injuries: [{ id: 'burned_arm' }],
+    bag: [{ id: 'light_armour', worn: true }],
+    appearance: {
+      outfit: 'casual', cybernetics: ['mechanical_arm'],
+      visualProfile: { id: 'aurix-v1', hairStyle: 'swept', hairColour: 'silver', facialHair: 'goatee', expression: 'smirk' },
+    },
+  });
+  assert.equal(profile.id, 'aurix-v1');
+  assert.equal(profile.identity.hairStyle, 'swept');
+  assert.equal(profile.identity.facialHair, 'goatee');
+  assert.equal(profile.styling.outfit, 'armour_saiyan');
+  assert.deepEqual(profile.condition.injuries, ['burned_arm']);
+  assert.deepEqual(profile.condition.cybernetics, ['mechanical_arm']);
+  assert.equal(profile.pose.expression, 'smirk');
+});
+
+test('asset plans expose optional visual-detail layers without weakening the core kit gate', async () => {
+  const { portraitAssetPlan } = await import('../src/ui/portrait-assets.js');
+  const plan = portraitAssetPlan({
+    raceId: 'earthling', injuries: ['bruised_eye'],
+    appearance: { facialHair: 'beard_short', expression: 'grimace', cybernetics: ['mechanical_arm'] },
+  });
+  assert.ok(plan.layers.some((entry) => entry.key === 'facial-hair/beard_short'));
+  assert.ok(plan.layers.some((entry) => entry.key === 'injury/bruised_eye'));
+  assert.ok(plan.layers.some((entry) => entry.key === 'cybernetic/mechanical_arm'));
+  assert.ok(plan.layers.some((entry) => entry.key === 'expression/grimace'));
+  assert.equal(plan.renderer, 'parametric-fallback');
+});
 
 test('portrait markup advertises the requested sprite or sheet variant', async () => {
   const { portraitSvg } = await import('../src/ui/portrait.js');
@@ -100,3 +126,4 @@ test('portrait markup advertises the requested sprite or sheet variant', async (
   assert.match(portraitSvg(character, { variant: 'sprite' }), /data-asset-variant="sprite"/);
   assert.match(portraitSvg(character, { variant: 'sheet' }), /data-asset-variant="sheet"/);
 });
+
