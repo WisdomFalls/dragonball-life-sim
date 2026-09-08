@@ -58,3 +58,15 @@ test('asset plans keep compact sprites and sheet portraits visually identical', 
   assert.equal(sprite.renderer, 'parametric-fallback');
   assert.ok(sprite.layers.some((entry) => entry.key === 'accessory/scouter'));
 });
+
+
+test('asset renderer only composes complete reviewed layer sets', async () => {
+  const { renderAssetPortrait } = await import('../src/ui/portrait-assets.js');
+  assert.equal(renderAssetPortrait({ renderer: 'parametric-fallback' }), null);
+  const svg = renderAssetPortrait({
+    renderer: 'asset', variant: 'sprite', rig: { id: 'humanoid:standard:ready' },
+    layers: [],
+  });
+  assert.match(svg, /viewBox="0 0 96 128"/);
+  assert.match(svg, /data-renderer="asset"/);
+});
