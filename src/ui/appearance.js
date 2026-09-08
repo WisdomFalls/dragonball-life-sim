@@ -82,7 +82,7 @@ export function visualProfileFor(character = {}, opts = {}) {
   const savedIdentity = character.visualIdentity || null;
   const personal = character.personalAppearance || {};
   const behavior = character.visualBehavior || null;
-  const expression = opts.expression || custom.expression || a.expression || 'neutral';
+  const expression = opts.expression ? resolved.visualState.temporary.expression.primary : custom.expression || a.expression || resolved.visualState.temporary.expression.primary || 'neutral';
   const cybernetics = distinct([
     ...(custom.cybernetics || a.cybernetics || []),
     ...(resolved.accessories.includes('cyber_eye') ? ['cyber_eye'] : []),
@@ -199,7 +199,7 @@ export function resolveAppearance(character = {}, opts = {}) {
     outfit: equipment.outfit || (character.appearance && character.appearance.outfit) || 'casual',
   };
   const mode = opts.mode || 'profile';
-  const visualState = resolveVisualState(character, { marks, accessories: equipment.accessories, attachments: equipment.attachments, form, expression: opts.expression, mode });
+  const visualState = resolveVisualState(character, { marks, accessories: equipment.accessories, attachments: equipment.attachments, form, expression: opts.expression ?? character.expressionGuidance ?? appearance.expression, mode });
   return {
     character,
     appearance,
@@ -224,10 +224,18 @@ export function resolveVisualState(character = {}, opts = {}) {
   return {
     ageStage: ageStageFor(character),
     acquired: { marks: (opts.marks || []).slice(), injuries: injuryRecords, prosthetics: injuryRecords.filter((entry) => entry.prosthetic).map((entry) => entry.prosthetic) },
-    temporary: { fatigue, expression: opts.expression || 'neutral', afterlife: !!character.inAfterlife, formId: opts.form && opts.form.id || null, aura: map && map.overrides.aura || null },
+    temporary: { fatigue, expression: resolveVisualExpression(opts.expression || character.expressionGuidance), afterlife: !!character.inAfterlife, formId: opts.form && opts.form.id || null, aura: map && map.overrides.aura || null },
     attachments: opts.attachments ? opts.attachments.slice() : visualAttachmentsFor([], { legacyIds: opts.accessories || [], raceId: character.raceId, rigFamily: bodyFamilyFor(character.raceId) }),
     alternateRig: map && map.rigOverride || null,
   };
+}
+
+/** Pure adapter: simulation supplies a semantic feeling; presentation selects
+ * morphology. It neither calculates nor writes emotional simulation state. */
+export function resolveVisualExpression(guidance) {
+  if (!guidance) return { primary: 'neutral', secondary: null, intensity: 0 };
+  if (typeof guidance === 'string') return { primary: guidance, secondary: null, intensity: 50 };
+  return { primary: guidance.primary || 'neutral', secondary: guidance.secondary || null, intensity: Math.max(0, Math.min(100, guidance.intensity ?? 50)) };
 }
 
 function normalizeVisualInjury(entry = {}) {
