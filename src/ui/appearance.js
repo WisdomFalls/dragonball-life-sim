@@ -20,14 +20,22 @@ const BODY_OUTFITS = {
 // needs to select a real silhouette before it selects hair or clothing: an
 // ape, a giant Namekian and a Frost Demon cannot be made believable by scaling
 // the same humanoid sprite.
-const BODY_FAMILIES = {
+export const BODY_FAMILIES = Object.freeze({
   saiyan: 'humanoid', halfsaiyan: 'humanoid', earthling: 'humanoid',
   android: 'humanoid', half_android: 'humanoid', tuffle: 'humanoid',
   cerealian: 'humanoid', half_cerealian: 'humanoid', shinjin: 'humanoid',
+  metamoran: 'humanoid', unrecorded: 'humanoid', driftkin: 'humanoid',
   namekian: 'namekian', frostdemon: 'frost_demon', half_frostkin: 'frost_demon',
   frost_android: 'frost_demon', majin: 'majin', bioandroid: 'bioandroid',
-  yardratian: 'yardratian', kryllian: 'kryllian',
-};
+  yardratian: 'yardratian', kryllian: 'kryllian', vezrin: 'vezrin', beast: 'beast',
+});
+
+// Hairlessness is a species fact, independent of the broader body family.
+export const HAIRLESS_RACES = new Set(['namekian', 'frostdemon', 'majin', 'bioandroid', 'vezrin']);
+
+export function bodyFamilyFor(raceId) {
+  return BODY_FAMILIES[raceId] || 'generated_humanoid';
+}
 
 const FORM_RIGS = {
   golden_oozaru: { family: 'great_ape', scale: 'colossal', pose: 'beast' },
@@ -82,7 +90,7 @@ function equip(character, marks) {
 }
 
 function rigFor(character, appearance, form, mode) {
-  const base = BODY_FAMILIES[character.raceId] || 'generated_humanoid';
+  const base = bodyFamilyFor(character.raceId);
   const formRig = form && FORM_RIGS[form.id] || {};
   return {
     family: formRig.family || base,
