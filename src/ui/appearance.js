@@ -6,7 +6,7 @@
 // or, later, an authored sprite rig.
 
 import { getItem } from '../data/items.js';
-import { ageStageFor, TRANSFORMATION_VISUAL_MAPS } from '../engine/visuals.js';
+import { ageStageFor, TRANSFORMATION_VISUAL_MAPS, visualAttachmentsFor } from '../engine/visuals.js';
 
 const ITEM_ACCESSORIES = {
   scouter: 'scouter', potara: 'potara', z_sword: 'sword', power_pole: 'pole',
@@ -163,7 +163,9 @@ function equip(character, marks) {
   }
   if (character.inAfterlife && !character.keptBody) addUnique(accessories, 'halo');
   if (marks.includes('missing_eye') && !accessories.includes('cyber_eye')) addUnique(accessories, 'eyepatch');
-  return { accessories, outfit };
+  return { accessories, outfit, attachments: visualAttachmentsFor(visualItems(character), {
+    legacyIds: accessories, raceId: character.raceId, rigFamily: bodyFamilyFor(character.raceId),
+  }) };
 }
 
 function rigFor(character, appearance, form, mode) {
@@ -197,7 +199,7 @@ export function resolveAppearance(character = {}, opts = {}) {
     outfit: equipment.outfit || (character.appearance && character.appearance.outfit) || 'casual',
   };
   const mode = opts.mode || 'profile';
-  const visualState = resolveVisualState(character, { marks, accessories: equipment.accessories, form, expression: opts.expression, mode });
+  const visualState = resolveVisualState(character, { marks, accessories: equipment.accessories, attachments: equipment.attachments, form, expression: opts.expression, mode });
   return {
     character,
     appearance,
@@ -214,7 +216,7 @@ export function resolveAppearance(character = {}, opts = {}) {
 
 /** Translate authoritative simulation facts into presentation facts only. */
 export function resolveVisualState(character = {}, opts = {}) {
-  const injuryRecords = (character.injuries || []).map((entry) => ({ id: typeof entry === 'string' ? entry : entry.id, side: entry.side || null, prosthetic: entry.prosthetic || null }));
+  const injuryRecords = (character.injuries || []).map((entry) => normalizeVisualInjury(typeof entry === 'string' ? { id: entry } : entry));
   const health = character.vitals && character.vitals.health;
   const healthMax = character.vitals && character.vitals.healthMax;
   const fatigue = health === undefined || !healthMax ? 'normal' : health / healthMax < 0.25 ? 'critical' : health / healthMax < 0.55 ? 'hurt' : 'normal';
@@ -223,9 +225,19 @@ export function resolveVisualState(character = {}, opts = {}) {
     ageStage: ageStageFor(character),
     acquired: { marks: (opts.marks || []).slice(), injuries: injuryRecords, prosthetics: injuryRecords.filter((entry) => entry.prosthetic).map((entry) => entry.prosthetic) },
     temporary: { fatigue, expression: opts.expression || 'neutral', afterlife: !!character.inAfterlife, formId: opts.form && opts.form.id || null, aura: map && map.overrides.aura || null },
-    attachments: (opts.accessories || []).slice(),
+    attachments: opts.attachments ? opts.attachments.slice() : visualAttachmentsFor([], { legacyIds: opts.accessories || [], raceId: character.raceId, rigFamily: bodyFamilyFor(character.raceId) }),
     alternateRig: map && map.rigOverride || null,
   };
+}
+
+function normalizeVisualInjury(entry = {}) {
+  const id = entry.id || 'unknown';
+  const side = entry.side || null;
+  const lost = { lost_arm: 'missing_arm', lost_hand: 'missing_hand', lost_leg: 'missing_leg', lost_eye: 'missing_eye' }[id] || id;
+  const sided = side && (lost.startsWith('missing_') || entry.prosthetic) ? `${lost}_${side}` : lost;
+  const prosthetic = entry.prosthetic || null;
+  const prostheticKey = prosthetic ? `${prosthetic}_${side || 'center'}` : null;
+  return { id, side, prosthetic, assetKey: sided, prostheticKey };
 }
 
 export function resolvedAccessoryIds(character, opts) {
