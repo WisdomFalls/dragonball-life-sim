@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { Rng } from '../src/engine/rng.js';
 import {
   ageStageFor, ensureVisualContracts, generateInheritedVisualIdentity,
-  generateVisualIdentity, initialVisualBehavior, visualConstraintsFor,
+  generateVisualIdentity, initialVisualBehavior, visualAttachmentFor, visualAttachmentsFor,
+  visualConstraintsFor, isVisualTokenCompatible, filterCompatibleVisualTokens,
 } from '../src/engine/visuals.js';
 
 test('visual identity preserves biological traits separately from acquired history', () => {
@@ -62,6 +63,47 @@ test('visual state resolves acquired history and live form without copying eithe
   assert.deepEqual(state.acquired.prosthetics, ['mech_arm']);
   assert.equal(state.temporary.fatigue, 'critical');
   assert.equal(state.temporary.aura, 'gold');
-  assert.deepEqual(state.attachments, ['scouter']);
+  assert.deepEqual(state.attachments.map((attachment) => attachment.id), ['scouter']);
+});
+
+test('attachment resolver normalizes declared and legacy item visuals', () => {
+  const legacy = visualAttachmentFor('scouter');
+  assert.deepEqual(legacy, { id: 'scouter', slot: 'face', anchor: 'eye_left', layer: 'foreground_face', compatibleRigs: ['*'], assetSet: 'accessory/scouter', stateVariants: ['intact'], state: 'intact' });
+  const declared = visualAttachmentFor({ id: 'test_blade', cat: 'weapon', visual: { slot: 'weapon', anchor: 'hand_front', layer: 'foreground_hand', compatibleRigs: ['humanoid'], assetSet: 'weapon/test_blade', stateVariants: ['intact', 'cracked'] } }, { state: 'cracked' });
+  assert.equal(declared.assetSet, 'weapon/test_blade');
+  assert.equal(declared.state, 'cracked');
+  assert.deepEqual(visualAttachmentsFor(['scouter'], { raceId: 'saiyan', rigFamily: 'humanoid' }).map((a) => a.id), ['scouter']);
+});
+
+test('sided injuries and prosthetics retain left/right asset keys in the layer plan', async () => {
+  const { resolveVisualState } = await import('../src/ui/appearance.js');
+  const { portraitAssetPlan } = await import('../src/ui/portrait-assets.js');
+  const character = { raceId: 'earthling', injuries: [{ id: 'lost_arm', side: 'left', prosthetic: 'mech_arm' }, { id: 'lost_eye', side: 'right' }], appearance: {} };
+  const state = resolveVisualState(character);
+  assert.deepEqual(state.acquired.injuries.map((i) => [i.assetKey, i.prostheticKey]), [['missing_arm_left', 'mech_arm_left'], ['missing_eye_right', null]]);
+  const keys = portraitAssetPlan(character).layers.map((layer) => layer.key);
+  assert.ok(keys.includes('injury/missing_arm_left'));
+  assert.ok(keys.includes('prosthetic/mech_arm_left'));
+  assert.ok(keys.includes('injury/missing_eye_right'));
+});
+
+test('race compatibility rejects invalid tokens and filters attachments by rig', () => {
+  assert.equal(isVisualTokenCompatible({ raceId: 'namekian', rigFamily: 'namekian', category: 'hair', tokenId: 'straight' }), false);
+  assert.equal(isVisualTokenCompatible({ raceId: 'namekian', rigFamily: 'namekian', category: 'speciesFeature', tokenId: 'antennae_01' }), true);
+  assert.equal(isVisualTokenCompatible({ raceId: 'earthling', rigFamily: 'humanoid', category: 'speciesFeature', tokenId: 'antennae_01' }), false);
+  const attachments = filterCompatibleVisualTokens([{ id: 'tail_only', compatibleRigs: ['beast'] }, { id: 'visor', compatibleRigs: ['humanoid'] }], { raceId: 'earthling', rigFamily: 'humanoid', category: 'attachment' });
+  assert.deepEqual(attachments.map((a) => a.id), ['visor']);
+});
+
+test('version 3 saves migrate visual contracts without replacing legacy appearance', async () => {
+  const { deserialise } = await import('../src/engine/save.js');
+  const migrated = deserialise({ v: 3, state: {
+    world: {}, memory: {}, stats: {}, npcs: {},
+    character: { id: 'legacy', raceId: 'earthling', age: 22, appearance: { hairStyle: 'cropped', hairColour: 'brown', face: 'round' }, vitals: {} },
+  } });
+  assert.equal(migrated.version, 4);
+  assert.equal(migrated.character.appearance.hairStyle, 'cropped');
+  assert.equal(migrated.character.personalAppearance.hairstyle.family, 'cropped');
+  assert.equal(migrated.character.visualIdentity.biological.face.head, 'round_01');
 });
 
