@@ -1145,7 +1145,7 @@ select.text-input { font-family: var(--font-mono); font-size: 13px; }
 <script>
 (function () {
 "use strict";
-/* ==== data/lexicon.js ==== */
+/* ==== data\lexicon.js ==== */
 const __mod_data_lexicon_js = (function () {
 // Surface-realisation banks. The generator never writes a fixed sentence: it
 // writes a shape, and this file supplies the words. Every entry here multiplies
@@ -1245,7 +1245,7 @@ const LEXICON_KEYS = Object.keys(LEXICON);
   return { LEXICON, LEXICON_KEYS };
 })();
 
-/* ==== engine/text.js ==== */
+/* ==== engine\text.js ==== */
 const __mod_engine_text_js = (function () {
 // Text grammar. Templates are shapes, not sentences.
 //
@@ -1422,7 +1422,7 @@ function ordinal(n) {
   return { render, tidy, variantCount, numberish, zeni, listPhrase, ordinal };
 })();
 
-/* ==== engine/memory.js ==== */
+/* ==== engine\memory.js ==== */
 const __mod_engine_memory_js = (function () {
 // Story memory. Three jobs:
 //   1. Suppression - remember the exact shape of what has already happened so
@@ -1600,7 +1600,7 @@ function recentBeats(memory, limit = 5) {
   return { createMemory, fingerprint, noveltyWeight, remember, addFact, findFacts, hasFact, openThread, activeThreads, findThread, advanceThread, closeThread, threadPressure, recallSummary, recentBeats };
 })();
 
-/* ==== data/races.js ==== */
+/* ==== data\races.js ==== */
 const __mod_data_races_js = (function () {
 // Playable races. Each one changes the stat floor, the growth curve, the
 // lifespan, the transformation ladder, and which special mechanics are live.
@@ -2313,7 +2313,7 @@ const TEMPERAMENTS = [
   return { RACES, RACE_BY_ID, CREATABLE_RACES, getRace, generateRace, registerRace, sexesFor, maturity, hasPerk, raceHasTail, UPBRINGINGS, BODY_TYPES, TEMPERAMENTS };
 })();
 
-/* ==== data/places.js ==== */
+/* ==== data\places.js ==== */
 const __mod_data_places_js = (function () {
 // Locations. `danger` drives encounter lethality, `tags` gate events, and
 // `training` is the multiplier for training done here.
@@ -2395,7 +2395,7 @@ function placesWith(tag) {
   return { PLACES, PLACE_BY_ID, getPlace, placesOn, placesWith };
 })();
 
-/* ==== data/timeline.js ==== */
+/* ==== data\timeline.js ==== */
 const __mod_data_timeline_js = (function () {
 // The canon spine. These fire as world events in the year they are due, and
 // the player can walk into them, ignore them, or change them outright. Once a
@@ -2512,7 +2512,7 @@ function worldPowerBaseline(year) {
   return { TIMELINE, isTournamentYear, timelineFor, eraName, worldPowerBaseline };
 })();
 
-/* ==== engine/rng.js ==== */
+/* ==== engine\rng.js ==== */
 const __mod_engine_rng_js = (function () {
 // Seeded, serialisable PRNG. Every life is reproducible from its seed, which
 // keeps saves honest and makes the soak tests deterministic.
@@ -2639,7 +2639,7 @@ function substream(rng, topic) {
   return { hashSeed, Rng, clamp, substream };
 })();
 
-/* ==== data/traits.js ==== */
+/* ==== data\traits.js ==== */
 const __mod_data_traits_js = (function () {
 // Traits.
 //
@@ -2910,7 +2910,7 @@ function checkEarnedTraits(state) {
   return { TRAIT_KINDS, TRAITS, TRAIT_BY_ID, getTrait, traitEffect, hasTrait, inheritTraits, originTraits, checkEarnedTraits };
 })();
 
-/* ==== data/transformations.js ==== */
+/* ==== data\transformations.js ==== */
 const __mod_data_transformations_js = (function () {
 // Transformation ladders. Each form multiplies effective power, drains ki, and
 // unlocks only when its requirement object is satisfied by the live character.
@@ -3417,7 +3417,7 @@ function transformationOrigin(id) {
   return { TRANSFORMATIONS, TRANSFORM_BY_ID, ladderFor, getTransformation, transformationOrigin };
 })();
 
-/* ==== data/techniques.js ==== */
+/* ==== data\techniques.js ==== */
 const __mod_data_techniques_js = (function () {
 // The skill tree. Six branches, each with prerequisites, teachers and a real
 // combat effect. `learnDC` is rolled against a blend of relevant stats.
@@ -3790,7 +3790,7 @@ function inventTechnique(character, rng, opts = {}) {
   return { BRANCHES, TECHNIQUES, techniqueOrigin, TECH_BY_ID, getTechnique, availableTechniques, techniquePurity, setTechniquePurity, techniqueDisplayName, techniquePower, INVENTABLE_BRANCHES, inventTechnique };
 })();
 
-/* ==== data/items.js ==== */
+/* ==== data\items.js ==== */
 const __mod_data_items_js = (function () {
 // Assets, gear and consumables. `effect` is applied by the engine when owned
 // (passive) or used (consumable).
@@ -4153,7 +4153,7 @@ function interpretWishLocally(text) {
   return { ITEMS, ITEM_BY_ID, LOCAL_GOODS, getItem, shopStock, DRAGONS, WISH_GROUPS, WISHES, WISH_BY_ID, interpretWishLocally };
 })();
 
-/* ==== engine/mastery.js ==== */
+/* ==== engine\mastery.js ==== */
 const __mod_engine_mastery_js = (function () {
 // Form ceilings.
 //
@@ -4323,7 +4323,7 @@ function masteryList(character) {
   return { ceilingFor, ceilingPressure, ceilingDamping, ceilingBlock, masteryOf, trainMastery, masteryMult, masteryDrain, masteryLabel, masteryList };
 })();
 
-/* ==== engine/stats.js ==== */
+/* ==== engine\stats.js ==== */
 const __mod_engine_stats_js = (function () {
 // Power level mathematics. Dragon Ball power is exponential, so growth here is
 // multiplicative: a percentage gain per year of training that compounds. That
@@ -4641,7 +4641,7 @@ function naturalDeathChance(character) {
   return { STAT_KEYS, STAT_LABELS, ageFactor, agingDecay, trainingRate, zenkaiBoost, bestForm, equippedWeapon, weaponAttackBonus, gearDefenseBonus, combatPower, powerTier, winChance, statAverage, applyStatDelta, looksScore, healthMaxFor, staminaMaxFor, kiMaxFor, lifeExpectancy, naturalDeathChance };
 })();
 
-/* ==== data/planets.js ==== */
+/* ==== data\planets.js ==== */
 const __mod_data_planets_js = (function () {
 // Worlds, as places with politics rather than backdrops. Each has people on it,
 // a law, somebody who defends it, and a distance from everywhere else.
@@ -4896,7 +4896,7 @@ const TRAVEL_METHODS = [
   return { PLANETS, PLANET_BY_ID, getPlanet, planetExists, travelYears, TRAVEL_METHODS };
 })();
 
-/* ==== data/names.js ==== */
+/* ==== data\names.js ==== */
 const __mod_data_names_js = (function () {
 // Race-appropriate name generation. Every species in Dragon Ball is named
 // after a theme: Saiyans are vegetables, Namekians are snails and instruments,
@@ -5080,11 +5080,109 @@ function generateHomageName(rng, baseName) {
   return { generateName, generateFullName, EPITHETS, TITLES, generateTitle, generateEpithet, generateSignatureName, generateHomageName };
 })();
 
-/* ==== ui/portrait.js ==== */
+/* ==== ui\appearance.js ==== */
+const __mod_ui_appearance_js = (function () {
+// Presentation-only appearance resolution.
+//
+// Simulation records deliberately keep birth traits, equipment, injuries and
+// transformations in separate places. Renderers should never each decide how
+// to combine them: this module makes one deterministic snapshot for a portrait
+// or, later, an authored sprite rig.
+
+const { getItem } = __mod_data_items_js;
+
+const ITEM_ACCESSORIES = {
+  scouter: 'scouter', potara: 'potara', z_sword: 'sword', power_pole: 'pole',
+  championship_belt: 'belt', turtle_shell: 'shell', cyber_eye: 'cyber_eye',
+};
+
+const BODY_OUTFITS = {
+  gi: 'gi_orange', armour: 'armour_saiyan', casual: 'casual',
+};
+
+function addUnique(list, value) {
+  if (value && !list.includes(value)) list.push(value);
+}
+
+function markIds(character) {
+  const appearance = character.appearance || {};
+  const marks = (appearance.marks || []).slice();
+  if (appearance.marking && appearance.marking !== 'none' && !marks.length) {
+    marks.push(appearance.marking === 'scar' ? 'scar_cheek' : appearance.marking);
+  }
+  for (const scar of character.scars || []) addUnique(marks, scar.mark);
+  return marks;
+}
+
+function visualItems(character) {
+  const bag = character.bag || [];
+  // A bag is authoritative once it exists. Older saves only have items, so
+  // retain the previous behaviour until they are migrated into a bag.
+  if (bag.length) return bag.filter((entry) => entry.worn).map((entry) => entry.id);
+  return character.items || [];
+}
+
+function equip(character, marks) {
+  const accessories = (character.appearance && character.appearance.accessories || []).slice();
+  let outfit = character.appearance && character.appearance.outfit;
+
+  for (const itemId of visualItems(character)) {
+    const item = getItem(itemId);
+    if (!item) continue;
+    addUnique(accessories, item.wear || ITEM_ACCESSORIES[itemId]);
+    if (item.slot === 'body' && BODY_OUTFITS[item.style]) outfit = BODY_OUTFITS[item.style];
+  }
+  if (character.inAfterlife && !character.keptBody) addUnique(accessories, 'halo');
+  if (marks.includes('missing_eye') && !accessories.includes('cyber_eye')) addUnique(accessories, 'eyepatch');
+  return { accessories, outfit };
+}
+
+/**
+ * Resolve all presentation data without changing the character record. `form`
+ * is allowed to be a transformation object or its id; battle passes the live
+ * object while normal portraits can use activeForm from the saved character.
+ */
+function resolveAppearance(character = {}, opts = {}) {
+  const marks = markIds(character);
+  const equipment = equip(character, marks);
+  const selectedForm = opts.form === undefined ? character.activeForm : opts.form;
+  const form = typeof selectedForm === 'string' ? { id: selectedForm } : selectedForm || null;
+  const appearance = {
+    buildShape: 'balanced', hairStyle: 'spiked', hairColour: 'black',
+    eyeShape: 'sharp', eyeColour: 'black', skin: 'light', face: 'square',
+    outfit: 'casual', marks: [], accessories: [],
+    ...(character.appearance || {}),
+    outfit: equipment.outfit || (character.appearance && character.appearance.outfit) || 'casual',
+  };
+  return {
+    character,
+    appearance,
+    marks,
+    accessories: equipment.accessories,
+    form,
+    maturityRate: opts.maturityRate ?? character.maturityRate ?? 1,
+    expression: opts.expression,
+    mode: opts.mode || 'profile',
+  };
+}
+
+function resolvedAccessoryIds(character, opts) {
+  return resolveAppearance(character, opts).accessories;
+}
+
+function resolvedMarkIds(character, opts) {
+  return resolveAppearance(character, opts).marks;
+}
+  return { resolveAppearance, resolvedAccessoryIds, resolvedMarkIds };
+})();
+
+/* ==== ui\portrait.js ==== */
 const __mod_ui_portrait_js = (function () {
 // A parametric portrait. Every choice in the character creator changes the
 // drawing, and the drawing follows the character through the game: transform
 // and the aura appears, lose the tail and the tail is gone.
+
+const { resolveAppearance, resolvedAccessoryIds, resolvedMarkIds } = __mod_ui_appearance_js;
 
 const HAIR_STYLES = [
   { id: 'spiked', name: 'Spiked upward' },
@@ -5244,34 +5342,12 @@ const ACCESSORY_PRESETS = [
 
 /** Every accessory the character is wearing right now, from all sources. */
 function wornAccessories(character) {
-  const a = character.appearance || {};
-  const out = new Set(a.accessories || []);
-  const items = character.items || [];
-  for (const acc of ACCESSORY_PRESETS) {
-    if (acc.item && items.includes(acc.item)) out.add(acc.id);
-  }
-  // Shop accessories carry the id of what they put on you.
-  for (const id of items) {
-    if (id.startsWith('acc_')) out.add(id.slice(4));
-  }
-  if (items.includes('cyber_eye')) out.add('cyber_eye');
-  if (character.inAfterlife && !character.keptBody) out.add('halo');
-  // Missing an eye without a patch is a choice; the default is the patch.
-  const marks = allMarks(character);
-  if (marks.includes('missing_eye') && !out.has('cyber_eye')) out.add('eyepatch');
-  return [...out];
+  return resolvedAccessoryIds(character);
 }
 
 /** Marks from creation plus everything the life has left on the body. */
 function allMarks(character) {
-  const a = character.appearance || {};
-  const list = (a.marks || []).slice();
-  // Legacy single marking from older saves.
-  if (a.marking && a.marking !== 'none' && !list.length) {
-    list.push(a.marking === 'scar' ? 'scar_cheek' : a.marking);
-  }
-  for (const sc of character.scars || []) if (sc.mark && !list.includes(sc.mark)) list.push(sc.mark);
-  return list;
+  return resolvedMarkIds(character);
 }
 
 /** Darken or lighten a hex colour, for brows and shadow detail. */
@@ -5544,7 +5620,9 @@ function npcPortrait(npc, opts = {}) {
     traits: npc.traits || [],
     tags: npc.tags || [],
     canonTags: npc.canonTags || [],
-    flags: {},
+    flags: npc.flags || {},
+    bag: npc.bag || [],
+    activeForm: npc.activeForm || null,
   }, opts);
 }
 
@@ -5806,7 +5884,9 @@ function formVisualsFallback(form) {
  * adds the aura and hair changes of an active transformation.
  */
 function portraitSvg(character, opts = {}) {
-  const a = character.appearance || {};
+  const resolved = resolveAppearance(character, opts);
+  const a = resolved.appearance;
+  character = { ...character, appearance: a, maturityRate: resolved.maturityRate };
   let skin = look(SKIN_TONES, a.skin, 'light').hex;
   const hairColour = look(HAIR_COLOURS, a.hairColour, 'black').hex;
   const eyeColour = look(EYE_COLOURS, a.eyeColour, 'black').hex;
@@ -5842,7 +5922,7 @@ function portraitSvg(character, opts = {}) {
   const waist = Math.round(shoulderWidth * (fem ? 0.7 : 0.94));
   const hip = Math.round(shoulderWidth * (fem ? 0.98 : 0.9));
   const jawTaper = fem ? 8 : 4;
-  const mood = expressionFor(character, opts);
+  const mood = expressionFor(character, { ...opts, expression: resolved.expression, form: resolved.form });
 
   // How kept-together they are. This used to just darken every surface by
   // one flat amount, which read as a colour filter rather than a body that
@@ -5853,7 +5933,7 @@ function portraitSvg(character, opts = {}) {
   const bodyColour = outfit.main || skin;
   const trimColour = outfit.trim || '#c9a227';
 
-  const visuals = opts.form ? (FORM_VISUALS[opts.form.id] || formVisualsFallback(opts.form)) : null;
+  const visuals = resolved.form ? (FORM_VISUALS[resolved.form.id] || formVisualsFallback(resolved.form)) : null;
   const finalHair = visuals && visuals.hair ? visuals.hair : hairColour;
   const finalEyeColour = visuals && visuals.eyes ? visuals.eyes : eyeColour;
   const auraColour = visuals ? visuals.aura : null;
@@ -6386,7 +6466,7 @@ function defaultAppearance(rng, raceId) {
   return { HAIR_STYLES, HAIR_COLOURS, EYE_SHAPES, EYE_COLOURS, SKIN_TONES, FACE_SHAPES, OUTFITS, STANCES, BUILD_SHAPES, MARK_PRESETS, ACCESSORY_PRESETS, wornAccessories, allMarks, LIFE_STAGES, lifeStage, npcPortrait, EXPRESSIONS, expressionFor, portraitSvg, defaultAppearance };
 })();
 
-/* ==== engine/origins.js ==== */
+/* ==== engine\origins.js ==== */
 const __mod_engine_origins_js = (function () {
 // Where you came from, decided for you.
 //
@@ -6676,7 +6756,7 @@ function describeOrigin(character) {
   return { rollOrigin, describeOrigin };
 })();
 
-/* ==== data/currency.js ==== */
+/* ==== data\currency.js ==== */
 const __mod_data_currency_js = (function () {
 // Money is local.
 //
@@ -6813,7 +6893,7 @@ function exchange(character, fromId, toId, amount) {
   return { CURRENCIES, PLANET_CURRENCY, currencyFor, getCurrency, emptyPurse, balance, credit, debit, canAfford, priceIn, formatMoney, exchange };
 })();
 
-/* ==== data/canon.js ==== */
+/* ==== data\canon.js ==== */
 const __mod_data_canon_js = (function () {
 // Real characters from the series. `years` gates when they can appear at all,
 // `power` is sparse keyframes of effective combat power by Age (interpolated),
@@ -7543,7 +7623,7 @@ function mentorsAvailable(year) {
   return { CANON, CANON_BY_ID, getCanon, canonPower, canonAlive, ITINERARY, canonUniverse, canonPartner, canonPlace, canonAvailable, mentorsAvailable };
 })();
 
-/* ==== data/jobs.js ==== */
+/* ==== data\jobs.js ==== */
 const __mod_data_jobs_js = (function () {
 // Careers. Each is a ladder: you start at rung 0 and get promoted when your
 // performance, stats and years served clear the next rung's bar. Salary is in
@@ -7973,7 +8053,7 @@ function careersFor(character, placeTags, planetId) {
   return { CAREERS, CAREER_BY_ID, getCareer, dutiesFor, careersFor };
 })();
 
-/* ==== data/canonlooks.js ==== */
+/* ==== data\canonlooks.js ==== */
 const __mod_data_canonlooks_js = (function () {
 // What the canon cast actually look like.
 //
@@ -8439,7 +8519,7 @@ function canonLook(canonId, year, raceId) {
   return { CANON_LOOKS, SPECIES_LOOK, canonLook };
 })();
 
-/* ==== engine/npc.js ==== */
+/* ==== engine\npc.js ==== */
 const __mod_engine_npc_js = (function () {
 // People. Everyone who is not the player is an NPC record: generated strangers,
 // family, and canon characters wrapped in the same shape so every system can
@@ -9539,7 +9619,7 @@ function learnAbout(npc, amount = 1) {
   return { RELATIONS, resetNpcCounter, nextNpcId, makeAppearance, makeNpc, effectiveKnowledge, makeCanonNpc, makeFamily, lineageLabel, describeLineage, makeChild, driftAppearance, driftPersonality, scarNpc, progressNpc, relationshipTick, spouseFlavor, weddingLine, courtLine, birthLine, dossier, statReveal, describeNpc, relationLabel, bondScore, bondLabel, romanceLabel, KNOWLEDGE_LEVELS, knowledgeLabel, learnAbout };
 })();
 
-/* ==== engine/state.js ==== */
+/* ==== engine\state.js ==== */
 const __mod_engine_state_js = (function () {
 // Game state: the character, the world, and everyone in it.
 
@@ -9978,7 +10058,7 @@ function setWorldFlag(state, name, value = true) {
   return { SAVE_VERSION, APPEARANCE, defaultCreation, createGame, getRng, saveRng, currentYear, place, npcList, livingNpcs, npcsByRelation, addNpc, findNpc, characterSummary, aiContext, isChild, isAdult, hasItem, giveItem, spend, adjust, healthCap, refreshCeilings, setFlag, flag, worldFlag, setWorldFlag };
 })();
 
-/* ==== engine/aieffects.js ==== */
+/* ==== engine\aieffects.js ==== */
 const __mod_engine_aieffects_js = (function () {
 // Validation for model-authored events.
 //
@@ -10136,7 +10216,7 @@ function buildAiEvent(raw, id) {
   return { sanitiseText, validateEffects, applyAiEffects, buildAiEvent };
 })();
 
-/* ==== engine/generator.js ==== */
+/* ==== engine\generator.js ==== */
 const __mod_engine_generator_js = (function () {
 // The event generator.
 //
@@ -10456,7 +10536,7 @@ function slotNpc(state, slots) {
   return { registerEvents, allTemplates, getTemplate, buildContext, selectTemplate, materialise, forceEvent, generateEvent, resolveChoice, directorBias, pickNpc, npcSlot, slotNpc };
 })();
 
-/* ==== engine/market.js ==== */
+/* ==== engine\market.js ==== */
 const __mod_engine_market_js = (function () {
 // What a shop actually has today.
 //
@@ -10586,7 +10666,7 @@ function tradeRelationships(state, planetId) {
   return { rollMarketYear, liveShopStock, demandFor, isImportedHere, priceMult, tryStartTrade, hasTrade, tradeSellBonus, tradeRelationships };
 })();
 
-/* ==== engine/inventory.js ==== */
+/* ==== engine\inventory.js ==== */
 const __mod_engine_inventory_js = (function () {
 // Things you own.
 //
@@ -11000,7 +11080,7 @@ function repairItem(state, itemId) {
   return { SLOTS, itemSlot, inventoryOf, ensureBag, findEntry, hasItem, addItem, removeItem, toggleWorn, valueHere, sellItem, buyItem, npcBag, lootFromDefeated, knownItems, requestItem, giftFit, giveItem, damageGear, repairItem };
 })();
 
-/* ==== engine/settlement.js ==== */
+/* ==== engine\settlement.js ==== */
 const __mod_engine_settlement_js = (function () {
 // Somewhere to live, and what your name is worth.
 //
@@ -11508,7 +11588,7 @@ const DEED_SCALE = {
   return { HOME_KINDS, homeOf, homeOptions, settleHome, homeBonus, SHIP_ROOMS, SHIP_ROOM_BY_ID, SHIP_HULLS, SHIP_HULL_BY_ID, SHIP_COMPONENTS, SHIP_COMPONENT_BY_ID, shipOf, starshipOptions, buildStarship, shipComponentOptions, addShipComponent, renameShip, claimStarship, shipRoomOptions, addShipRoom, inviteAboard, sellStarship, reputationOf, reputationLabel, spreadWord, processReputationQueue, DEED_SCALE };
 })();
 
-/* ==== engine/body.js ==== */
+/* ==== engine\body.js ==== */
 const __mod_engine_body_js = (function () {
 // What a fight takes and does not give back.
 //
@@ -11805,7 +11885,7 @@ function mechanize(c, degree = 'partial') {
   return { INJURIES, PROSTHETICS, FITTERS, fittersFor, injuries, hasInjury, maim, injuryList, prostheticOptions, fitProsthetic, restoreBody, mechanize };
 })();
 
-/* ==== data/factions.js ==== */
+/* ==== data\factions.js ==== */
 const __mod_data_factions_js = (function () {
 // The organisations.
 //
@@ -12189,7 +12269,7 @@ function factionIntent(faction, character) {
   return { FACTIONS, FACTION_BY_ID, getFaction, factionsPresent, factionIntent };
 })();
 
-/* ==== engine/battle.js ==== */
+/* ==== engine\battle.js ==== */
 const __mod_engine_battle_js = (function () {
 // Turn-based combat.
 //
@@ -14285,7 +14365,7 @@ function autoResolve(state, rng, battle) {
   return { voiceLine, REPLIES, STANCES, createBattle, speedGap, standingFoes, lockout, battleActions, takeTurn, battleStatus, describeMatchup, moralAlignmentOf, killKarmaDelta, finishLethalWin, lootDefeatedNpc, battleAftermath, autoResolve };
 })();
 
-/* ==== engine/events/helpers.js ==== */
+/* ==== engine\events\helpers.js ==== */
 const __mod_engine_events_helpers_js = (function () {
 // Shared machinery for event templates.
 
@@ -14626,7 +14706,7 @@ function offerBattle(ctx, foe, opts = {}) {
   return { apply, summarise, fact, stranger, meetCanon, canonHere, canonOnPlanet, relate, killNpc, thread, bumpThread, trainYear, powerLine, elsewhere, moveTo, money, localMoney, canAfford, hurt, odds, scaledFoePower, tierOf, squadOf, offerBattle, bondScore, findNpc, setFlag, setWorldFlag, numberish, nextNpcId, getCanon, canonPower };
 })();
 
-/* ==== engine/events/origins.js ==== */
+/* ==== engine\events\origins.js ==== */
 const __mod_engine_events_origins_js = (function () {
 // Scripted origins. Some things are not optional: if you were on Planet Vegeta
 // in Age 737 then Age 737 happens to you. What you do in the hours before it,
@@ -15055,7 +15135,7 @@ registerEvents([
   return { POD_HEADINGS };
 })();
 
-/* ==== engine/events/childhood.js ==== */
+/* ==== engine\events\childhood.js ==== */
 const __mod_engine_events_childhood_js = (function () {
 // The first dozen years. A life sim is judged on its opening, and a Dragon
 // Ball childhood is where the species differences are most visible: a Saiyan
@@ -15392,7 +15472,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/life.js ==== */
+/* ==== engine\events\life.js ==== */
 const __mod_engine_events_life_js = (function () {
 // Everyday life: childhood, school, work, money, health, ageing.
 
@@ -15800,7 +15880,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== data/kicolors.js ==== */
+/* ==== data\kicolors.js ==== */
 const __mod_data_kicolors_js = (function () {
 // The colour a character's own ki actually takes, once they have enough
 // control over it to notice. Purely descriptive - a name and a line of
@@ -15829,7 +15909,7 @@ function getKiColor(id) {
   return { KI_COLORS, getKiColor };
 })();
 
-/* ==== engine/combat.js ==== */
+/* ==== engine\combat.js ==== */
 const __mod_engine_combat_js = (function () {
 // Fights. Resolved as a short exchange model rather than a single dice roll, so
 // that techniques, transformations and condition all show up in the narration.
@@ -16021,7 +16101,7 @@ function describeGap(mine, theirs) {
   return { opponentPower, fight, narrateFight, runTournament, buildField, describeGap };
 })();
 
-/* ==== engine/events/adult.js ==== */
+/* ==== engine\events\adult.js ==== */
 const __mod_engine_events_adult_js = (function () {
 // The long middle of a life: the years after you have stopped being promising
 // and before anyone calls you old.
@@ -16456,7 +16536,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/progression.js ==== */
+/* ==== engine\progression.js ==== */
 const __mod_engine_progression_js = (function () {
 // Transformation gating. Each form declares a requirement object; the custom
 // clauses below are the story conditions - a ritual, an absorption, a death -
@@ -16629,7 +16709,7 @@ function ladderStatus(state) {
   return { missingRequirements, requirementsMet, unlockableForms, nearbyForms, tryUnlockForm, describeRequirement, ladderStatus };
 })();
 
-/* ==== engine/events/training.js ==== */
+/* ==== engine\events\training.js ==== */
 const __mod_engine_events_training_js = (function () {
 // Training, mentors, techniques and transformations - the spine of a Dragon
 // Ball life. Outcomes are computed from stats and place, never fixed.
@@ -17094,7 +17174,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/social.js ==== */
+/* ==== engine\events\social.js ==== */
 const __mod_engine_events_social_js = (function () {
 // Relationships. Friends, rivals, lovers, family, children, betrayal, and the
 // strangers who turn up because of something you did three years ago.
@@ -17520,7 +17600,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/conflict.js ==== */
+/* ==== engine\events\conflict.js ==== */
 const __mod_engine_events_conflict_js = (function () {
 // Fights that come looking for you: rivals, invaders, monsters, crime, and the
 // consequences of being someone people have heard of.
@@ -17906,7 +17986,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== data/universes.js ==== */
+/* ==== data\universes.js ==== */
 const __mod_data_universes_js = (function () {
 // The other eleven universes.
 //
@@ -18070,7 +18150,7 @@ function multiverseField(year = 780, exclude = []) {
   return { UNIVERSES, UNIVERSE_BY_ID, getUniverse, otherUniverses, universeFighters, multiverseField };
 })();
 
-/* ==== engine/survival.js ==== */
+/* ==== engine\survival.js ==== */
 const __mod_engine_survival_js = (function () {
 // The Tournament of Power, played by its own rules.
 //
@@ -18553,7 +18633,7 @@ function survivalStatus(board) {
   return { RULES, startSurvival, allFighters, standing, myTeam, opponents, endangered, survivalActions, survivalTurn, resolveTeamWish, survivalStatus };
 })();
 
-/* ==== engine/dragonballs.js ==== */
+/* ==== engine\dragonballs.js ==== */
 const __mod_engine_dragonballs_js = (function () {
 // The Dragon Balls.
 //
@@ -18847,7 +18927,7 @@ function ballManifest(state) {
   return { GRID, scatterBalls, ensureBallSet, ballsHeld, ballsOn, surveyPlanet, startHunt, pingSquare, dragonFor, summonReady, summonActive, beginSummon, wishGranted, dismissDragon, scatterAfterWish, ballsAreInert, ballManifest };
 })();
 
-/* ==== engine/prologue.js ==== */
+/* ==== engine\prologue.js ==== */
 const __mod_engine_prologue_js = (function () {
 // The first minutes.
 //
@@ -19054,7 +19134,7 @@ function prologueEntries(state, rng) {
   return { prologueEntries };
 })();
 
-/* ==== engine/economy.js ==== */
+/* ==== engine\economy.js ==== */
 const __mod_engine_economy_js = (function () {
 // The action economy.
 //
@@ -19214,7 +19294,7 @@ function costLabel(action) {
   return { yearCapacity, limitFor, usedThisYear, resetYearBudget, actionBlocked, ageGate, chargeAction, trainingCapForYear, grantTrainingPower, trainingRoomLeft, COST_LABEL, costLabel };
 })();
 
-/* ==== engine/trials.js ==== */
+/* ==== engine\trials.js ==== */
 const __mod_engine_trials_js = (function () {
 // Trials: the small playable tests that sit behind training, learning a
 // technique, and reaching for a form. The engine defines what a trial is and
@@ -19570,7 +19650,7 @@ function inventForm(state, rng, baseFormId, name) {
   return { TRIAL_KINDS, STAT_TRIALS, startTrial, trialBonus, gradeTrial, resolveTrial, getMastery, setMastery, masteryEffect, inventForm };
 })();
 
-/* ==== engine/bounty.js ==== */
+/* ==== engine\bounty.js ==== */
 const __mod_engine_bounty_js = (function () {
 // The underworld's side of fame: a price on your own head once you have
 // earned one, and a standing board of other people's prices you can go
@@ -19647,7 +19727,7 @@ function clearBounty(state, npcId) {
   return { wantedLevel, refreshMostWantedBoard, mostWantedBoard, clearBounty };
 })();
 
-/* ==== engine/news.js ==== */
+/* ==== engine\news.js ==== */
 const __mod_engine_news_js = (function () {
 // Word from beyond your own life.
 //
@@ -19742,7 +19822,7 @@ function ambientNews(state, rng) {
   return { pushNews, newsFeed, ambientNews };
 })();
 
-/* ==== engine/lifecycle.js ==== */
+/* ==== engine\lifecycle.js ==== */
 const __mod_engine_lifecycle_js = (function () {
 // The turn loop. A year is: passive drift, then a short queue of generated
 // events the player answers one at a time, then the bookkeeping.
@@ -20681,7 +20761,7 @@ function beginLegacy(state) {
   return { mournNpc, openingLogEntry, startYear, insertEvent, eventsRemaining, renarrateLast, currentEvent, choose, skipRemaining, die, tickRevivalEffort, acceptPermanentDeath, reviveCharacter, enterAfterlife, epitaph, beginLegacy };
 })();
 
-/* ==== engine/tournament.js ==== */
+/* ==== engine\tournament.js ==== */
 const __mod_engine_tournament_js = (function () {
 // Tournaments as brackets you actually fight.
 //
@@ -21360,7 +21440,7 @@ function settle(state, t, rng = null) {
   return { FORMATS, buildEntrants, createTournament, roundName, playerMatch, playerOpponent, resolveOtherMatches, recordPlayerResult, advanceRound, standings, bracketSummary, payout, placementLine, matchBattleSpec, describeField, autoRunTournament, topConsequence, settle };
 })();
 
-/* ==== engine/events/world.js ==== */
+/* ==== engine\events\world.js ==== */
 const __mod_engine_events_world_js = (function () {
 // The world moving on its own: the canon timeline, tournaments, the Dragon
 // Balls, space, and the gods. The player can join in, ignore it, or change it,
@@ -22242,7 +22322,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/wishes.js ==== */
+/* ==== engine\events\wishes.js ==== */
 const __mod_engine_events_wishes_js = (function () {
 // The dragon, and what you ask it for.
 //
@@ -22825,7 +22905,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/canonlife.js ==== */
+/* ==== engine\events\canonlife.js ==== */
 const __mod_engine_events_canonlife_js = (function () {
 // The cast keeps living.
 //
@@ -23324,7 +23404,7 @@ registerEvents([
   return { canonDrift };
 })();
 
-/* ==== engine/events/saiyanpolitics.js ==== */
+/* ==== engine\events\saiyanpolitics.js ==== */
 const __mod_engine_events_saiyanpolitics_js = (function () {
 // The survivors, and what they want from you.
 //
@@ -23681,7 +23761,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/otherworld.js ==== */
+/* ==== engine\events\otherworld.js ==== */
 const __mod_engine_events_otherworld_js = (function () {
 // The Other World, as a place with things in it.
 //
@@ -24129,7 +24209,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/comms.js ==== */
+/* ==== engine\comms.js ==== */
 const __mod_engine_comms_js = (function () {
 // Reaching somebody who is not on this world. Two related things live here:
 // a signature lock for Instant Transmission (canonically imprecise even for
@@ -24223,7 +24303,7 @@ function transmissionMissLine(rng) {
   return { offWorldContacts, npcFamiliarity, placeFamiliarity, transmissionLockChance, attemptLock, callAcrossSpace, transmissionMissLine };
 })();
 
-/* ==== engine/events/growingup.js ==== */
+/* ==== engine\events\growingup.js ==== */
 const __mod_engine_events_growingup_js = (function () {
 // The things a life teaches you whether or not you go looking.
 //
@@ -24728,7 +24808,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/forces.js ==== */
+/* ==== engine\events\forces.js ==== */
 const __mod_engine_events_forces_js = (function () {
 // Somebody else's organisation, arriving.
 //
@@ -25091,7 +25171,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/peace.js ==== */
+/* ==== engine\events\peace.js ==== */
 const __mod_engine_events_peace_js = (function () {
 // The years when nothing is trying to end the world.
 //
@@ -25493,7 +25573,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/injury.js ==== */
+/* ==== engine\events\injury.js ==== */
 const __mod_engine_events_injury_js = (function () {
 // Living with what a fight took.
 //
@@ -25686,7 +25766,7 @@ registerEvents([
 ]);
 })();
 
-/* ==== engine/events/afterlife.js ==== */
+/* ==== engine\events\afterlife.js ==== */
 const __mod_engine_events_afterlife_js = (function () {
 // Death is a location in this setting, not an ending. King Yemma's desk, Snake
 // Way, King Kai's planet, Hell, the Other World tournament, and the ways back.
@@ -26702,7 +26782,7 @@ function longReunionBeats(ctx, s, focus) {
   return { hellPower, findEndedRecord, deadPowerNow };
 })();
 
-/* ==== engine/conversation.js ==== */
+/* ==== engine\conversation.js ==== */
 const __mod_engine_conversation_js = (function () {
 // What you talk about, and how it sounds.
 //
@@ -27078,7 +27158,7 @@ function topicHint(state, npc, topic) {
   return { TOPICS, topicsFor, converse, topicHint };
 })();
 
-/* ==== engine/social.js ==== */
+/* ==== engine\social.js ==== */
 const __mod_engine_social_js = (function () {
 // What you can do to and for the people in your life.
 //
@@ -27904,7 +27984,7 @@ function runNpcAction(state, rng, npcId, actionId) {
   return { checkRomanceSpark, SOCIAL_ACTIONS, SOCIAL_BY_ID, canVisitLiving, npcActions, runNpcAction, bondLabel, romanceLabel, relationLabel };
 })();
 
-/* ==== engine/worlds.js ==== */
+/* ==== engine\worlds.js ==== */
 const __mod_engine_worlds_js = (function () {
 // Standing on a world: what you have done there, what it thinks of you, and
 // who turns up when you go too far.
@@ -28329,7 +28409,7 @@ function worldManifest(state) {
   return { worldRecord, planetAreas, planetFullyPurged, purgeArea, wildTrainingRisk, planetDestroyed, trainAllOutOnWild, standingOn, travelOptions, travelTo, actOnWorld, worldResponse, worldManifest };
 })();
 
-/* ==== engine/shipbattle.js ==== */
+/* ==== engine\shipbattle.js ==== */
 const __mod_engine_shipbattle_js = (function () {
 // Ship-to-ship combat. A separate, much shorter model than personal combat
 // (combat.js's fight()) because a ship fight is not about technique or
@@ -28471,7 +28551,7 @@ function resolveShipCrash(state, rng, ship, opts = {}) {
   return { randomHostileShip, resolveShipBattle, narrateShipBattle, resolveShipCrash };
 })();
 
-/* ==== engine/broadcast.js ==== */
+/* ==== engine\broadcast.js ==== */
 const __mod_engine_broadcast_js = (function () {
 // Watching television. A quiet way to spend an evening, and the one place
 // news.js's galaxy headlines actually reach the player as something other
@@ -28553,7 +28633,7 @@ function watchBroadcast(state, rng) {
   return { watchBroadcast };
 })();
 
-/* ==== engine/events/actions.js ==== */
+/* ==== engine\events\actions.js ==== */
 const __mod_engine_events_actions_js = (function () {
 // Player-initiated activities. Events are what happens to you; these are what
 // you do about it. Each resolves immediately and costs part of the year.
@@ -30889,7 +30969,7 @@ function actionOptions(state, actionId) {
   return { INSTITUTION_TYPES, ACTIONS, ACTION_BY_ID, availableActions, runAction, actionOptions };
 })();
 
-/* ==== engine/ai.js ==== */
+/* ==== engine\ai.js ==== */
 const __mod_engine_ai_js = (function () {
 // The AI layer.
 //
@@ -31501,7 +31581,7 @@ function clampNum(v, lo, hi) {
   return { MODEL, DEFAULT_CONFIG, PRESETS, getAiConfig, setAiConfig, initSampling, getApiKey, setApiKey, backendName, backendLabel, aiAvailable, buildEventPrompt, buildNarrationPrompt, testAiEndpoint, improviseEvent, narrateOutcome, errorCopy, judgeReply, interpretWish };
 })();
 
-/* ==== engine/save.js ==== */
+/* ==== engine\save.js ==== */
 const __mod_engine_save_js = (function () {
 // Saves. State is plain data by construction - templates are looked up by id,
 // never stored - so a save is just JSON.
@@ -31678,7 +31758,7 @@ const { ACTIONS, availableActions, runAction, actionOptions } = __mod_engine_eve
   return { createGame, defaultCreation, characterSummary, currentYear, livingNpcs, aiContext, startYear, choose, currentEvent, enterAfterlife, epitaph, beginLegacy, die, insertEvent, renarrateLast, skipRemaining, eventsRemaining, reviveCharacter, tickRevivalEffort, openingLogEntry, acceptPermanentDeath, initSampling, improviseEvent, narrateOutcome, backendName, aiAvailable, getApiKey, setApiKey, errorCopy, interpretWish, PRESETS, save, load, listSaves, clearSlot, exportString, importString, allTemplates, ladderStatus, nearbyForms, unlockableForms, Rng, ACTIONS, availableActions, runAction, actionOptions };
 })();
 
-/* ==== engine/leaderboard.js ==== */
+/* ==== engine\leaderboard.js ==== */
 const __mod_engine_leaderboard_js = (function () {
 // Where you actually stand. seek_challenge and hold_tournament both find
 // somebody in a power band scaled to be a plausible fight - useful for
@@ -31729,7 +31809,7 @@ function strongestBeings(state, opts = {}) {
   return { strongestBeings };
 })();
 
-/* ==== engine/dialogue.js ==== */
+/* ==== engine\dialogue.js ==== */
 const __mod_engine_dialogue_js = (function () {
 // Saying your own words to somebody. With a model connected, it reads the line
 // and answers in character. Without one, a local reader scores tone against
@@ -31827,7 +31907,7 @@ function impressionLabel(impression) {
   return { scoreReplyLocally, applyReply, impressionLabel };
 })();
 
-/* ==== engine/perception.js ==== */
+/* ==== engine\perception.js ==== */
 const __mod_engine_perception_js = (function () {
 // What you can actually tell about somebody.
 //
@@ -31938,7 +32018,7 @@ function shortPower(state, targetPower) {
   return { SCOUTER_CEILING, hasScouter, hasKiSense, canReadPower, readPower, describePower, shortPower };
 })();
 
-/* ==== ui/trialui.js ==== */
+/* ==== ui\trialui.js ==== */
 const __mod_ui_trialui_js = (function () {
 // The playable half of a trial. Four shapes, reused everywhere: hit the beat,
 // repeat the form, hold on, or decide when to stop pushing.
@@ -32364,7 +32444,7 @@ function runRampage(trial, stage, foot, onDone) {
   return { playTrial };
 })();
 
-/* ==== ui/ambience.js ==== */
+/* ==== ui\ambience.js ==== */
 const __mod_ui_ambience_js = (function () {
 // Procedural ambience. Not a soundtrack - there is nowhere to put licensed
 // music in a single self-contained HTML file without either bloating it far
@@ -32462,7 +32542,7 @@ function setMood(mood) {
   return { setAmbienceEnabled, isAmbienceEnabled, setMood };
 })();
 
-/* ==== ui/app.js ==== */
+/* ==== ui\app.js ==== */
 const __mod_ui_app_js = (function () {
 // UI controller. Vanilla DOM, one render pass per change - the simulation is
 // the interesting part, so the interface stays boring on purpose.

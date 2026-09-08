@@ -2,6 +2,8 @@
 // drawing, and the drawing follows the character through the game: transform
 // and the aura appears, lose the tail and the tail is gone.
 
+import { resolveAppearance, resolvedAccessoryIds, resolvedMarkIds } from './appearance.js';
+
 export const HAIR_STYLES = [
   { id: 'spiked', name: 'Spiked upward' },
   { id: 'wild', name: 'Wild and unruly' },
@@ -160,34 +162,12 @@ export const ACCESSORY_PRESETS = [
 
 /** Every accessory the character is wearing right now, from all sources. */
 export function wornAccessories(character) {
-  const a = character.appearance || {};
-  const out = new Set(a.accessories || []);
-  const items = character.items || [];
-  for (const acc of ACCESSORY_PRESETS) {
-    if (acc.item && items.includes(acc.item)) out.add(acc.id);
-  }
-  // Shop accessories carry the id of what they put on you.
-  for (const id of items) {
-    if (id.startsWith('acc_')) out.add(id.slice(4));
-  }
-  if (items.includes('cyber_eye')) out.add('cyber_eye');
-  if (character.inAfterlife && !character.keptBody) out.add('halo');
-  // Missing an eye without a patch is a choice; the default is the patch.
-  const marks = allMarks(character);
-  if (marks.includes('missing_eye') && !out.has('cyber_eye')) out.add('eyepatch');
-  return [...out];
+  return resolvedAccessoryIds(character);
 }
 
 /** Marks from creation plus everything the life has left on the body. */
 export function allMarks(character) {
-  const a = character.appearance || {};
-  const list = (a.marks || []).slice();
-  // Legacy single marking from older saves.
-  if (a.marking && a.marking !== 'none' && !list.length) {
-    list.push(a.marking === 'scar' ? 'scar_cheek' : a.marking);
-  }
-  for (const sc of character.scars || []) if (sc.mark && !list.includes(sc.mark)) list.push(sc.mark);
-  return list;
+  return resolvedMarkIds(character);
 }
 
 /** Darken or lighten a hex colour, for brows and shadow detail. */
@@ -460,7 +440,9 @@ export function npcPortrait(npc, opts = {}) {
     traits: npc.traits || [],
     tags: npc.tags || [],
     canonTags: npc.canonTags || [],
-    flags: {},
+    flags: npc.flags || {},
+    bag: npc.bag || [],
+    activeForm: npc.activeForm || null,
   }, opts);
 }
 
@@ -722,7 +704,9 @@ function formVisualsFallback(form) {
  * adds the aura and hair changes of an active transformation.
  */
 export function portraitSvg(character, opts = {}) {
-  const a = character.appearance || {};
+  const resolved = resolveAppearance(character, opts);
+  const a = resolved.appearance;
+  character = { ...character, appearance: a, maturityRate: resolved.maturityRate };
   let skin = look(SKIN_TONES, a.skin, 'light').hex;
   const hairColour = look(HAIR_COLOURS, a.hairColour, 'black').hex;
   const eyeColour = look(EYE_COLOURS, a.eyeColour, 'black').hex;
@@ -758,7 +742,7 @@ export function portraitSvg(character, opts = {}) {
   const waist = Math.round(shoulderWidth * (fem ? 0.7 : 0.94));
   const hip = Math.round(shoulderWidth * (fem ? 0.98 : 0.9));
   const jawTaper = fem ? 8 : 4;
-  const mood = expressionFor(character, opts);
+  const mood = expressionFor(character, { ...opts, expression: resolved.expression, form: resolved.form });
 
   // How kept-together they are. This used to just darken every surface by
   // one flat amount, which read as a colour filter rather than a body that
@@ -769,7 +753,7 @@ export function portraitSvg(character, opts = {}) {
   const bodyColour = outfit.main || skin;
   const trimColour = outfit.trim || '#c9a227';
 
-  const visuals = opts.form ? (FORM_VISUALS[opts.form.id] || formVisualsFallback(opts.form)) : null;
+  const visuals = resolved.form ? (FORM_VISUALS[resolved.form.id] || formVisualsFallback(resolved.form)) : null;
   const finalHair = visuals && visuals.hair ? visuals.hair : hairColour;
   const finalEyeColour = visuals && visuals.eyes ? visuals.eyes : eyeColour;
   const auraColour = visuals ? visuals.aura : null;
