@@ -31,3 +31,12 @@ test('appearance resolution preserves legacy item-only saves and body marks', ()
   assert.equal(resolved.form.id, 'ssj');
 });
 
+test('appearance resolution selects lore-appropriate rigs for major forms', () => {
+  const ape = resolveAppearance({ raceId: 'saiyan', appearance: {} }, { form: { id: 'golden_oozaru' }, mode: 'battle' });
+  const giant = resolveAppearance({ raceId: 'namekian', appearance: {} }, { form: { id: 'giant_form' }, mode: 'battle' });
+  const orange = resolveAppearance({ raceId: 'namekian', appearance: {} }, { form: { id: 'orange_piccolo' }, mode: 'battle' });
+  assert.deepEqual(ape.rig, { family: 'great_ape', scale: 'colossal', pose: 'beast', id: 'great_ape:colossal:beast' });
+  assert.equal(giant.rig.id, 'namekian:giant:guard');
+  assert.equal(orange.rig.id, 'namekian:large:ready');
+});
+
