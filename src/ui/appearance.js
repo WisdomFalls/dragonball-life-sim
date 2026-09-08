@@ -16,6 +16,34 @@ const BODY_OUTFITS = {
   gi: 'gi_orange', armour: 'armour_saiyan', casual: 'casual',
 };
 
+// These are art-rig names rather than gameplay race labels. A pixel renderer
+// needs to select a real silhouette before it selects hair or clothing: an
+// ape, a giant Namekian and a Frost Demon cannot be made believable by scaling
+// the same humanoid sprite.
+const BODY_FAMILIES = {
+  saiyan: 'humanoid', halfsaiyan: 'humanoid', earthling: 'humanoid',
+  android: 'humanoid', half_android: 'humanoid', tuffle: 'humanoid',
+  cerealian: 'humanoid', half_cerealian: 'humanoid', shinjin: 'humanoid',
+  namekian: 'namekian', frostdemon: 'frost_demon', half_frostkin: 'frost_demon',
+  frost_android: 'frost_demon', majin: 'majin', bioandroid: 'bioandroid',
+  yardratian: 'yardratian', kryllian: 'kryllian',
+};
+
+const FORM_RIGS = {
+  golden_oozaru: { family: 'great_ape', scale: 'colossal', pose: 'beast' },
+  giant_form: { family: 'namekian', scale: 'giant', pose: 'guard' },
+  spirit_giant: { family: 'yardratian', scale: 'giant', pose: 'guard' },
+  orange_piccolo: { family: 'namekian', scale: 'large', pose: 'ready' },
+  ssj_grade3: { scale: 'large', pose: 'ready' },
+  legendary_ss: { scale: 'large', pose: 'ready' },
+  majin_super: { scale: 'large', pose: 'ready' },
+};
+
+const STANCE_POSES = {
+  turtle: 'guard', crane: 'ready', saiyan: 'ready', namek: 'guard',
+  demon: 'aggressive', formless: 'neutral', custom: 'neutral',
+};
+
 function addUnique(list, value) {
   if (value && !list.includes(value)) list.push(value);
 }
@@ -53,6 +81,19 @@ function equip(character, marks) {
   return { accessories, outfit };
 }
 
+function rigFor(character, appearance, form, mode) {
+  const base = BODY_FAMILIES[character.raceId] || 'generated_humanoid';
+  const formRig = form && FORM_RIGS[form.id] || {};
+  return {
+    family: formRig.family || base,
+    scale: formRig.scale || 'standard',
+    pose: formRig.pose || (mode === 'battle' ? STANCE_POSES[appearance.stance] || 'ready' : 'neutral'),
+    // A stable id lets authored sprite manifests target a family and form
+    // without branching on every simulation field in the renderer.
+    id: `${formRig.family || base}:${formRig.scale || 'standard'}:${formRig.pose || (mode === 'battle' ? STANCE_POSES[appearance.stance] || 'ready' : 'neutral')}`,
+  };
+}
+
 /**
  * Resolve all presentation data without changing the character record. `form`
  * is allowed to be a transformation object or its id; battle passes the live
@@ -70,6 +111,7 @@ export function resolveAppearance(character = {}, opts = {}) {
     ...(character.appearance || {}),
     outfit: equipment.outfit || (character.appearance && character.appearance.outfit) || 'casual',
   };
+  const mode = opts.mode || 'profile';
   return {
     character,
     appearance,
@@ -78,7 +120,8 @@ export function resolveAppearance(character = {}, opts = {}) {
     form,
     maturityRate: opts.maturityRate ?? character.maturityRate ?? 1,
     expression: opts.expression,
-    mode: opts.mode || 'profile',
+    mode,
+    rig: rigFor(character, appearance, form, mode),
   };
 }
 
