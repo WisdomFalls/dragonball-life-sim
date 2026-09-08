@@ -1,0 +1,708 @@
+// Playable races. Each one changes the stat floor, the growth curve, the
+// lifespan, the transformation ladder, and which special mechanics are live.
+
+export const RACES = [
+  {
+    id: 'saiyan',
+    name: 'Saiyan',
+    short: 'Saiyan',
+    blurb: 'Born to fight. You grow strongest at the edge of death, and the moon is not your friend.',
+    homeworlds: ['planet_vegeta', 'sadala', 'east_city'],
+    base: { strength: 62, speed: 58, technique: 40, kiControl: 38, durability: 62, intellect: 40, charisma: 44, discipline: 38 },
+    growth: { power: 1.55, technique: 0.9, kiControl: 1.0, discipline: 0.85 },
+    startPower: [8, 40],
+    lifespan: [78, 105],
+    agingRate: 0.78,
+    maturityRate: 0.9,
+    appetite: 3.2,
+    perks: ['zenkai', 'oozaru', 'battleLust', 'proudLineage'],
+    transformLadder: 'saiyan',
+    naming: 'saiyan',
+    tags: ['mortal', 'warriorRace'],
+    hairColours: ['black', 'jet black', 'spiked black'],
+    startingTechniques: [],
+    notes: 'Zenkai: surviving near-fatal damage permanently raises your ceiling.',
+  },
+  {
+    id: 'halfsaiyan',
+    name: 'Half-Saiyan',
+    short: 'Half-Saiyan',
+    hybrid: true,
+    blurb: 'Earth blood and Saiyan blood. Latent potential that erupts when someone you love is in danger.',
+    homeworlds: ['paozu', 'satan_city', 'west_city'],
+    base: { strength: 52, speed: 52, technique: 48, kiControl: 50, durability: 54, intellect: 55, charisma: 52, discipline: 44 },
+    growth: { power: 1.35, technique: 1.15, kiControl: 1.2, discipline: 1.0 },
+    startPower: [4, 20],
+    lifespan: [85, 115],
+    agingRate: 0.86,
+    maturityRate: 0.95,
+    appetite: 2.2,
+    perks: ['hiddenPotential', 'ragePower', 'zenkaiWeak', 'oozaru'],
+    transformLadder: 'halfsaiyan',
+    naming: 'halfsaiyan',
+    tags: ['mortal', 'warriorRace', 'earthling'],
+    hairColours: ['black', 'lavender', 'dark brown', 'black with a stubborn cowlick'],
+    startingTechniques: [],
+    notes: 'Hidden potential: rage and unlocking rituals convert emotion into raw power.',
+  },
+  {
+    id: 'earthling',
+    name: 'Earthling',
+    short: 'Human',
+    blurb: 'No cheat codes. Just technique, guts, and the best martial arts tradition in the galaxy.',
+    homeworlds: ['east_city', 'west_city', 'paozu', 'papaya'],
+    base: { strength: 40, speed: 42, technique: 60, kiControl: 58, durability: 40, intellect: 58, charisma: 58, discipline: 55 },
+    growth: { power: 0.85, technique: 1.45, kiControl: 1.4, discipline: 1.25 },
+    startPower: [1, 6],
+    lifespan: [72, 96],
+    agingRate: 1.0,
+    maturityRate: 1.0,
+    appetite: 1.0,
+    perks: ['techniqueGenius', 'luck', 'socialAnimal', 'cheapTraining'],
+    transformLadder: 'earthling',
+    naming: 'earthling',
+    tags: ['mortal', 'earthling'],
+    hairColours: ['black', 'brown', 'blonde', 'blue', 'orange', 'white', 'shaved bald'],
+    startingTechniques: [],
+    notes: 'You learn techniques faster than anyone and you are never the strongest in the room.',
+  },
+  {
+    id: 'namekian',
+    name: 'Namekian',
+    short: 'Namekian',
+    sexes: ['male'],
+    blurb: 'Regeneration, a body that stretches, and a species memory older than most empires.',
+    homeworlds: ['namek', 'new_namek', 'yunzabit'],
+    base: { strength: 50, speed: 48, technique: 56, kiControl: 62, durability: 58, intellect: 62, charisma: 40, discipline: 66 },
+    growth: { power: 1.15, technique: 1.25, kiControl: 1.3, discipline: 1.3 },
+    startPower: [3, 18],
+    lifespan: [240, 500],
+    agingRate: 0.35,
+    maturityRate: 3.2,
+    appetite: 0.05,
+    perks: ['regeneration', 'giantForm', 'assimilate', 'waterOnly', 'asexualBirth', 'meditative'],
+    transformLadder: 'namekian',
+    naming: 'namekian',
+    tags: ['mortal', 'namekian'],
+    hairColours: ['none (Namekians do not grow hair)'],
+    startingTechniques: ['stretch_limb'],
+    notes: 'You live on water alone, regrow limbs, and can produce an heir by yourself.',
+  },
+  {
+    id: 'frostdemon',
+    name: 'Frost Demon',
+    short: 'Frost Demon',
+    sexes: ['male'],
+    blurb: 'Born at a power most warriors die chasing. The question is whether you ever bother to train.',
+    homeworlds: ['frieza_ship', 'planet_frieza_79'],
+    base: { strength: 66, speed: 64, technique: 46, kiControl: 60, durability: 64, intellect: 60, charisma: 50, discipline: 24 },
+    growth: { power: 1.2, technique: 0.85, kiControl: 1.05, discipline: 0.7 },
+    startPower: [400, 4000],
+    lifespan: [150, 260],
+    agingRate: 0.55,
+    maturityRate: 1.4,
+    appetite: 0.6,
+    perks: ['innatePower', 'suppressionForms', 'vacuumProof', 'arrogance', 'survivesAnything'],
+    // A tail, same as the species standing next to them on the ship. It does
+    // not do anything - there is no Great Ape on this ladder - but it should
+    // be drawn.
+    hasTail: true,
+    transformLadder: 'frostdemon',
+    naming: 'frostdemon',
+    tags: ['mortal', 'imperial'],
+    hairColours: ['none (chitin and bio-armour)'],
+    startingTechniques: ['death_beam'],
+    notes: 'Enormous innate power, terrible work ethic. Training is worth double if you ever start.',
+  },
+  {
+    id: 'majin',
+    name: 'Majin',
+    short: 'Majin',
+    blurb: 'Elastic, immortal-ish, and utterly unpredictable. You regenerate from a puff of pink smoke.',
+    homeworlds: ['wastes', 'east_city'],
+    base: { strength: 58, speed: 46, technique: 44, kiControl: 54, durability: 78, intellect: 34, charisma: 46, discipline: 20 },
+    growth: { power: 1.3, technique: 0.95, kiControl: 1.05, discipline: 0.6 },
+    startPower: [50, 900],
+    lifespan: [400, 900],
+    agingRate: 0.2,
+    maturityRate: 1.0,
+    appetite: 4.5,
+    perks: ['regeneration', 'absorption', 'candyBeam', 'elastic', 'chaos', 'hardToKill'],
+    transformLadder: 'majin',
+    naming: 'majin',
+    tags: ['magical', 'chaotic'],
+    hairColours: ['none (a single head-tentacle)'],
+    startingTechniques: ['regenerate'],
+    notes: 'Absorbing a stronger fighter permanently steals a slice of their power and skill.',
+  },
+  {
+    id: 'android',
+    name: 'Android',
+    short: 'Android',
+    blurb: 'Built, not born. No ki signature to sense, no stamina to run out, no birthdays that matter.',
+    homeworlds: ['red_ribbon_lab', 'west_city'],
+    base: { strength: 64, speed: 60, technique: 50, kiControl: 30, durability: 70, intellect: 66, charisma: 44, discipline: 60 },
+    growth: { power: 0.9, technique: 1.0, kiControl: 0.5, discipline: 1.1 },
+    startPower: [200, 2500],
+    lifespan: [300, 800],
+    agingRate: 0.08,
+    maturityRate: 1.6,
+    appetite: 0.3,
+    perks: ['noKiSignature', 'infiniteStamina', 'upgradeable', 'energyAbsorb', 'coldLogic'],
+    transformLadder: 'android',
+    naming: 'android',
+    tags: ['artificial'],
+    hairColours: ['blonde', 'black', 'silver', 'red', 'synthetic auburn'],
+    startingTechniques: ['energy_absorb'],
+    notes: 'You cannot be sensed, you never tire, and you grow by upgrades rather than training.',
+  },
+  {
+    id: 'bioandroid',
+    name: 'Bio-Android',
+    short: 'Bio-Android',
+    blurb: 'A patchwork of stolen cells. Everyone you absorb makes you a little more yourself.',
+    homeworlds: ['red_ribbon_lab', 'wastes'],
+    base: { strength: 60, speed: 58, technique: 62, kiControl: 58, durability: 66, intellect: 70, charisma: 36, discipline: 50 },
+    growth: { power: 1.25, technique: 1.3, kiControl: 1.2, discipline: 0.9 },
+    startPower: [100, 1800],
+    lifespan: [200, 600],
+    agingRate: 0.15,
+    maturityRate: 3.0,
+    appetite: 1.5,
+    perks: ['absorption', 'regeneration', 'copyTechnique', 'perfectForm', 'noKiSignature'],
+    // The absorption tail is not incidental to what a Bio-Android is - it is
+    // how the absorbing happens, same as it always was for the fighter this
+    // race is built from.
+    hasTail: true,
+    transformLadder: 'bioandroid',
+    naming: 'bioandroid',
+    tags: ['artificial', 'chaotic'],
+    hairColours: ['none (carapace)'],
+    startingTechniques: ['regenerate'],
+    notes: 'You can copy any technique you witness, and absorbing fighters advances your form.',
+  },
+  {
+    id: 'shinjin',
+    name: 'Shinjin',
+    short: 'Kai',
+    blurb: 'Divine stock. Weak arms, enormous spirit, and a job description that involves the fate of worlds.',
+    homeworlds: ['sacred_world', 'kai_planet'],
+    base: { strength: 38, speed: 44, technique: 58, kiControl: 78, durability: 42, intellect: 74, charisma: 60, discipline: 70 },
+    growth: { power: 0.95, technique: 1.3, kiControl: 1.5, discipline: 1.3 },
+    startPower: [20, 300],
+    lifespan: [1200, 5000],
+    agingRate: 0.03,
+    maturityRate: 0.55,
+    appetite: 0.7,
+    perks: ['divineKi', 'kaiKai', 'potara', 'longView', 'magicAptitude'],
+    transformLadder: 'shinjin',
+    naming: 'shinjin',
+    tags: ['divine'],
+    hairColours: ['white mohawk', 'purple', 'none'],
+    startingTechniques: ['kai_kai'],
+    notes: 'Divine ki means gods notice you. Mortals mostly cannot sense you at all.',
+  },
+  {
+    id: 'tuffle',
+    name: 'Tuffle',
+    short: 'Tuffle',
+    blurb: 'The species the Saiyans wiped out. Small, brilliant, and very hard to kill permanently.',
+    homeworlds: ['planet_vegeta', 'west_city'],
+    base: { strength: 30, speed: 40, technique: 55, kiControl: 45, durability: 34, intellect: 88, charisma: 50, discipline: 70 },
+    growth: { power: 0.7, technique: 1.2, kiControl: 1.0, discipline: 1.35 },
+    startPower: [1, 5],
+    lifespan: [90, 140],
+    agingRate: 0.9,
+    maturityRate: 1.0,
+    appetite: 0.8,
+    perks: ['techGenius', 'machineMutant', 'grudge', 'inventor'],
+    transformLadder: 'tuffle',
+    naming: 'tuffle',
+    tags: ['mortal', 'inventor'],
+    hairColours: ['none', 'thin white'],
+    startingTechniques: [],
+    notes: 'You build your power instead of training it: machines, gravity rigs, and worse.',
+  },
+  {
+    id: 'yardratian',
+    name: 'Yardratian',
+    short: 'Yardratian',
+    blurb: 'Spirit control over brute force. Your people invented the technique everyone wants to steal.',
+    homeworlds: ['yardrat'],
+    base: { strength: 34, speed: 46, technique: 66, kiControl: 74, durability: 38, intellect: 66, charisma: 52, discipline: 68 },
+    growth: { power: 0.8, technique: 1.5, kiControl: 1.45, discipline: 1.2 },
+    startPower: [2, 12],
+    lifespan: [110, 180],
+    agingRate: 0.7,
+    maturityRate: 0.9,
+    appetite: 0.5,
+    perks: ['spiritControl', 'instantTransmissionNative', 'shapeShift', 'pacifist'],
+    transformLadder: 'yardratian',
+    naming: 'yardratian',
+    tags: ['mortal'],
+    hairColours: ['none', 'wispy white'],
+    startingTechniques: ['instant_transmission'],
+    notes: 'You start knowing Instant Transmission. Everyone will eventually ask you to teach it.',
+  },
+  {
+    id: 'cerealian',
+    name: 'Cerealian',
+    short: 'Cerealian',
+    blurb: 'The last of a people the Saiyans erased. Survivors make excellent students of anything.',
+    homeworlds: ['cereal', 'east_city'],
+    base: { strength: 42, speed: 50, technique: 58, kiControl: 56, durability: 46, intellect: 60, charisma: 54, discipline: 62 },
+    growth: { power: 1.0, technique: 1.3, kiControl: 1.25, discipline: 1.2 },
+    startPower: [2, 10],
+    lifespan: [80, 120],
+    agingRate: 0.9,
+    maturityRate: 1.0,
+    appetite: 1.0,
+    perks: ['survivor', 'fastLearner', 'grudge', 'dragonTouched'],
+    transformLadder: 'cerealian',
+    naming: 'cerealian',
+    tags: ['mortal'],
+    hairColours: ['orange', 'black', 'brown', 'white'],
+    startingTechniques: [],
+    notes: 'A vendetta you did not choose, and a knack for learning from anyone who will teach.',
+  },
+
+  // ------------------------------------------------------------ half-breeds
+  // Half-Saiyan proved the shape works: two lines that would not otherwise
+  // mix, stats interpolated between the parents, and a transformation ladder
+  // stitched together out of both sides' forms rather than invented fresh.
+  // These are the same idea applied past Saiyan and Human - Android 17 and 18
+  // were the other half-breed the source material actually gave a name to,
+  // and the logic that makes one half-breed possible does not stop there.
+  {
+    id: 'half_android',
+    name: 'Half-Android',
+    short: 'Half-Android',
+    hybrid: true,
+    blurb: 'Augmented rather than built. Fully human where it counts, and no longer entirely, underneath.',
+    homeworlds: ['red_ribbon_lab', 'east_city', 'west_city'],
+    base: { strength: 52, speed: 51, technique: 55, kiControl: 44, durability: 55, intellect: 62, charisma: 51, discipline: 58 },
+    growth: { power: 0.88, technique: 1.2, kiControl: 0.95, discipline: 1.18 },
+    startPower: [50, 400],
+    lifespan: [150, 300],
+    agingRate: 0.4,
+    maturityRate: 1.2,
+    appetite: 0.6,
+    perks: ['techniqueGenius', 'luck', 'socialAnimal', 'upgradeable'],
+    transformLadder: 'half_android',
+    naming: 'earthling',
+    tags: ['mortal', 'earthling', 'artificial'],
+    hairColours: ['black', 'blonde', 'silver', 'brown', 'white'],
+    startingTechniques: [],
+    notes: 'You age slowly and take a beating well, and you are still entirely yourself doing it.',
+  },
+  {
+    id: 'half_frostkin',
+    name: 'Half-Frostkin',
+    short: 'Half-Frostkin',
+    hybrid: true,
+    blurb: 'Human on one side, an emperor\'s bloodline on the other. Neither half asked the other\'s permission.',
+    homeworlds: ['east_city', 'west_city', 'planet_frieza_79'],
+    base: { strength: 53, speed: 53, technique: 53, kiControl: 59, durability: 52, intellect: 59, charisma: 54, discipline: 40 },
+    growth: { power: 1.02, technique: 1.15, kiControl: 1.22, discipline: 0.98 },
+    startPower: [30, 300],
+    lifespan: [110, 180],
+    agingRate: 0.75,
+    maturityRate: 1.15,
+    appetite: 0.8,
+    perks: ['innatePower', 'techniqueGenius', 'luck'],
+    transformLadder: 'half_frostkin',
+    naming: 'earthling',
+    tags: ['mortal', 'earthling', 'imperial'],
+    hairColours: ['black', 'brown', 'white', 'silver'],
+    startingTechniques: [],
+    hasTail: true,
+    notes: 'Some of what you were born with, you did not have to train for. Most of it, you still do.',
+  },
+  {
+    id: 'frost_android',
+    name: 'Frost-Android',
+    short: 'Frost-Android',
+    hybrid: true,
+    blurb: 'Imperial bloodline and Red Ribbon engineering in the same body. Neither program was designed to share.',
+    homeworlds: ['planet_frieza_79', 'red_ribbon_lab'],
+    base: { strength: 65, speed: 62, technique: 48, kiControl: 45, durability: 67, intellect: 63, charisma: 47, discipline: 42 },
+    growth: { power: 1.05, technique: 0.93, kiControl: 0.78, discipline: 0.9 },
+    startPower: [300, 3000],
+    lifespan: [250, 500],
+    agingRate: 0.3,
+    maturityRate: 1.5,
+    appetite: 0.4,
+    perks: ['innatePower', 'upgradeable', 'coldLogic', 'survivesAnything'],
+    transformLadder: 'frost_android',
+    naming: 'android',
+    tags: ['mortal', 'imperial', 'artificial'],
+    hairColours: ['none (chitin and bio-armour)', 'silver', 'synthetic auburn'],
+    startingTechniques: [],
+    hasTail: true,
+    notes: 'Two separate reasons to underestimate you, and both of them are wrong.',
+  },
+  {
+    id: 'half_cerealian',
+    name: 'Half-Cerealian',
+    short: 'Half-Cerealian',
+    hybrid: true,
+    blurb: 'Earth blood and the last blood of a murdered world. One half of your family tree has almost nobody left on it.',
+    homeworlds: ['east_city', 'west_city', 'cereal'],
+    base: { strength: 41, speed: 46, technique: 59, kiControl: 57, durability: 43, intellect: 59, charisma: 56, discipline: 59 },
+    growth: { power: 0.92, technique: 1.38, kiControl: 1.32, discipline: 1.22 },
+    startPower: [1, 8],
+    lifespan: [76, 108],
+    agingRate: 0.95,
+    maturityRate: 1.0,
+    appetite: 1.0,
+    perks: ['survivor', 'fastLearner', 'techniqueGenius', 'luck'],
+    transformLadder: 'cerealian',
+    naming: 'cerealian',
+    tags: ['mortal', 'earthling'],
+    hairColours: ['orange', 'black', 'brown', 'dark red'],
+    startingTechniques: [],
+    notes: 'Half of a people that is almost gone. Whether anyone remembers that is up to you.',
+  },
+
+  // ------------------------------------------------------------ new worlds
+  {
+    id: 'kryllian',
+    name: 'Kryllian',
+    short: 'Kryllian',
+    blurb: 'Chitin, not skin, and a hive that never fully stops talking to you. You are never really alone, for better and worse.',
+    homeworlds: ['kryllos'],
+    base: { strength: 58, speed: 55, technique: 48, kiControl: 45, durability: 68, intellect: 52, charisma: 30, discipline: 62 },
+    growth: { power: 1.05, technique: 0.95, kiControl: 0.85, discipline: 1.1 },
+    startPower: [80, 700],
+    lifespan: [90, 160],
+    agingRate: 0.9,
+    maturityRate: 1.3,
+    appetite: 1.4,
+    perks: ['regeneration', 'fastLearner', 'hiveMind', 'chitinArmour'],
+    // Chitin, not skin, all the way down - the same plating that covers the
+    // rest of a Kryllian does not stop at the spine.
+    hasTail: true,
+    transformLadder: 'kryllian',
+    naming: 'kryllian',
+    tags: ['mortal', 'hivekind'],
+    hairColours: ['none (chitin does not grow hair)'],
+    startingTechniques: [],
+    notes: 'The hive knows what you know. Most Kryllians find that a comfort. You may not.',
+  },
+  // ----------------------------------------------------- NPC-only additions
+  // Everything past this point exists for NPCs, canon casts, and the
+  // universe's population - never for character creation, per
+  // CORE_PLAYABLE_RACE_IDS below. Some are real canon races the show never
+  // gave much page time to; some, like Kryllian above, are invented to fill
+  // in a universe that is supposed to hold far more than seven playable
+  // options.
+  {
+    id: 'metamoran',
+    name: 'Metamoran',
+    short: 'Metamoran',
+    blurb: 'Short, orange, and the reason the Fusion Dance exists at all - your people worked out how to become someone else on purpose.',
+    homeworlds: ['metamor'],
+    base: { strength: 40, speed: 44, technique: 62, kiControl: 60, durability: 44, intellect: 58, charisma: 48, discipline: 58 },
+    growth: { power: 0.9, technique: 1.2, kiControl: 1.1, discipline: 1.0 },
+    startPower: [3, 16],
+    lifespan: [90, 140],
+    agingRate: 0.85,
+    maturityRate: 1.0,
+    appetite: 1.1,
+    perks: ['fusionAptitude', 'stoutBuild', 'goodHumoured'],
+    transformLadder: 'earthling',
+    naming: 'metamoran',
+    tags: ['mortal'],
+    hairColours: ['black', 'brown'],
+    startingTechniques: ['fusion_dance'],
+    notes: 'You start knowing the Fusion Dance. Everyone who learns it eventually gets the pose wrong the first time - you never did.',
+  },
+  // Jiren's own race is never named on-screen - deliberately, and the
+  // series never explains where he is actually from. That silence is the
+  // point being represented here, not a gap to be quietly filled in.
+  {
+    id: 'unrecorded',
+    name: 'Unrecorded',
+    short: 'Unrecorded',
+    blurb: 'Nobody outside Universe 11 has a name for what you are. Nobody has ever gotten one of you to explain, either.',
+    homeworlds: ['universe11'],
+    base: { strength: 88, speed: 82, technique: 80, kiControl: 84, durability: 90, intellect: 60, charisma: 30, discipline: 96 },
+    growth: { power: 1.75, technique: 1.1, kiControl: 1.15, discipline: 1.4 },
+    startPower: [200, 3000],
+    lifespan: [90, 150],
+    agingRate: 0.85,
+    maturityRate: 1.0,
+    appetite: 1.2,
+    perks: ['innatePower', 'silentGrief', 'unshakeable'],
+    transformLadder: 'earthling',
+    naming: 'other',
+    tags: ['mortal', 'u11'],
+    hairColours: ['black', 'white', 'grey'],
+    startingTechniques: [],
+    notes: 'Whatever happened to your world, you do not discuss it. The strength is not in spite of that. It is because of it.',
+  },
+  {
+    id: 'vezrin',
+    name: 'Vezrin',
+    short: 'Vezrin',
+    blurb: 'Crystalline growths along the spine and skull that catch light and thought both. You hear more of a room than you say out loud.',
+    homeworlds: ['vezra'],
+    base: { strength: 32, speed: 40, technique: 56, kiControl: 78, durability: 40, intellect: 74, charisma: 44, discipline: 60 },
+    growth: { power: 0.85, technique: 1.15, kiControl: 1.5, discipline: 1.05 },
+    startPower: [2, 10],
+    lifespan: [140, 220],
+    agingRate: 0.6,
+    maturityRate: 0.85,
+    appetite: 0.6,
+    perks: ['telepathic', 'crystallineFrame', 'senseDanger'],
+    transformLadder: 'earthling',
+    naming: 'vezrin',
+    tags: ['mortal', 'psychic'],
+    hairColours: ['none (crystal, not hair)'],
+    startingTechniques: ['telepathy'],
+    notes: 'You start knowing Telepathy. Privacy is a concept your people find faintly ridiculous.',
+  },
+  {
+    id: 'driftkin',
+    name: 'Driftkin',
+    short: 'Driftkin',
+    blurb: 'Nobody in living memory was born under gravity. Your people have not had a homeworld in generations, and stopped missing one a while ago.',
+    homeworlds: ['driftkin_fleet'],
+    base: { strength: 48, speed: 60, technique: 54, kiControl: 50, durability: 52, intellect: 56, charisma: 40, discipline: 54 },
+    growth: { power: 1.05, technique: 1.05, kiControl: 1.0, discipline: 0.95 },
+    startPower: [4, 22],
+    lifespan: [95, 150],
+    agingRate: 0.9,
+    maturityRate: 1.05,
+    appetite: 1.3,
+    perks: ['vacuumProof', 'shipborn', 'wanderer'],
+    transformLadder: 'earthling',
+    naming: 'driftkin',
+    tags: ['mortal', 'nomadic'],
+    hairColours: ['black', 'grey', 'shaved'],
+    startingTechniques: [],
+    notes: 'Home is whichever hull you are currently standing in. That has never once struck you as strange.',
+  },
+  // Not a species a life can begin as or grow into - a data shape for
+  // whatever followed you home as a child (child_animal, childhood.js).
+  // Before this existed, a tamed animal had no race of its own and fell
+  // through to makeNpc()'s normal weighted pick over every playable
+  // species, which is how a wolf that followed you home could quietly
+  // become a Saiyan. hidden keeps it out of both character creation and
+  // the pool ordinary NPCs are drawn from.
+  {
+    id: 'beast', name: 'Animal', short: 'Animal', hidden: true,
+    sexes: ['male', 'female'],
+    blurb: 'Whatever followed you home. Not a fighter, not a person, still yours.',
+    homeworlds: [],
+    base: { strength: 45, speed: 55, technique: 5, kiControl: 5, durability: 45, intellect: 10, charisma: 30, discipline: 20 },
+    growth: { power: 1.0, technique: 0.2, kiControl: 0.2, discipline: 0.3 },
+    startPower: [1, 5],
+    lifespan: [8, 20],
+    agingRate: 1.4,
+    maturityRate: 2.0,
+    appetite: 1.2,
+    perks: [],
+    hasTail: true,
+    transformLadder: 'beast',
+    naming: 'other',
+    tags: ['animal'],
+    hairColours: ['brown', 'black', 'white', 'grey', 'orange'],
+    startingTechniques: [],
+    notes: 'Loyal, occasionally enormous, never going to hold a conversation.',
+  },
+];
+
+export const RACE_BY_ID = Object.fromEntries(RACES.map((r) => [r.id, r]));
+
+// Half-breeds are what happens when two species meet, not a starting point -
+// nobody is born a Half-Saiyan by choosing it on a menu. Creation offers
+// only the races a life can actually begin as; makeChild() still routes to
+// every hybrid here the moment the right pairing happens in play. hidden
+// races (a tamed animal's data shape, not a species) never belong here either.
+//
+// Past that, fresh character creation is deliberately capped to a fixed
+// core roster: Saiyan, Human, Frost Demon (Frostkin), Namekian, Majin,
+// Android, Bio-Android. Every other full race in RACES.js - Shinjin,
+// Tuffle, Yardratian, Cerealian, Kryllian, and anything added after this
+// line - exists for NPCs, canon casts, and the universe's population only,
+// never as something to start a life as. beginLegacy() (taking over an
+// heir's life) is not creation and is not filtered by this: a half-Saiyan,
+// quarter-Android, quarter-Majin grandchild is playable the moment you
+// inherit their life, whatever race that turns out to be.
+const CORE_PLAYABLE_RACE_IDS = new Set([
+  'saiyan', 'earthling', 'frostdemon', 'namekian', 'majin', 'android', 'bioandroid',
+]);
+export const CREATABLE_RACES = RACES.filter((r) => !r.hybrid && !r.hidden && CORE_PLAYABLE_RACE_IDS.has(r.id));
+
+export function getRace(id) {
+  return RACE_BY_ID[id] || RACE_BY_ID.earthling;
+}
+
+// ------------------------------------------------------- generated races
+// The curated NPC-only additions above (Metamoran, Vezrin, Driftkin,
+// Kryllian...) are still a fixed list - a universe this size should not
+// keep producing the same dozen background species forever. generateRace()
+// invents one on the spot: real stats, a real lifespan, a couple of perks
+// drawn from a pool safe for any species to have (nothing species-defining
+// like oozaru or kaiKai), and a name nobody wrote down in advance.
+//
+// Registered into RACE_BY_ID immediately, same as any curated entry, so
+// getRace() resolves it right away - but a generated id will not survive a
+// save/load on its own, since RACE_BY_ID is rebuilt fresh from this file
+// every time the module loads. makeNpc() also stashes the full definition
+// on the npc itself (npc.raceDef) as a durable backup, and save.js's
+// migrate() re-registers every npc.raceDef it finds on load, before
+// anything else runs.
+const RACE_SYL_A = ['Vez', 'Kry', 'Zor', 'Mel', 'Thal', 'Cor', 'Ish', 'Dren', 'Sol', 'Vash', 'Nyx', 'Quor', 'Bryn', 'Xel', 'Or', 'Jhen', 'Ral'];
+const RACE_SYL_B = ['ra', 'ith', 'an', 'or', 'eth', 'ul', 'ax', 'in', 'yr', 'os', 'ad'];
+const RACE_SUFFIX = ['ian', 'kin', 'ari', 'ite', 'oth', 'an', 'ese'];
+
+function generateRaceName(rng) {
+  const name = `${rng.pick(RACE_SYL_A)}${rng.pick(RACE_SYL_B)}${rng.pick(RACE_SUFFIX)}`;
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+const GENERIC_PERK_POOL = [
+  'hardToKill', 'fastLearner', 'luck', 'senseDanger', 'telepathic', 'wanderer',
+  'socialAnimal', 'stoutBuild', 'goodHumoured', 'survivor', 'meditative',
+  'longView', 'unshakeable', 'coldLogic', 'battleLust', 'noKiSignature', 'vacuumProof',
+];
+
+const GENERIC_BODY = [
+  { note: 'chitin-plated', hairColours: ['none (chitin, not hair)'] },
+  { note: 'scaled', hairColours: ['none (scales, not hair)'] },
+  { note: 'furred', hairColours: ['black', 'brown', 'grey', 'white'] },
+  { note: 'crystalline along the skull and spine', hairColours: ['none (crystal growths, not hair)'] },
+  { note: 'faintly bioluminescent', hairColours: ['none (light patterns, not hair)'] },
+  { note: 'ordinary-skinned, otherwise unremarkable to look at', hairColours: ['black', 'brown', 'red', 'white'] },
+];
+
+const GENERIC_HOME = [
+  'a heavy-gravity world', 'a world with three suns and no real night', 'an ocean world with no dry land to speak of',
+  'a world scoured by radiation, adapted to rather than escaped', 'a world so cold most life lives underground',
+  'a world nobody outside its own system has bothered to properly chart',
+];
+
+/** Invent a wholly new species. Registers it into RACE_BY_ID and returns
+ * the full definition (also stash on npc.raceDef - see makeNpc()). */
+export function generateRace(rng) {
+  const body = rng.pick(GENERIC_BODY);
+  const home = rng.pick(GENERIC_HOME);
+  const id = 'gen_' + Math.floor(rng.next() * 1e12).toString(36);
+  const name = generateRaceName(rng);
+  const spread = () => rng.int(28, 92);
+  const base = {
+    strength: spread(), speed: spread(), technique: spread(), kiControl: spread(),
+    durability: spread(), intellect: spread(), charisma: spread(), discipline: spread(),
+  };
+  const round2 = (v) => Math.round(v * 100) / 100;
+  const race = {
+    id, name, short: name, generated: true,
+    blurb: `${body.note.charAt(0).toUpperCase()}${body.note.slice(1)}, from ${home}. Nobody outside their own system has much reason to have heard of them.`,
+    homeworlds: [],
+    base,
+    growth: {
+      power: round2(rng.float(0.75, 1.5)),
+      technique: round2(rng.float(0.85, 1.3)),
+      kiControl: round2(rng.float(0.85, 1.3)),
+      discipline: round2(rng.float(0.85, 1.25)),
+    },
+    startPower: [1, rng.int(4, 20)],
+    lifespan: [rng.int(50, 90), rng.int(100, 260)],
+    agingRate: round2(rng.float(0.6, 1.3)),
+    maturityRate: round2(rng.float(0.75, 1.3)),
+    appetite: round2(rng.float(0.6, 1.4)),
+    perks: rng.sample(GENERIC_PERK_POOL, rng.int(1, 2)),
+    transformLadder: 'earthling',
+    naming: 'other',
+    tags: ['mortal', 'generated'],
+    hairColours: body.hairColours,
+    startingTechniques: [],
+    notes: `One of countless species nobody bothered writing a proper field guide for. ${name}s do not think of themselves as exotic.`,
+  };
+  registerRace(race);
+  return race;
+}
+
+/** Wire a generated race back into the shared lookup table - used both by
+ * generateRace() itself and by save.js's migrate() when restoring one
+ * found on an npc.raceDef after a save/load. Idempotent. */
+export function registerRace(race) {
+  RACE_BY_ID[race.id] = race;
+  if (!RACES.includes(race)) RACES.push(race);
+}
+
+/** Which sexes a race actually shows. Most have both; a few, canonically, do not. */
+export function sexesFor(raceId) {
+  return getRace(raceId).sexes || ['female', 'male'];
+}
+
+/**
+ * How grown-up someone is, which is not the same as how slowly they age.
+ * A Namekian is an adult in four years and lives for three centuries; a Kai
+ * ages barely at all but is still a child at ten.
+ */
+export function maturity(character) {
+  const race = getRace(character.raceId);
+  return character.age * (race.maturityRate ?? 1);
+}
+
+export function hasPerk(character, perk) {
+  const race = getRace(character.raceId);
+  if (race.perks.includes(perk)) return true;
+  return Array.isArray(character.extraPerks) && character.extraPerks.includes(perk);
+}
+
+/**
+ * Who has a tail, drawn on the portrait. Not the same question as who can go
+ * Great Ape with it - a Saiyan's tail is both a body part and a mechanic
+ * (`oozaru` gates on it), a Frost Demon's is a body part and nothing else,
+ * because the transformation ladder that would ask for it is never on their
+ * ladder in the first place.
+ */
+export function raceHasTail(raceId) {
+  const race = getRace(raceId);
+  if (!race) return false;
+  return race.perks.includes('oozaru') || !!race.hasTail;
+}
+
+// Upbringings replace the usual life-sim "starting family wealth" roll with
+// something that also sets a narrative direction.
+export const UPBRINGINGS = [
+  { id: 'warrior_clan', name: 'Warrior Clan', blurb: 'Raised on drills and bruises.', stats: { strength: 6, discipline: 5, charisma: -3 }, wealth: 0.9, power: 1.3 },
+  { id: 'street', name: 'Street Kid', blurb: 'Nobody fed you. You got fast.', stats: { speed: 6, technique: 3, discipline: -2, charisma: 3 }, wealth: 0.3, power: 1.1 },
+  { id: 'wealthy', name: 'Old Money', blurb: 'Capsule-brand everything.', stats: { intellect: 5, charisma: 6, discipline: -4 }, wealth: 4.5, power: 0.9 },
+  { id: 'temple', name: 'Temple Foundling', blurb: 'Raised by monks who did not explain much.', stats: { kiControl: 7, discipline: 7, intellect: 3, charisma: -4 }, wealth: 0.5, power: 1.15 },
+  { id: 'lab', name: 'Laboratory Subject', blurb: 'You have a serial number somewhere.', stats: { durability: 7, intellect: 5, charisma: -6 }, wealth: 0.6, power: 1.25 },
+  { id: 'farm', name: 'Farm Kid', blurb: 'Hard work, big skies, one shotgun.', stats: { strength: 5, durability: 5, intellect: -2, discipline: 3 }, wealth: 0.8, power: 1.0 },
+  { id: 'city', name: 'City Ordinary', blurb: 'A completely normal childhood. Suspicious.', stats: { intellect: 3, charisma: 4 }, wealth: 1.0, power: 1.0 },
+  { id: 'orphan_pod', name: 'Landed in a Pod', blurb: 'Someone found you in a crater.', stats: { durability: 5, strength: 4, charisma: -2 }, wealth: 0.4, power: 1.2 },
+  { id: 'royal', name: 'Royal Blood', blurb: 'A throne, or the memory of one.', stats: { charisma: 8, discipline: 4, strength: 3 }, wealth: 3.0, power: 1.35 },
+  { id: 'exile', name: 'Exile', blurb: 'Your people are gone or you are not welcome back.', stats: { discipline: 5, technique: 4, charisma: -3, intellect: 3 }, wealth: 0.4, power: 1.1 },
+  { id: 'self_raised', name: 'Raised Yourself', blurb: 'Nobody came. You worked it out.', stats: { discipline: 8, durability: 6, charisma: -8, intellect: 4 }, wealth: 0.1, power: 1.2, tags: ['alone'] },
+  { id: 'animals', name: 'Raised by Animals', blurb: 'You learned to hunt before you learned to talk.', stats: { speed: 8, durability: 7, strength: 4, charisma: -12, intellect: -4 }, wealth: 0.05, power: 1.3, tags: ['feral'] },
+  { id: 'foster', name: 'Fostered', blurb: 'Somebody took you in who did not have to.', stats: { charisma: 5, discipline: 3, kiControl: 2 }, wealth: 0.7, power: 1.05, tags: ['kind'] },
+  { id: 'saiyan_creche', name: 'Saiyan Creche', blurb: 'Graded at birth and shipped out at three.', stats: { strength: 7, durability: 6, discipline: 4, charisma: -6 }, wealth: 0.5, power: 1.45, tags: ['saiyan'] },
+  { id: 'conquered', name: 'Occupied World', blurb: 'Somebody else\'s flag over your town.', stats: { speed: 4, discipline: 4, intellect: 3, charisma: -2 }, wealth: 0.3, power: 1.1, tags: ['bitter'] },
+];
+
+export const BODY_TYPES = [
+  { id: 'wiry', name: 'Wiry', stats: { speed: 5, strength: -3, technique: 2 } },
+  { id: 'lean', name: 'Lean', stats: { speed: 3, kiControl: 2 } },
+  { id: 'balanced', name: 'Balanced', stats: {} },
+  { id: 'stocky', name: 'Stocky', stats: { durability: 5, speed: -3, strength: 2 } },
+  { id: 'massive', name: 'Massive', stats: { strength: 7, durability: 4, speed: -6 } },
+  { id: 'small', name: 'Small', stats: { speed: 6, technique: 4, durability: -5, strength: -4 } },
+];
+
+export const TEMPERAMENTS = [
+  { id: 'hotblooded', name: 'Hot-blooded', stats: { strength: 4, discipline: -4 }, tags: ['reckless'] },
+  { id: 'stoic', name: 'Stoic', stats: { discipline: 6, charisma: -3 }, tags: ['calm'] },
+  { id: 'cunning', name: 'Cunning', stats: { intellect: 5, technique: 3, charisma: -2 }, tags: ['sly'] },
+  { id: 'kind', name: 'Kind', stats: { charisma: 6, kiControl: 2 }, tags: ['good'] },
+  { id: 'proud', name: 'Proud', stats: { strength: 3, charisma: 2, discipline: 2, intellect: -2 }, tags: ['proud'] },
+  { id: 'lazy', name: 'Lazy', stats: { discipline: -7, charisma: 4, intellect: 2 }, tags: ['slack'] },
+  { id: 'curious', name: 'Curious', stats: { intellect: 6, technique: 3, durability: -2 }, tags: ['seeker'] },
+  { id: 'cruel', name: 'Cruel', stats: { strength: 3, charisma: -5, discipline: 3 }, tags: ['evil'] },
+];

@@ -1,0 +1,235 @@
+<div id="app">
+
+  <!-- ==================================================== title screen -->
+  <section class="screen active" id="screen-title">
+    <div class="create">
+      <h1 class="logo">Dragon Ball<em>Mortal Coil</em></h1>
+      <p class="tagline">A full simulated life inside the Dragon Ball universe. Pick a species and an
+        era, then live it one year at a time: training, family, rivalries, war, death, and whatever the
+        Dragon Balls still owe you by the end.</p>
+
+      <div class="field">
+        <span class="field-label">What's here</span>
+        <ul class="feature-list" id="title-features"></ul>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Continue a life</span>
+        <div id="title-saves"></div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Ambience</span>
+        <div class="opts" id="opt-ambience"></div>
+        <p class="row-note" id="ambience-note" style="margin-top:6px"></p>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Reference</span>
+        <button class="ghost-btn" id="btn-form-reference" type="button">Transformation ladders, every species</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ character creation -->
+  <section class="screen" id="screen-create">
+    <div class="create">
+      <h1 class="logo">Dragon Ball<em>Mortal Coil</em></h1>
+      <p class="tagline">One life, one year at a time. Pick a species and a century. Everything
+        else is decided for you, the way it is for everybody.</p>
+
+      <div class="field">
+        <label class="field-label" for="in-name">Name</label>
+        <div style="display:flex;gap:7px">
+          <input class="text-input" id="in-name" maxlength="24" placeholder="Kakarot" autocomplete="off">
+          <button class="ghost-btn" id="btn-reroll-name" style="width:auto;margin:0;padding:10px 14px">Roll</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Species</span>
+        <div class="opts" id="opt-race"></div>
+        <div class="race-card" id="race-card"></div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Born in</span>
+        <select class="text-input" id="in-era"></select>
+        <p class="row-note" id="era-note" style="margin-top:6px"></p>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Sex</span>
+        <div class="opts" id="opt-sex"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="in-seed">Seed (optional)</label>
+        <input class="text-input" id="in-seed" placeholder="leave blank for a random life" autocomplete="off">
+      </div>
+
+      <p class="hint-text">Everything else — where you were born, who raised you, what you look
+        like, and what you were born capable of — is rolled for you. You find out by living it.</p>
+
+      <button class="primary-btn" id="btn-begin">Begin a life</button>
+      <button class="ghost-btn" id="btn-back-title">Back to title</button>
+      <p class="hint-text" id="create-ai-note"></p>
+    </div>
+  </section>
+
+  <!-- ========================================================== play -->
+  <section class="screen" id="screen-play">
+    <header class="hud">
+      <div class="hud-top">
+        <div class="hud-portrait" id="hud-portrait"></div>
+        <div>
+          <div class="hud-name" id="hud-name">-</div>
+          <div class="hud-sub" id="hud-sub">-</div>
+        </div>
+        <div class="hud-spacer"></div>
+        <div class="hud-age" id="hud-age">0<small>years</small></div>
+      </div>
+
+      <div class="scouter">
+        <span class="scouter-label">PWR</span>
+        <span class="scouter-value" id="hud-power">0</span>
+        <span class="scouter-tier" id="hud-tier">-</span>
+      </div>
+
+      <div class="bars">
+        <div class="bar bar-health">
+          <div class="bar-label"><span>Health</span><span id="v-health">100</span></div>
+          <div class="bar-track"><div class="bar-fill" id="f-health" style="width:100%"></div></div>
+        </div>
+        <div class="bar bar-happy">
+          <div class="bar-label"><span>Mood</span><span id="v-happy">65</span></div>
+          <div class="bar-track"><div class="bar-fill" id="f-happy" style="width:65%"></div></div>
+        </div>
+        <div class="bar bar-ki">
+          <div class="bar-label"><span>Ki</span><span id="v-ki">40</span></div>
+          <div class="bar-track"><div class="bar-fill" id="f-ki" style="width:60%"></div></div>
+        </div>
+      </div>
+
+      <div class="pills" id="hud-pills"></div>
+    </header>
+
+    <div class="feed" id="feed"></div>
+
+    <nav class="dock">
+      <button class="age-btn" id="btn-age">Age up</button>
+      <div class="tabs">
+        <button class="tab-btn" data-panel="activities"><span>&#9876;</span>Do</button>
+        <button class="tab-btn" data-panel="people"><span>&#9788;</span>People</button>
+        <button class="tab-btn" data-panel="power"><span>&#9889;</span>Power</button>
+        <button class="tab-btn" data-panel="records"><span>&#9635;</span>Life</button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ========================================================= battle -->
+  <section class="screen" id="screen-battle">
+    <header class="foe-head">
+      <div class="foe-top">
+        <div class="foe-face" id="foe-face" hidden></div>
+        <div>
+          <div class="foe-name" id="foe-name">-</div>
+          <div class="foe-sub" id="foe-sub">-</div>
+        </div>
+        <div class="foe-power" id="foe-power">-</div>
+      </div>
+      <div class="bar-track big"><div class="bar-fill foe-hp" id="foe-hp" style="width:100%"></div></div>
+      <div class="foe-meta">
+        <span id="foe-state">-</span>
+        <span id="battle-round">Round 1</span>
+      </div>
+      <div class="foe-squad" id="foe-squad" hidden></div>
+      <div class="destruction" id="destruction" hidden>
+        <span>Collateral</span>
+        <div class="bar-track"><div class="bar-fill dmg" id="destruction-fill" style="width:0%"></div></div>
+      </div>
+    </header>
+
+    <div class="battle-log" id="battle-log"></div>
+
+    <div class="me-strip">
+      <div class="me-face" id="me-face"></div>
+      <div class="me-bars">
+        <div class="mini"><span>HP</span><div class="bar-track"><div class="bar-fill hp" id="my-hp" style="width:100%"></div></div></div>
+        <div class="mini"><span>KI</span><div class="bar-track"><div class="bar-fill ki" id="my-ki" style="width:100%"></div></div></div>
+        <div class="mini"><span>STA</span><div class="bar-track"><div class="bar-fill sta" id="my-sta" style="width:100%"></div></div></div>
+      </div>
+      <div class="me-state" id="my-state">Neutral</div>
+    </div>
+
+    <nav class="battle-tabs" id="battle-tabs"></nav>
+    <div class="battle-actions" id="battle-actions"></div>
+  </section>
+
+  <!-- ========================================================== trial -->
+  <section class="screen" id="screen-trial">
+    <header class="trial-head">
+      <div class="trial-kicker" id="trial-kicker">Trial</div>
+      <div class="trial-title" id="trial-title">-</div>
+      <div class="trial-blurb" id="trial-blurb">-</div>
+      <div class="trial-progress" id="trial-progress">-</div>
+    </header>
+    <div class="trial-stage" id="trial-stage"></div>
+    <div class="trial-foot" id="trial-foot"></div>
+  </section>
+
+  <!-- =========================================================== hunt -->
+  <section class="screen" id="screen-hunt">
+    <header class="hunt-head">
+      <div class="hunt-title" id="hunt-title">Search</div>
+      <div class="hunt-sub" id="hunt-sub">-</div>
+      <div class="hunt-pings" id="hunt-pings">-</div>
+    </header>
+    <div class="hunt-grid" id="hunt-grid"></div>
+    <div class="hunt-readout" id="hunt-readout"></div>
+    <div class="hunt-foot" id="hunt-foot"></div>
+  </section>
+
+  <!-- =================================================== the last stage -->
+  <section class="screen" id="screen-survival">
+    <header class="surv-head">
+      <div class="surv-clock" id="surv-clock">48:00</div>
+      <div class="surv-title" id="surv-title">The Tournament of Power</div>
+      <div class="surv-sub" id="surv-sub">-</div>
+      <div class="surv-bars">
+        <div class="mini"><span>FOOTING</span><div class="bar-track"><div class="bar-fill hp" id="surv-grip" style="width:100%"></div></div></div>
+        <div class="mini"><span>STAMINA</span><div class="bar-track"><div class="bar-fill sta" id="surv-sta" style="width:100%"></div></div></div>
+      </div>
+    </header>
+    <div class="surv-teams" id="surv-teams"></div>
+    <div class="battle-log" id="surv-log"></div>
+    <div class="surv-actions" id="surv-actions"></div>
+  </section>
+
+  <!-- ===================================================== tournament -->
+  <section class="screen" id="screen-tourney">
+    <header class="tourney-head">
+      <div class="tourney-kicker" id="tourney-kicker">Tournament</div>
+      <div class="tourney-title" id="tourney-title">-</div>
+      <div class="tourney-sub" id="tourney-sub">-</div>
+      <div class="tourney-rules" id="tourney-rules">-</div>
+    </header>
+    <div class="tourney-body" id="tourney-body"></div>
+    <div class="tourney-foot" id="tourney-foot"></div>
+  </section>
+
+  <!-- ======================================================== epitaph -->
+  <section class="screen" id="screen-death">
+    <div class="epitaph" id="epitaph"></div>
+  </section>
+
+</div>
+
+<div class="sheet-scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-heading">
+  <div class="sheet-grab"></div>
+  <div class="sheet-body" id="sheet-body"></div>
+  <div class="sheet-foot" id="sheet-foot"></div>
+</div>
+
+<div class="toast" id="toast"></div>

@@ -1,0 +1,501 @@
+// The things a life teaches you whether or not you go looking.
+//
+// Flight is the obvious one: in this setting nobody who fights walks anywhere
+// after a certain point, and learning it is a moment rather than a purchase.
+// Contacting somebody on another world is the other: once the galaxy is big,
+// keeping a relationship alive across it has to be possible.
+
+import { registerEvents, npcSlot } from '../generator.js';
+import { apply, fact, relate, trainYear, powerLine, findNpc, stranger, meetCanon } from './helpers.js';
+import { combatPower } from '../stats.js';
+import { getPlace, PLACES } from '../../data/places.js';
+import { PLANETS } from '../../data/planets.js';
+import { getTechnique } from '../../data/techniques.js';
+import { currencyFor, formatMoney, canAfford, debit, priceIn } from '../../data/currency.js';
+import { maturity } from '../../data/races.js';
+import { getCanon } from '../../data/canon.js';
+import { ITEMS, getItem } from '../../data/items.js';
+import { addItem, findEntry } from '../inventory.js';
+import { numberish } from '../text.js';
+import { clamp } from '../rng.js';
+import { startTrial } from '../trials.js';
+import { npcFamiliarity, attemptLock, transmissionMissLine } from '../comms.js';
+
+/** People you know who are not on this world. */
+function offWorld(ctx) {
+  const here = getPlace(ctx.character.placeId).planet;
+  return Object.values(ctx.state.npcs).filter((n) => {
+    if (!n.alive) return false;
+    const p = getPlace(n.placeId || 'east_city');
+    return p && p.planet !== here && (n.closeness || 0) > 25;
+  });
+}
+
+registerEvents([
+  // ------------------------------------------------------------- flight
+  {
+    id: 'learn_flight', noFatigue: true, tags: ['training', 'milestone'], weight: 90,
+    minBioAge: 7,
+    when: (ctx) => !ctx.character.techniques.includes('bukujutsu')
+      && ctx.character.stats.kiControl >= 28
+      && !ctx.character.inAfterlife,
+    slots: (ctx) => {
+      const teachers = Object.values(ctx.state.npcs).filter((n) => n.alive
+        && (n.techniques || []).includes('bukujutsu') && (n.closeness || 0) > 30);
+      const who = teachers.length ? ctx.rng.pick(teachers) : null;
+      return {
+        who: who ? who.name : null,
+        npcId: who ? who.id : null,
+        drop: ctx.rng.pick(['a barn roof', 'a cliff nobody sensible goes near', 'the top of a water tower',
+          'a rock in the middle of a river', 'a ledge you got onto and cannot get off']),
+      };
+    },
+    title: 'Off The Ground',
+    text: (ctx, s) => (s.who
+      ? `{[who] has been doing it in front of you for years|You ask [who] how|You have watched [who] do it and never asked}.
+         {"It is not jumping"|"Stop trying to push off anything"|"You are already doing most of it"}.
+         {They make you stand on [drop] until you work it out|It takes an afternoon and then a month|You fall a great deal}.`
+      : `{Nobody teaches you|You work it out on your own, badly|It happens by accident}.
+         {You come off [drop] and do not land|Something catches, about a metre up|For four seconds you are not touching anything}.
+         {You come down hard|You land on your face|It is the most frightening thing that has ever happened to you}.`),
+    choices: (ctx, s) => [
+      { id: 'stick', label: 'Keep at it until it holds',
+        hint: 'You have to hold it yourself. Nobody can do this part for you.',
+        effect: (c2, sl) => {
+          if (sl.npcId) relate(c2, findNpc(c2.state, sl.npcId), { closeness: 12, respect: 10 });
+          // Flight is a thing you hold, not a thing you buy, so it is played.
+          const trial = startTrial(c2.state, c2.rng, {
+            kind: 'endurance',
+            purpose: 'technique',
+            // Almost everybody in this setting can fly. The test is whether
+            // you hold it today, not whether you are capable of it at all.
+            difficulty: 1,
+            label: 'Off the ground',
+            blurb: 'Hold it. The moment you think about it you are on the floor.',
+            payload: { techId: 'bukujutsu' },
+          });
+          return {
+            text: `{You go back up|You climb it again|You get back on the roof}. `
+              + `{The trick is not pushing. The trick is not stopping|`
+              + `It is entirely a matter of not letting go|Everything depends on the next thirty seconds}.`,
+            changes: [],
+            trial,
+          };
+        } },
+      { id: 'later', label: 'Leave it for now', danger: false, effect: (c2) => ({
+        text: `{You put it down|It frightens you and you do not say so|There is time}. `
+          + `{You walk everywhere for another few years|It will come back around|Somebody laughs at you for it later}.`,
+        changes: apply(c2, { happiness: -4 }),
+      }) },
+    ],
+  },
+
+  // ------------------------------------------------- talking across space
+  {
+    id: 'long_distance', tags: ['social', 'world'], weight: 26,
+    minBioAge: 12,
+    when: (ctx) => offWorld(ctx).length > 0,
+    slots: (ctx) => {
+      const away = offWorld(ctx);
+      if (!away.length) return null;
+      const npc = ctx.rng.weighted(away, (n) => 1 + (n.closeness || 0) / 20);
+      const gap = ctx.year - (npc.lastSeen || ctx.year);
+      return { ...npcSlot(npc), gap: Math.max(1, gap), where: getPlace(npc.placeId || 'east_city').name };
+    },
+    title: (ctx, s) => `Word From ${s.npcName}`,
+    text: `{It takes a while to reach you|The signal is bad and it is them|Somebody hands you a message that has been three months in transit}.
+      [npcName], on [where]. {[gap] years since you were in the same room|You have not spoken in [gap] years|It has been [gap] years}.`,
+    choices: (ctx, s) => [
+      { id: 'answer', label: 'Answer properly', effect: (c2, sl) => {
+        const npc = findNpc(c2.state, sl.npcId);
+        relate(c2, npc, { closeness: 14, trust: 10 });
+        if (npc) npc.lastSeen = c2.year;
+        return { text: `{You send back more than you meant to|It takes three attempts to say anything true|`
+          + `You talk into the thing for an hour and send all of it}. `
+          + `{The reply comes back months later and is worth the wait|You do this now, every year|It is not the same and it is something}.`,
+        changes: apply(c2, { happiness: 14 }) };
+      } },
+      { id: 'go', label: 'Go and see them', hint: 'It is a long way.', effect: (c2, sl) => {
+        const npc = findNpc(c2.state, sl.npcId);
+        const dest = getPlace(npc && npc.placeId ? npc.placeId : 'east_city');
+        const instant = c2.character.techniques.includes('instant_transmission') || c2.character.techniques.includes('kai_kai');
+        if (instant) {
+          const kaiKai = c2.character.techniques.includes('kai_kai');
+          const lock = attemptLock(c2.character, c2.rng, npcFamiliarity(npc, c2.year), kaiKai);
+          if (!lock.success) {
+            // A missed lock does not strand you - it just costs the year you
+            // meant to save, and the moment you meant to have.
+            return { text: `{${transmissionMissLine(c2.rng)}} By the time you sort out where you actually are, the year is mostly gone.`,
+            changes: apply(c2, { happiness: -6 }) };
+          }
+          c2.character.placeId = dest.id;
+          if (npc) { npc.lastSeen = c2.year; relate(c2, npc, { closeness: 22, trust: 14 }); }
+          return { text: `{You lock onto them and go|It takes no time at all, which never stops being strange|`
+            + `You are there before you have finished deciding}. {They are not ready for you|`
+            + `They put food in front of you within four minutes|You stay a while}.`,
+          changes: apply(c2, { happiness: 22 }) };
+        }
+        const cur = currencyFor(getPlace(c2.character.placeId).planet);
+        const fare = priceIn(400000, cur.id);
+        if (!canAfford(c2.character, cur.id, fare)) {
+          return { text: `{Passage costs ${formatMoney(fare, cur.id)} and you do not have it|`
+            + `You price it up and put it away|There is no way to get there this year}.`,
+          changes: apply(c2, { happiness: -8 }) };
+        }
+        debit(c2.character, cur.id, fare);
+        c2.character.placeId = dest.id;
+        if (npc) { npc.lastSeen = c2.year; relate(c2, npc, { closeness: 26, trust: 18 }); }
+        return { text: `{You buy passage and spend most of a year asleep|`
+          + `${formatMoney(fare, cur.id)}, and a berth the size of a coffin|You go}. `
+          + `{They do not know you are coming|They are older than the last picture|You should have done this sooner}.`,
+        changes: apply(c2, { happiness: 24 }) };
+      } },
+      { id: 'nothing', label: 'Leave it unanswered', effect: (c2, sl) => {
+        const npc = findNpc(c2.state, sl.npcId);
+        relate(c2, npc, { closeness: -10, trust: -8 });
+        return { text: `{You mean to answer|You draft something and do not send it|You put it somewhere and it stays there}. `
+          + `{Another year goes by|They stop sending|Neither of you says anything about it afterwards}.`,
+        changes: apply(c2, { happiness: -6 }) };
+      } },
+    ],
+  },
+
+  // -------------------------------------------- somewhere to train properly
+  {
+    id: 'build_chamber', noFatigue: true, tags: ['world', 'training', 'property'], weight: 22,
+    minBioAge: 18,
+    when: (ctx) => !ctx.character.flags.has_chamber && ctx.character.home
+      && combatPower(ctx.character) > 100000,
+    slots: (ctx) => {
+      const known = Object.values(ctx.state.npcs).filter((n) => n.alive && (n.closeness || 0) > 30);
+      const smart = known.filter((n) => (n.stats && n.stats.intellect >= 75) || n.canonId === 'bulma' || n.canonId === 'gero');
+      // A god does not need to be a genius to build one of these - Kami built
+      // the original by simply being able to. Read that off canon.js's own
+      // tags rather than the NPC's own (which only ever carries temperament),
+      // and require more trust than the merely clever version does.
+      const divine = known.filter((n) => n.canonId && (getCanon(n.canonId)?.tags || []).includes('divine') && (n.closeness || 0) > 50);
+      const pickedSmart = smart.length ? ctx.rng.pick(smart) : null;
+      const pickedDivine = divine.length ? ctx.rng.pick(divine) : null;
+      return {
+        who: pickedSmart ? pickedSmart.name : null,
+        npcId: pickedSmart ? pickedSmart.id : null,
+        god: pickedDivine ? pickedDivine.name : null,
+        godId: pickedDivine ? pickedDivine.id : null,
+        mine: ctx.character.iq >= 130,
+      };
+    },
+    title: 'A Room That Runs Faster',
+    text: (ctx, s) => `{You have been thinking about it for years|It comes up because you have run out of places to train|
+      Somebody mentions the Lookout and you cannot stop thinking about it}.
+      A room with its own gravity and its own clock. ${s.god
+    ? `{[god] could simply make one|You mention it to [god] and they do not see the difficulty|[god] has built stranger things than this}.`
+    : s.mine
+      ? '{You could build it|You have worked out most of it already|The maths is not beyond you}.'
+      : s.who
+        ? '{[who] could build it|You could not begin to build it. [who] could|[who] laughs and then stops laughing and starts sketching}.'
+        : '{You would need somebody far cleverer than you|There is nobody within reach who could|You do not know anyone who could build it}.'}`,
+    choices: (ctx, s) => {
+      const list = [];
+      const cur = currencyFor(getPlace(ctx.character.placeId).planet);
+      const cost = priceIn(14000000, cur.id);
+      if (s.god) {
+        list.push({
+          id: 'divine', label: `Ask ${s.god} to make one`, hint: 'No money changes hands. That is not how this works.',
+          effect: (c2, sl) => {
+            const npc = sl.godId ? findNpc(c2.state, sl.godId) : null;
+            if (npc) relate(c2, npc, { closeness: 6, respect: 10 });
+            c2.character.flags.has_chamber = true;
+            c2.character.chamber = { built: true, rate: 3.6, aging: 1.5, by: sl.god, divine: true };
+            fact(c2, `${sl.god} made them a training chamber, the way a god makes something - by deciding it exists.`,
+              { type: 'property', weight: 9, tags: ['training', 'divine'] });
+            return { text: `{There is no ceremony to it|${sl.god} does not so much build the room as decide it is already there|`
+              + `One moment it is an idea and the next it is a door}. `
+              + `{The gravity is exact. The clock is exact. Nothing about it is improvised|`
+              + `It does not creak, hum, or need maintaining, unlike every other version of this ever made|`
+              + `You get the distinct sense you did not pay the real price for this yet}.`,
+            changes: apply(c2, { happiness: 24, karma: 2 }) };
+          },
+        });
+      }
+      if (s.mine) {
+        list.push({
+          id: 'build_self', label: `Build it yourself - ${formatMoney(cost, cur.id)}`,
+          effect: (c2) => {
+            if (!canAfford(c2.character, cur.id, cost)) {
+              return { text: `You cost it out. ${formatMoney(cost, cur.id)}. You are a long way short.`, changes: [] };
+            }
+            debit(c2.character, cur.id, cost);
+            c2.character.flags.has_chamber = true;
+            c2.character.chamber = { built: true, rate: 2.6, aging: 1.6 };
+            fact(c2, 'Built a training chamber that runs faster than the world outside it.',
+              { type: 'property', weight: 8, tags: ['training'] });
+            return { text: `{It takes two years and most of your money|`
+              + `You get the gravity right before you get the clock right|Nothing explodes, which surprises everybody}. `
+              + `{A day in there is a week out here|You will age faster than the people waiting outside|That is the trade}.`,
+            changes: apply(c2, { happiness: 20, stats: { intellect: 4 } }) };
+          },
+        });
+      }
+      if (s.who) {
+        const helped = Math.round(cost * 1.5);
+        list.push({
+          id: 'hire', label: `Ask ${s.who} to build it - ${formatMoney(helped, cur.id)}`,
+          effect: (c2, sl) => {
+            if (!canAfford(c2.character, cur.id, helped)) {
+              return { text: `${sl.who} quotes you ${formatMoney(helped, cur.id)} and does not negotiate.`, changes: [] };
+            }
+            debit(c2.character, cur.id, helped);
+            const npc = sl.npcId ? findNpc(c2.state, sl.npcId) : null;
+            if (npc) relate(c2, npc, { closeness: 10, respect: 8 });
+            c2.character.flags.has_chamber = true;
+            c2.character.chamber = { built: true, rate: 3.1, aging: 1.7, by: sl.who };
+            fact(c2, `${sl.who} built them a training chamber.`, { type: 'property', weight: 8, tags: ['training'] });
+            return { text: `{It arrives in pieces and goes up in a week|${sl.who} is insulted you thought it would be hard|`
+              + `They bill you twice and it is worth it}. {A day in there is more than a week out here|`
+              + `You are going to get old in that room|It is the best thing you have ever bought}.`,
+            changes: apply(c2, { happiness: 22 }) };
+          },
+        });
+      }
+      list.push({
+        id: 'lookout', label: 'Go and ask to use the one that exists',
+        hint: 'The Lookout. They do not lend it to just anybody.',
+        effect: (c2) => {
+          const worthy = (c2.character.karma || 0) > 10 || (c2.character.fame || 0) > 40;
+          if (!worthy) {
+            return { text: `{They hear you out|Somebody very polite explains that it is not available|`
+              + `The answer is no and it is final}. {You are not the sort of person they lend it to|`
+              + `Not yet|Come back when you have done something}.`, changes: apply(c2, { happiness: -8 }) };
+          }
+          c2.character.flags.chamber_access = true;
+          fact(c2, 'Was given access to the Hyperbolic Time Chamber.',
+            { type: 'property', weight: 7, tags: ['training'] });
+          return { text: `{They agree, with conditions|You are given two days and told what happens if you take three|`
+            + `Somebody walks you up and does not speak the whole way}. {A year inside for a day out here|`
+            + `Nobody has ever come out of it the same|You are told exactly how many times you may use it}.`,
+          changes: apply(c2, { happiness: 16 }) };
+        },
+      });
+      list.push({
+        id: 'no', label: 'Train outside like everybody else',
+        effect: (c2) => {
+          const t = trainYear(c2, { intensity: 1.4 });
+          return { text: `{You have a mountain and that is enough|`
+            + `Rooms that cheat time are for people who are behind|You get on with it}. ${powerLine(t.gained)}`,
+          changes: [] };
+        },
+      });
+      return list;
+    },
+  },
+  // Not the shop's stock - something made for you specifically. The type is
+  // rolled rather than picked, which still lands on "any type" across
+  // repeated encounters; what actually changes is who makes it, and that is
+  // where the quality (weaponAttackBonus's new qualityMult, in stats.js)
+  // comes from. Wear and breakage need nothing new here - damageGear()
+  // already treats any worn item the same regardless of how it was
+  // acquired, which is exactly the "just like clothing and armour" the
+  // request asked for.
+  {
+    id: 'weapon_commission', tags: ['world', 'opportunity', 'gear'], weight: 14,
+    minBioAge: 14,
+    when: (ctx) => !ctx.character.inAfterlife,
+    slots: (ctx) => {
+      // Unique relics (the Z-Sword, the like) are singular artifacts with
+      // their own history - not something a smith, or even a god, simply
+      // produces on request.
+      const pool = ITEMS.filter((i) => i.cat === 'weapon' && !(i.passive && i.passive.unique));
+      const chosen = ctx.rng.pick(pool);
+      const known = Object.values(ctx.state.npcs).filter((n) => n.alive && (n.closeness || 0) > 30);
+      const smiths = known.filter((n) => (n.stats && (n.stats.technique >= 70 || n.stats.intellect >= 70)));
+      const divine = known.filter((n) => n.canonId && (getCanon(n.canonId)?.tags || []).includes('divine') && (n.closeness || 0) > 50);
+      const pickedSmith = smiths.length ? ctx.rng.pick(smiths) : null;
+      const pickedDivine = divine.length ? ctx.rng.pick(divine) : null;
+      return {
+        itemId: chosen.id, itemName: chosen.name, itemDesc: chosen.desc,
+        smithName: pickedSmith?.name, smithId: pickedSmith?.id,
+        godName: pickedDivine?.name, godId: pickedDivine?.id,
+        mine: (ctx.character.iq || 100) >= 110 || (ctx.character.flags.weaponTrainingYears || 0) >= 1,
+      };
+    },
+    title: 'Something Worth Carrying',
+    text: (ctx, s) => `You have been thinking about a ${s.itemName.toLowerCase()} lately - not buying one off a shelf, having one made. ${s.itemDesc}
+      {There is a version of this that is actually yours|The shop-bought ones are all the same weapon wearing different names|Whoever makes it decides more than the design does}.`,
+    choices: (ctx, s) => {
+      const list = [];
+      const cur = currencyFor(getPlace(ctx.character.placeId).planet);
+      const item = getItem(s.itemId);
+      const baseCost = priceIn(Math.max(2000, item.cost || 20000), cur.id);
+      // addItem() is a no-op if this exact weapon id is already in the bag
+      // (non-consumables are unique per id) - reads as re-forging the one
+      // you have rather than a wasted commission, which is the more honest
+      // framing anyway.
+      const give = (c2, entry, qualityMult, karma) => {
+        entry.condition = 100;
+        entry.qualityMult = qualityMult;
+        entry.worn = true;
+        if (karma) c2.character.karma = clamp((c2.character.karma || 0) + karma, -100, 100);
+      };
+      if (s.mine) {
+        const cost = Math.round(baseCost * 0.5);
+        list.push({
+          id: 'self', label: `Make it yourself - ${formatMoney(cost, cur.id)} in materials`,
+          effect: (c2, sl) => {
+            if (!canAfford(c2.character, cur.id, cost)) return { text: `${formatMoney(cost, cur.id)} in materials, and you are short.`, changes: [] };
+            debit(c2.character, cur.id, cost);
+            addItem(c2.character, sl.itemId, { condition: 100 });
+            give(c2, findEntry(c2.character, sl.itemId), 0.9);
+            const changes = apply(c2, { happiness: 14, stats: { technique: 3 } });
+            fact(c2, `Built ${sl.itemName} with their own hands.`, { type: 'item', weight: 4, tags: ['asset', 'weapon'] });
+            return { text: `{It is not perfect - you can see where your own hand slipped|The first one you actually finish, after two that did not survive testing|You get it right on the third attempt and stop there before you ruin it}. `
+              + `${sl.itemName}, and it is entirely yours.`, changes };
+          },
+        });
+      }
+      if (s.smithName) {
+        const cost = Math.round(baseCost * 1.15);
+        list.push({
+          id: 'hire', label: `Ask ${s.smithName} to make it - ${formatMoney(cost, cur.id)}`,
+          effect: (c2, sl) => {
+            if (!canAfford(c2.character, cur.id, cost)) return { text: `${sl.smithName} quotes ${formatMoney(cost, cur.id)} and does not haggle.`, changes: [] };
+            debit(c2.character, cur.id, cost);
+            addItem(c2.character, sl.itemId, { condition: 100, from: sl.smithName });
+            give(c2, findEntry(c2.character, sl.itemId), 1.1);
+            const npc = sl.smithId ? findNpc(c2.state, sl.smithId) : null;
+            if (npc) relate(c2, npc, { closeness: 6, respect: 6 });
+            const changes = apply(c2, { happiness: 12 });
+            fact(c2, `${sl.smithName} built them ${sl.itemName}.`, { type: 'item', weight: 4, tags: ['asset', 'weapon'] });
+            return { text: `{${sl.smithName} takes measurements you did not know mattered|It comes back better balanced than anything you could have described|${sl.smithName} throws in adjustments you did not ask for and does not charge extra}. `
+              + `${sl.itemName}, properly made.`, changes };
+          },
+        });
+      }
+      if (s.godName) {
+        list.push({
+          id: 'divine', label: `Ask ${s.godName} to make it`, hint: 'No charge. That is not how this works.',
+          effect: (c2, sl) => {
+            addItem(c2.character, sl.itemId, { condition: 100, from: sl.godName });
+            give(c2, findEntry(c2.character, sl.itemId), 1.4, 2);
+            const npc = sl.godId ? findNpc(c2.state, sl.godId) : null;
+            if (npc) relate(c2, npc, { closeness: 4, respect: 8 });
+            const changes = apply(c2, { happiness: 20 });
+            fact(c2, `${sl.godName} made them ${sl.itemName}, the way a god makes something.`,
+              { type: 'item', weight: 7, tags: ['asset', 'weapon', 'divine'] });
+            return { text: `{There is no forge, no fire, no waiting|One moment it does not exist and the next it is simply in your hand|${sl.godName} does not seem to consider this difficult}. `
+              + `${sl.itemName}. It will not need repairing anywhere near as often as it should.`, changes };
+          },
+        });
+      }
+      {
+        const cost = Math.round(baseCost * 0.85);
+        list.push({
+          id: 'buy', label: `Commission it from a smith for hire - ${formatMoney(cost, cur.id)}`,
+          effect: (c2, sl) => {
+            if (!canAfford(c2.character, cur.id, cost)) return { text: `${formatMoney(cost, cur.id)}, and you do not have it on you.`, changes: [] };
+            debit(c2.character, cur.id, cost);
+            addItem(c2.character, sl.itemId, { condition: 100 });
+            give(c2, findEntry(c2.character, sl.itemId), 1.0);
+            const changes = apply(c2, { happiness: 8 });
+            fact(c2, `Had ${sl.itemName} commissioned.`, { type: 'item', weight: 3, tags: ['asset', 'weapon'] });
+            return { text: `A shop that takes commissions, not just stock. ${sl.itemName}, made to order.`, changes };
+          },
+        });
+      }
+      list.push({ id: 'skip', label: 'Not now', effect: () => ({ text: `{Some other year|Not worth it yet|You keep the money}.`, changes: [] }) });
+      return list;
+    },
+  },
+]);
+
+// --------------------------------------------------------- crossing over
+
+/**
+ * Between universes.
+ *
+ * There are exactly three ways across in the series: Kai Kai, an angel who
+ * agrees to carry you, or a ring that a god of destruction has personally
+ * cleared. Everything else stops at the edge of Universe 7.
+ */
+const NEIGHBOURS = [
+  { id: 'u6', number: 6, placeId: 'sadala', name: 'Universe 6',
+    blurb: 'The twin universe. Sadala never burned here, and the Saiyans on it are police.' },
+  { id: 'u11', number: 11, placeId: 'universe11', name: 'Universe 11',
+    blurb: 'Pride Troopers, top to bottom. Everybody here is on duty and nobody here is joking.' },
+  { id: 'u10', number: 10, placeId: 'universe10', name: 'Universe 10',
+    blurb: 'A universe that treats fighting as a religious discipline and its god as a critic.' },
+];
+
+function crossings(ctx) {
+  const c = ctx.character;
+  const out = [];
+  if (c.techniques.includes('kai_kai')) out.push({ id: 'kai_kai', label: 'Kai Kai across', cost: 0, years: 0 });
+  if (c.mentors.includes('whis') || c.mentors.includes('beerus') || c.flags.angel_escort) {
+    out.push({ id: 'angel', label: 'Ask Whis to carry you', cost: 0, years: 0 });
+  }
+  if (c.flags.zeno_pass || c.flags.won_tournament_of_power) {
+    out.push({ id: 'pass', label: 'Use the ring you were given', cost: 0, years: 0 });
+  }
+  return out;
+}
+
+registerEvents([
+  {
+    id: 'cross_universes', tags: ['world', 'cosmic'], weight: 26, minBioAge: 18,
+    when: (ctx) => !ctx.character.inAfterlife && crossings(ctx).length > 0,
+    slots: (ctx) => {
+      const dest = ctx.rng.pick(NEIGHBOURS.filter((n) => getPlace(n.placeId)));
+      if (!dest) return null;
+      const how = crossings(ctx)[0];
+      return {
+        universe: dest.name, number: String(dest.number), blurb: dest.blurb,
+        placeId: dest.placeId, how: how.id, howLabel: how.label,
+      };
+    },
+    title: 'The Wall Between',
+    text: `{You have known for a while that this universe has an edge|`
+      + `There are eleven other versions of everything and you can get to some of them|`
+      + `The boundary is not a wall so much as a decision}. `
+      + `[blurb] {You could go|Nobody would stop you|The way across is open to you and to almost nobody else}.`,
+    choices: (ctx, s) => [
+      {
+        id: 'cross', label: `Cross to ${s.universe}`,
+        hint: s.howLabel,
+        effect: (c2, sl) => {
+          const dest = getPlace(sl.placeId);
+          c2.character.placeId = sl.placeId;
+          c2.character.flags.crossed_universes = true;
+          c2.character.universe = Number(sl.number);
+          fact(c2, `Crossed into ${sl.universe}.`, { type: 'travel', weight: 8, tags: ['cosmic', 'travel'] });
+          return {
+            text: `{There is no distance to it. There is a step, and then a different set of physical constants|`
+              + `The crossing takes no time and costs you something you cannot name|`
+              + `One moment of complete wrongness, and then somewhere else}. `
+              + `${dest.name}. ${dest.desc}`,
+            changes: apply(c2, { happiness: 6 }),
+          };
+        },
+      },
+      {
+        id: 'look', label: 'Look, and come back',
+        effect: (c2, sl) => ({
+          text: `{You go far enough to see it and no further|`
+            + `A minute on the other side is enough to know it is real|`
+            + `You put your head through and take it out again}. `
+            + `{Everything there is the same and none of it is|`
+            + `It smells wrong. That is the part nobody mentions|`
+            + `You will be thinking about it for years}.`,
+          changes: apply(c2, { happiness: 4, stats: { intellect: 3 } }),
+          view: { universe: sl.universe },
+        }),
+      },
+      {
+        id: 'stay', label: 'Stay where you belong',
+        effect: (c2) => ({
+          text: `{You have enough universe here|There is nothing over there you need|`
+            + `You leave the edge alone. It is not going anywhere}.`,
+          changes: [],
+        }),
+      },
+    ],
+  },
+]);

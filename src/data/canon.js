@@ -1,0 +1,725 @@
+// Real characters from the series. `years` gates when they can appear at all,
+// `power` is sparse keyframes of effective combat power by Age (interpolated),
+// and `teaches` wires them into the skill tree as mentors.
+
+import { getPlace } from './places.js';
+import { getPlanet } from './planets.js';
+
+export const CANON = [
+  // ------------------------------------------------------------- Earth core
+  { id: 'goku', name: 'Son Goku', race: 'saiyan', years: [737, null], home: 'paozu',
+    tags: ['hero', 'rival', 'mentor', 'friendly', 'saiyan'], temperament: 'cheerful',
+    power: { 749: 10, 753: 180, 756: 260, 761: 8000, 762: 3000000, 767: 30000000, 774: 3000000000, 778: 1e12, 780: 4e13, 790: 9e13 },
+    teaches: ['kamehameha', 'super_kamehameha', 'instant_transmission', 'meteor_combination', 'dragon_fist', 'solar_flare', 'fusion_dance'],
+    personality: 'Guileless, endlessly hungry, and only interested in you if you can fight. Remembers food better than names.',
+    quirk: 'Will ask to spar within four sentences of meeting you.' },
+  { id: 'vegeta', name: 'Vegeta', race: 'saiyan', years: [732, null], home: 'capsule_corp',
+    tags: ['rival', 'antihero', 'mentor', 'prickly', 'saiyan', 'royal'], temperament: 'proud',
+    power: { 761: 18000, 762: 2500000, 767: 25000000, 774: 2500000000, 778: 8e11, 780: 3e13, 790: 8e13 },
+    teaches: ['galick_gun', 'final_flash', 'big_bang', 'high_speed', 'ki_suppress', 'suicide_blast'],
+    personality: 'Prince of a dead people, furious about it, and incapable of accepting help gracefully.',
+    quirk: 'Keeps a running mental ranking of everyone he has ever met.' },
+  { id: 'bulma', name: 'Bulma Briefs', race: 'earthling', years: [733, null], home: 'capsule_corp',
+    tags: ['ally', 'genius', 'romance', 'friendly', 'rich'], temperament: 'sharp',
+    power: { 749: 3, 780: 5 },
+    teaches: [], builds: ['dragon_radar', 'gravity_chamber', 'capsule_house', 'scouter'],
+    personality: 'The smartest person on the planet and completely unbothered about telling you so.',
+    quirk: 'Will fix your gravity chamber and then bill you for it.' },
+  { id: 'krillin', name: 'Krillin', race: 'earthling', years: [736, null], home: 'kame_house',
+    tags: ['ally', 'friendly', 'mentor', 'human'], temperament: 'warm',
+    power: { 753: 90, 761: 1200, 762: 75000, 767: 75000, 774: 200000, 780: 3000000 },
+    teaches: ['destructo_disc', 'kamehameha', 'solar_flare', 'ki_sense', 'bukujutsu'],
+    personality: 'The strongest ordinary human alive, and the first to admit exactly what that is worth.',
+    quirk: 'Introduces himself with a joke about dying.' },
+  { id: 'roshi', name: 'Master Roshi', race: 'earthling', years: [430, null], home: 'kame_house',
+    tags: ['mentor', 'legend', 'lecher', 'human'], temperament: 'sly',
+    power: { 749: 139, 761: 139, 774: 400, 780: 1000000 },
+    teaches: ['turtle_style', 'kamehameha', 'afterimage', 'mafuba', 'basic_martial_arts', 'dragon_throw'],
+    personality: 'Three hundred years old, invented the Kamehameha, and would still rather you fetched him a magazine.',
+    quirk: 'Every lesson begins with an errand that turns out to be the lesson.' },
+  { id: 'mutaito', name: 'Master Mutaito', race: 'earthling', years: [180, 400], home: 'hell',
+    tags: ['mentor', 'legend'], temperament: 'stoic',
+    power: { 380: 170 },
+    teaches: ['mafuba'],
+    personality: "Roshi's own teacher, generations dead. Sealed King Piccolo away at the cost of his own life, and the technique he built to do it outlived him.",
+    quirk: 'Never speaks of the seal he cannot walk back out of.' },
+  { id: 'chichi', name: 'Chi-Chi', race: 'earthling', years: [736, null], home: 'paozu',
+    tags: ['ally', 'romance', 'fierce', 'human'], temperament: 'fierce',
+    power: { 753: 73, 761: 130, 774: 600 },
+    teaches: ['basic_martial_arts', 'bukujutsu'],
+    personality: 'Ox-King\'s daughter, a genuine tournament fighter, and militantly focused on schoolwork.',
+    quirk: 'Will ask about your career prospects mid-fight.' },
+  { id: 'gohan', name: 'Son Gohan', race: 'halfsaiyan', years: [757, null], home: 'satan_city',
+    tags: ['ally', 'prodigy', 'scholar', 'friendly'], temperament: 'gentle',
+    power: { 761: 710, 762: 1500000, 767: 45000000, 774: 500000000, 780: 5e12, 790: 4e13 },
+    teaches: ['masenko', 'kamehameha', 'meteor_combination', 'bukujutsu'],
+    personality: 'Would genuinely rather be studying. Terrifying when someone he loves is hurt.',
+    quirk: 'Apologises to people he is in the middle of defeating.' },
+  { id: 'piccolo', name: 'Piccolo', race: 'namekian', years: [753, null], home: 'wastes',
+    tags: ['mentor', 'rival', 'ally', 'prickly', 'namekian'], temperament: 'severe',
+    power: { 761: 3500, 762: 1000000, 767: 18000000, 774: 30000000, 780: 4e11 },
+    teaches: ['special_beam_cannon', 'masenko', 'hellzone_grenade', 'ki_sense', 'ki_suppress', 'multiform', 'telepathy'],
+    personality: 'Started as the demon king reborn, ended as everyone\'s stern uncle. Does not discuss it.',
+    quirk: 'Trains you by dropping you somewhere hostile and leaving.' },
+  { id: 'yamcha', name: 'Yamcha', race: 'earthling', years: [733, null], home: 'west_city',
+    tags: ['ally', 'friendly', 'human', 'romance'], temperament: 'easygoing',
+    power: { 753: 75, 761: 1480, 767: 20000, 774: 90000 },
+    teaches: ['wolf_fang_fist', 'kamehameha', 'bukujutsu'],
+    personality: 'Former desert bandit, current professional baseball player, permanently underestimated.',
+    quirk: 'Deflects every compliment with a joke about his own death.' },
+  { id: 'tien', name: 'Tien Shinhan', race: 'earthling', years: [733, null], home: 'wastes',
+    tags: ['ally', 'rival', 'ascetic', 'human'], temperament: 'severe',
+    power: { 753: 180, 761: 1830, 767: 25000, 774: 150000, 780: 2000000 },
+    teaches: ['tri_beam', 'dodon_ray', 'solar_flare', 'multiform', 'afterimage', 'crane_style'],
+    personality: 'Left the Crane School over a matter of principle and has been paying for it ever since.',
+    quirk: 'Trains alone in the desert and pretends he does not want company.' },
+  { id: 'chiaotzu', name: 'Chiaotzu', race: 'earthling', years: [736, null], home: 'wastes',
+    tags: ['ally', 'psychic', 'small'], temperament: 'timid',
+    power: { 753: 145, 761: 610, 774: 30000 },
+    teaches: ['telekinesis', 'telepathy', 'suicide_blast', 'dodon_ray'],
+    personality: 'Tiny, pale, unnervingly powerful with his mind, and devoted to Tien absolutely.',
+    quirk: 'Says almost nothing and hears almost everything.' },
+  { id: 'launch', name: 'Launch', race: 'earthling', years: [733, null], home: 'kame_house',
+    tags: ['ally', 'chaotic', 'romance'], temperament: 'volatile',
+    power: { 753: 15, 774: 20 },
+    teaches: [],
+    personality: 'Sweet as anything until she sneezes, at which point there is a machine gun.',
+    quirk: 'Two entirely different people share the arrangement and neither remembers the other.' },
+  { id: 'ox_king', name: 'Ox-King', race: 'earthling', years: [700, null], home: 'paozu',
+    tags: ['ally', 'mentor', 'giant'], temperament: 'jolly',
+    power: { 749: 120, 774: 140 },
+    teaches: ['iron_body', 'dragon_throw', 'basic_martial_arts'],
+    personality: 'An enormous, gentle man who trained under Roshi and cries at weddings.',
+    quirk: 'Hugs. Without warning, and with full strength.' },
+  { id: 'satan', name: 'Mr. Satan', race: 'earthling', years: [737, null], home: 'satan_city',
+    tags: ['ally', 'fraud', 'famous', 'comic'], temperament: 'blustering',
+    power: { 767: 137, 774: 140, 780: 145 },
+    teaches: ['basic_martial_arts'],
+    personality: 'The world champion who cannot fly, cannot sense ki, and is somehow the bravest man here.',
+    quirk: 'Will offer you a sponsorship deal before he asks your name.' },
+  { id: 'videl', name: 'Videl Satan', race: 'earthling', years: [756, null], home: 'satan_city',
+    tags: ['ally', 'romance', 'detective'], temperament: 'blunt',
+    power: { 774: 500, 780: 900 },
+    teaches: ['bukujutsu', 'basic_martial_arts'],
+    personality: 'Her father is a fraud and she has spent her whole life compensating for it in public.',
+    quirk: 'Interrogates you like a suspect and means it kindly.' },
+  { id: 'goten', name: 'Son Goten', race: 'halfsaiyan', years: [767, null], home: 'paozu',
+    tags: ['ally', 'child', 'prodigy'], temperament: 'cheerful',
+    power: { 774: 1500000, 780: 40000000 },
+    teaches: ['fusion_dance', 'kamehameha'],
+    personality: 'Went Super Saiyan before he could reliably tie his shoes and thinks it is normal.',
+    quirk: 'Treats world-ending threats as an excuse to skip homework.' },
+  { id: 'trunks', name: 'Trunks Briefs', race: 'halfsaiyan', years: [766, null], home: 'capsule_corp',
+    tags: ['ally', 'child', 'prodigy', 'royal'], temperament: 'cocky',
+    power: { 774: 1800000, 780: 50000000 },
+    teaches: ['fusion_dance', 'galick_gun'],
+    personality: 'His mother is a genius and his father is a prince, and he has inherited the confidence of both.',
+    quirk: 'Bets on fights he is about to be in.' },
+  { id: 'future_trunks', name: 'Future Trunks', race: 'halfsaiyan', years: [764, null], home: 'west_city',
+    tags: ['ally', 'timetraveller', 'grim'], temperament: 'grim',
+    power: { 767: 22000000, 780: 6e11 },
+    teaches: ['mafuba', 'galick_gun', 'bukujutsu'],
+    personality: 'Came from a future where everyone died. Carries a sword and does not sleep well.',
+    quirk: 'Flinches at the sound of aircraft.' },
+  { id: 'marron', name: 'Marron', race: 'earthling', years: [770, null], home: 'kame_house',
+    tags: ['ally', 'child'], temperament: 'sweet',
+    power: { 780: 10 },
+    teaches: [],
+    personality: 'Krillin and 18\'s daughter, entirely normal, and everyone is quietly relieved about it.',
+    quirk: 'Blonde, tiny, and unimpressed by superpowers.' },
+  { id: 'uub', name: 'Uub', race: 'earthling', years: [774, null], home: 'papaya',
+    tags: ['ally', 'reincarnation', 'prodigy'], temperament: 'shy',
+    power: { 790: 2e12 },
+    teaches: ['basic_martial_arts', 'kamehameha'],
+    personality: 'A shy village boy carrying the reincarnated good half of a monster that ate the world.',
+    quirk: 'Apologises when he breaks the ring.' },
+  { id: 'pan', name: 'Pan', race: 'halfsaiyan', years: [779, null], home: 'satan_city',
+    tags: ['ally', 'child', 'prodigy'], temperament: 'bold',
+    power: { 790: 900000 },
+    teaches: [],
+    personality: 'Flew before she walked, and has never once been told she is too small.',
+    quirk: 'Challenges adults to fights at family dinners.' },
+  { id: 'bulla', name: 'Bulla Briefs', race: 'halfsaiyan', years: [778, null], home: 'capsule_corp',
+    tags: ['ally', 'child'], temperament: 'imperious',
+    power: { 790: 400000 },
+    teaches: [],
+    personality: 'Her father would move planets for her and everyone in the family knows it.',
+    quirk: 'Has never been told no by a Saiyan prince.' },
+
+  // ---------------------------------------------------------------- Guardians
+  { id: 'kami', name: 'Kami', race: 'namekian', years: [461, 767], home: 'lookout',
+    tags: ['mentor', 'divine', 'guardian', 'namekian'], temperament: 'grave',
+    power: { 749: 220, 761: 410 },
+    teaches: ['ki_control_mastery', 'ki_sense', 'bukujutsu', 'telepathy'],
+    personality: 'Guardian of the Earth, who once cut the evil out of himself and has regretted the method ever since.',
+    quirk: 'Answers questions with much older questions.' },
+  { id: 'popo', name: 'Mr. Popo', race: 'other', years: [400, null], home: 'lookout',
+    tags: ['mentor', 'servant', 'unsettling'], temperament: 'placid',
+    power: { 749: 1030, 780: 1030 },
+    teaches: ['basic_martial_arts', 'ki_sense', 'bukujutsu', 'iron_body'],
+    personality: 'Has tended the Lookout for longer than the current guardian has been alive. Nobody asks what he is.',
+    quirk: 'Beats you effortlessly and then offers you tea.' },
+  { id: 'dende', name: 'Dende', race: 'namekian', years: [755, null], home: 'lookout',
+    tags: ['ally', 'healer', 'guardian', 'namekian'], temperament: 'kind',
+    power: { 762: 10, 780: 100 },
+    teaches: ['healing'],
+    personality: 'A child who watched his world die and grew up to be the gentlest guardian Earth has had.',
+    quirk: 'Heals first, asks who you are afterwards.' },
+  { id: 'korin', name: 'Korin', race: 'other', years: [30, null], home: 'korin_tower',
+    tags: ['mentor', 'trickster', 'senzu'], temperament: 'dry',
+    power: { 749: 190, 780: 200 },
+    teaches: ['senzu_farming', 'high_speed', 'basic_martial_arts'],
+    personality: 'Eight hundred years old, shaped like a cat, and will make you chase a jug of water for three days.',
+    quirk: 'The training was never about the water.' },
+  { id: 'yajirobe', name: 'Yajirobe', race: 'earthling', years: [732, null], home: 'korin_tower',
+    tags: ['ally', 'coward', 'comic'], temperament: 'craven',
+    power: { 761: 970, 774: 1200 },
+    teaches: ['dragon_throw'],
+    personality: 'A fat samurai with a katana who has saved more lives than he admits and runs from all of it.',
+    quirk: 'Turns up with senzu beans at the worst possible moment.' },
+  { id: 'baba', name: 'Fortuneteller Baba', race: 'other', years: [400, null], home: 'devils_hand',
+    tags: ['mentor', 'seer', 'merchant'], temperament: 'mercenary',
+    power: { 749: 100, 780: 100 },
+    teaches: [],
+    personality: 'Roshi\'s older sister, floats on a crystal ball, and charges brutally for the truth.',
+    quirk: 'Will only tell your future if you beat five of her fighters.' },
+  { id: 'king_kai', name: 'King Kai', race: 'shinjin', years: [100, null], home: 'kai_planet',
+    tags: ['mentor', 'divine', 'comic'], temperament: 'jokey',
+    power: { 761: 3500, 780: 3500 },
+    teaches: ['kaioken', 'spirit_bomb', 'telepathy', 'ki_sense', 'ki_control_mastery'],
+    personality: 'Lord of the North Galaxy, and will not teach you anything until you laugh at his joke.',
+    quirk: 'The joke is never funny. Laugh anyway.' },
+  { id: 'supreme_kai', name: 'Supreme Kai Shin', race: 'shinjin', years: [1, null], home: 'sacred_world',
+    tags: ['divine', 'mentor', 'guardian'], temperament: 'earnest',
+    power: { 774: 5000000, 780: 8000000 },
+    teaches: ['kai_kai', 'god_ki', 'potara_craft', 'healing'],
+    personality: 'The last of five Supreme Kais, painfully aware that he is not the strongest thing in the room.',
+    quirk: 'Apologises for the state of the universe as though it were his fault. It sort of is.' },
+  { id: 'old_kai', name: 'Elder Kai', race: 'shinjin', years: [1, null], home: 'sacred_world',
+    tags: ['divine', 'mentor', 'lecher', 'comic'], temperament: 'crotchety',
+    power: { 774: 100, 780: 100 },
+    teaches: ['potara_craft'], grantsFlags: ['potential_unlocked'],
+    personality: 'Fifteen million years old, spent most of it in a sword, and has firm opinions about magazines.',
+    quirk: 'The unlocking ritual requires him to dance for five hours. He will not skip it.' },
+  { id: 'yemma', name: 'King Yemma', race: 'other', years: [1, null], home: 'check_in',
+    tags: ['divine', 'judge'], temperament: 'booming',
+    power: { 780: 50000 },
+    teaches: [],
+    personality: 'Judges every soul in the quadrant from behind a desk the size of a stadium.',
+    quirk: 'Decides in four seconds whether you keep your body.' },
+  { id: 'whis', name: 'Whis', race: 'angel', years: [1, null], home: 'beerus_world',
+    tags: ['divine', 'mentor', 'angel', 'untouchable'], temperament: 'serene',
+    power: { 778: 1e15, 790: 1e15 },
+    teaches: ['god_ki', 'ultra_instinct_art', 'ki_control_mastery', 'hakai'],
+    personality: 'Attendant, teacher and babysitter to a God of Destruction. Politely superior to everyone alive.',
+    quirk: 'Will absolutely train you, if you feed him something he has not eaten before.' },
+  { id: 'beerus', name: 'Beerus', race: 'other', years: [1, null], home: 'beerus_world',
+    tags: ['divine', 'destroyer', 'threat', 'mentor'], temperament: 'capricious',
+    power: { 778: 1e14, 790: 1e14 },
+    teaches: ['hakai', 'god_ki'],
+    personality: 'God of Destruction of Universe 7. Sleeps for decades, wakes hungry, erases planets over food.',
+    quirk: 'Whether he destroys you depends entirely on the pudding.' },
+  { id: 'vados', name: 'Vados', race: 'angel', years: [1, null], home: 'champa_world',
+    tags: ['divine', 'mentor', 'angel', 'untouchable', 'u6'], temperament: 'serene',
+    power: { 778: 1e15, 790: 1e15 },
+    teaches: ['god_ki', 'ultra_instinct_art', 'ki_control_mastery', 'hakai'],
+    personality: "Whis's older sister, and the same job for Universe 6 - marginally less patient about it.",
+    quirk: 'Finds Champa exhausting and has never once said so out loud.' },
+  { id: 'champa', name: 'Champa', race: 'other', years: [1, null], home: 'champa_world',
+    tags: ['divine', 'destroyer', 'threat', 'mentor', 'u6'], temperament: 'capricious',
+    power: { 778: 1e14, 790: 1e14 },
+    teaches: ['hakai', 'god_ki'],
+    personality: "God of Destruction of Universe 6, and Beerus's twin brother. Louder about food than Beerus, if that is possible.",
+    quirk: 'Holds a grudge about a wager with Beerus that neither of them will explain.' },
+  { id: 'zeno', name: 'Zeno', race: 'other', years: [778, null], home: 'grand_zeno',
+    tags: ['divine', 'omniking', 'threat'], temperament: 'childlike',
+    power: { 780: 1e20 },
+    teaches: [],
+    personality: 'A small giggling child who has erased eleven universes for a reason he did not explain.',
+    quirk: 'Wants a friend. Everyone is too terrified to be one.' },
+  { id: 'grand_priest', name: 'The Grand Priest', race: 'angel', years: [1, null], home: 'grand_zeno',
+    tags: ['divine', 'mentor', 'angel', 'untouchable'], temperament: 'serene',
+    power: { 780: 5e19 },
+    teaches: ['god_ki', 'ultra_instinct_art', 'ki_control_mastery', 'hakai'],
+    personality: 'Second only to the Omni-Kings themselves, father to every angel serving every God of Destruction, and unfailingly courteous about it.',
+    quirk: 'Refers to the end of a universe the way other people mention the weather.' },
+
+  // ------------------------------------------------------------------ Saiyans
+  { id: 'bardock', name: 'Bardock', race: 'saiyan', years: [700, 737], home: 'planet_vegeta',
+    tags: ['saiyan', 'rival', 'doomed', 'lowclass'], temperament: 'hard',
+    power: { 730: 10000, 737: 12000 },
+    teaches: ['high_speed', 'ki_blast'],
+    personality: 'A low-class soldier who started seeing the future and could not make anyone listen.',
+    quirk: 'Looks at you like he has already watched you die.' },
+  { id: 'gine', name: 'Gine', race: 'saiyan', years: [702, 737], home: 'planet_vegeta',
+    tags: ['saiyan', 'ally', 'gentle'], temperament: 'gentle',
+    power: { 737: 1200 },
+    teaches: [],
+    personality: 'A Saiyan who quit the army for the meat distribution plant, which nobody understood.',
+    quirk: 'The only Saiyan on the planet who says goodbye properly.' },
+  { id: 'raditz', name: 'Raditz', race: 'saiyan', years: [731, 761], home: 'frieza_ship',
+    tags: ['saiyan', 'villain', 'brother'], temperament: 'bullying',
+    power: { 761: 1500 },
+    teaches: ['ki_blast', 'high_speed'],
+    personality: 'The weakest of the surviving Saiyans and desperate that nobody find out.',
+    quirk: 'Talks about his scouter readings constantly.' },
+  { id: 'nappa', name: 'Nappa', race: 'saiyan', years: [715, 762], home: 'frieza_ship',
+    tags: ['saiyan', 'villain', 'brutal'], temperament: 'brutal',
+    power: { 761: 4000 },
+    teaches: ['galick_gun', 'ki_blast'],
+    personality: 'Former general of the Saiyan army, now a thug who blows up cities for something to do.',
+    quirk: 'Laughs before he kills. Every time.' },
+  { id: 'turles', name: 'Turles', race: 'saiyan', years: [720, null], home: 'frieza_ship',
+    tags: ['saiyan', 'villain', 'pirate'], temperament: 'smug',
+    power: { 762: 1900000 },
+    teaches: ['ki_blast'],
+    personality: 'A rogue Saiyan who plants a tree that drains worlds and eats the fruit himself.',
+    quirk: 'Looks exactly like someone you know, and enjoys it.' },
+  { id: 'broly', name: 'Broly', race: 'saiyan', years: [770, null], home: 'wastes',
+    // 'ally' and 'romance' added alongside the original threat/tragic tags
+    // rather than replacing them - everything that used to key off Broly
+    // being dangerous still should. This is what changed after Cheelai and
+    // Lemo got him off Vampa: he is not a threat looking for a reason any
+    // more, and he is not spending the rest of his life alone either.
+    tags: ['saiyan', 'threat', 'tragic', 'legendary', 'ally', 'romance'], temperament: 'unstable',
+    power: { 774: 1400000000, 780: 3e13 },
+    teaches: ['basic_martial_arts', 'iron_body'],
+    personality: 'Raised alone on a hostile world by a father who fitted him with a control ring. Enormous, terrified, kind underneath.',
+    quirk: 'Says one name over and over when the rage takes him.' },
+  { id: 'paragus', name: 'Paragus', race: 'saiyan', years: [700, 774], home: 'wastes',
+    tags: ['saiyan', 'villain', 'father'], temperament: 'scheming',
+    power: { 774: 4000 },
+    teaches: ['basic_martial_arts'],
+    personality: 'Exiled with his son, and has spent every year since building a weapon out of him.',
+    quirk: 'Speaks about his own child in the third person.' },
+  { id: 'cheelai', name: 'Cheelai', race: 'other', years: [755, null], home: 'wastes', sex: 'female',
+    tags: ['ally', 'romance', 'friendly'], temperament: 'wry',
+    power: { 780: 350 },
+    teaches: [],
+    personality: 'Frieza Force reconnaissance, technically, and the first person who ever asked Broly what he wanted instead of what he was for.',
+    quirk: 'Shapeshifts into whoever is most likely to get a straight answer out of somebody.' },
+  { id: 'lemo', name: 'Lemo', race: 'other', years: [748, null], home: 'wastes', sex: 'male',
+    tags: ['ally', 'friendly'], temperament: 'easygoing',
+    power: { 780: 90 },
+    teaches: [],
+    personality: 'Keeps the ship running and the other two fed, and deserted an army that never once deserved him.',
+    quirk: 'Names every piece of equipment he personally fixed.' },
+  { id: 'cabba', name: 'Cabba', race: 'saiyan', years: [760, null], home: 'sadala',
+    tags: ['saiyan', 'ally', 'u6', 'polite'], temperament: 'earnest',
+    power: { 779: 8e9, 780: 4e10 },
+    teaches: ['galick_gun'],
+    personality: 'A polite young Saiyan from a universe where his people never became conquerors.',
+    quirk: 'Bows before fighting and calls everyone sir.' },
+  { id: 'caulifla', name: 'Caulifla', race: 'saiyan', years: [762, null], home: 'sadala',
+    tags: ['saiyan', 'rival', 'u6'], temperament: 'brash',
+    power: { 780: 6e11 },
+    teaches: ['basic_martial_arts', 'high_speed'],
+    personality: 'Gang leader who learned Super Saiyan in an afternoon because someone told her how it felt.',
+    quirk: 'Learns any technique she watches twice.' },
+  { id: 'kale', name: 'Kale', race: 'saiyan', years: [764, null], home: 'sadala',
+    tags: ['saiyan', 'threat', 'u6', 'shy'], temperament: 'timid',
+    power: { 780: 9e11 },
+    teaches: ['basic_martial_arts', 'iron_body'],
+    personality: 'Painfully shy, until jealousy turns her into something the universe cannot hold.',
+    quirk: 'Apologises for the buildings afterwards.' },
+  { id: 'frost', name: 'Frost', race: 'frostdemon', years: [670, null], home: 'frost_belt',
+    tags: ['villain', 'imperial', 'threat', 'u6'], temperament: 'charming',
+    power: { 779: 1.2e12, 780: 1.2e12 },
+    teaches: ['death_beam'],
+    personality: 'Frieza with a press office. Runs the same slave-labour empire under a company name and a smile that has fooled entire worlds.',
+    quirk: 'Poisons his own blade before a fight and calls it a fair contest.' },
+
+  // -------------------------------------------------------- the last Cerealian
+  { id: 'granolah', name: 'Granolah', race: 'cerealian', years: [665, null], home: 'cereal',
+    // The wish spikes him past almost anyone alive and then it fades - the
+    // dragon gave him the strength, not the time to keep it. 785 is what is
+    // actually left once the effect settles: still formidable, nowhere near
+    // what he touched for those few years.
+    tags: ['bounty_hunter', 'survivor', 'rival', 'ally'], temperament: 'grim',
+    power: { 760: 600000, 781: 600000, 782: 8e12, 785: 4e11 },
+    teaches: ['ki_blast'],
+    personality: 'The last of his kind, raised by a Namekian on a planet full of ghosts, hunting bounties across a galaxy that owes him one.',
+    quirk: 'Counts everyone he has killed out loud, once a year, whether anyone is listening or not.' },
+  { id: 'monaito', name: 'Elder Monaito', race: 'namekian', years: [500, null], home: 'cereal',
+    tags: ['mentor', 'namekian'], temperament: 'weary',
+    power: { 782: 400 },
+    teaches: [],
+    personality: 'Raised the last Cerealian alone because nobody else was left to. Has quietly trained something far more dangerous since.',
+    quirk: 'Refuses to say what he actually taught Gas, even now.' },
+  { id: 'gas', name: 'Gas', race: 'other', years: [758, null], home: 'frieza_ship',
+    tags: ['threat', 'heeter'], temperament: 'eager',
+    power: { 762: 50000, 781: 2000000, 782: 4.5e13 },
+    teaches: [],
+    personality: 'The Heeter family\'s own weapon, trained in secret for exactly one purpose - being handed the title Granolah wished for himself.',
+    quirk: 'Asks, sincerely, whether he is strong enough yet. Every single fight.' },
+  { id: 'elec', name: 'Elec', race: 'other', years: [710, null], home: 'frieza_ship',
+    tags: ['villain', 'heeter'], temperament: 'ruthless',
+    power: { 782: 1000 },
+    teaches: [],
+    personality: 'Heads a family that deals in bounties, secrets, and other people\'s wars - and raised his own son as an investment.',
+    quirk: 'Refers to Gas as "the asset" in front of him and means it fondly.' },
+
+  // ------------------------------------------------------------- Frieza Force
+  { id: 'frieza', name: 'Frieza', race: 'frostdemon', years: [680, null], home: 'frieza_ship',
+    tags: ['villain', 'emperor', 'threat', 'imperial'], temperament: 'cruel',
+    power: { 762: 120000000, 764: 120000000, 779: 4e11, 780: 2e12, 790: 5e13 },
+    teaches: ['death_beam', 'death_ball'],
+    personality: 'Polite, small, and the single most feared creature in seven galaxies. Never raises his voice until the end.',
+    quirk: 'Kills people mid-sentence and continues the sentence.' },
+  { id: 'king_cold', name: 'King Cold', race: 'frostdemon', years: [600, 764], home: 'frieza_ship',
+    tags: ['villain', 'imperial'], temperament: 'urbane',
+    power: { 764: 100000000 },
+    teaches: ['death_beam'],
+    personality: 'Frieza\'s father, who built the empire and finds his son\'s temper slightly gauche.',
+    quirk: 'Compliments your technique while ordering your death.' },
+  { id: 'cooler', name: 'Cooler', race: 'frostdemon', years: [670, null], home: 'frieza_ship',
+    tags: ['villain', 'imperial', 'rival'], temperament: 'cold',
+    power: { 764: 470000000 },
+    teaches: ['death_beam'],
+    personality: 'Frieza\'s older brother. Stronger, quieter, and openly contemptuous of the family business.',
+    quirk: 'Has a fifth form his brother never achieved and never mentions it.' },
+  { id: 'zarbon', name: 'Zarbon', race: 'other', years: [700, 762], home: 'frieza_ship',
+    tags: ['villain', 'imperial', 'vain'], temperament: 'vain',
+    power: { 762: 30000 },
+    teaches: ['basic_martial_arts', 'afterimage'],
+    personality: 'Elegant, green-haired, and horrified that transforming makes him ugly.',
+    quirk: 'Fixes his hair between exchanges.' },
+  { id: 'dodoria', name: 'Dodoria', race: 'other', years: [700, 762], home: 'frieza_ship',
+    tags: ['villain', 'imperial', 'brutal'], temperament: 'brutal',
+    power: { 762: 22000 },
+    teaches: ['basic_martial_arts', 'iron_body'],
+    personality: 'Frieza\'s enforcer, pink, spiked, and entirely without an inner life.',
+    quirk: 'Cheerfully explains what he did to your homeworld.' },
+  { id: 'ginyu', name: 'Captain Ginyu', race: 'other', years: [690, null], home: 'frieza_ship',
+    tags: ['villain', 'imperial', 'comic'], temperament: 'theatrical',
+    power: { 762: 120000 },
+    teaches: ['body_change'],
+    personality: 'Commands the galaxy\'s most feared special forces and makes them rehearse poses.',
+    quirk: 'Will not fight until the entire team has finished the routine.' },
+  { id: 'recoome', name: 'Recoome', race: 'other', years: [700, 762], home: 'frieza_ship',
+    tags: ['villain', 'imperial', 'comic'], temperament: 'boisterous',
+    power: { 762: 65000 },
+    teaches: ['basic_martial_arts', 'ki_blast'],
+    personality: 'Enormous, orange-haired, and announces his own attacks by name and letter.',
+    quirk: 'Poses for a full second before every strike.' },
+  { id: 'burter', name: 'Burter', race: 'other', years: [700, 762], home: 'frieza_ship',
+    tags: ['villain', 'imperial', 'fast'], temperament: 'boastful',
+    power: { 762: 64000 },
+    teaches: ['high_speed'],
+    personality: 'The fastest in the universe, a claim he makes more often than he tests.',
+    quirk: 'Times everything, including conversations.' },
+  { id: 'jeice', name: 'Jeice', race: 'other', years: [700, 762], home: 'frieza_ship',
+    tags: ['villain', 'imperial'], temperament: 'cocky',
+    power: { 762: 63000 },
+    teaches: ['ki_blast'],
+    personality: 'Red-skinned, white-maned, and never fights anything alone if he can help it.',
+    quirk: 'Runs for reinforcements and calls it strategy.' },
+
+  // ------------------------------------------------------------- Red Ribbon
+  { id: 'gero', name: 'Dr. Gero', race: 'earthling', years: [690, 767], home: 'red_ribbon_lab',
+    tags: ['villain', 'genius', 'mentor', 'lab'], temperament: 'obsessive',
+    power: { 767: 20000000 },
+    teaches: ['energy_absorb', 'life_drain'],
+    personality: 'Turned himself into a machine to finish a grudge. Twenty years of work, all of it revenge.',
+    quirk: 'Refers to living people by model number.' },
+  { id: 'android_16', name: 'Android 16', race: 'android', years: [767, null], home: 'red_ribbon_lab',
+    tags: ['ally', 'android', 'gentle'], temperament: 'quiet',
+    power: { 767: 28000000 },
+    teaches: ['suicide_blast', 'iron_body'],
+    personality: 'Built to kill, programmed by a grieving father, and mostly interested in birds.',
+    quirk: 'Stops mid-battle to move an animal out of the way.' },
+  { id: 'android_17', name: 'Android 17', race: 'android', years: [753, null], home: 'wastes',
+    tags: ['ally', 'android', 'rival'], temperament: 'flippant',
+    power: { 767: 30000000, 780: 5e12 },
+    teaches: ['energy_absorb', 'ki_suppress'],
+    personality: 'Infinite energy, zero urgency. Became a park ranger, which surprised absolutely everyone.',
+    quirk: 'Talks about poachers with more heat than about world-enders.' },
+  { id: 'android_18', name: 'Android 18', race: 'android', years: [753, null], home: 'kame_house',
+    tags: ['ally', 'android', 'romance'], temperament: 'dry',
+    power: { 767: 29000000, 780: 3e12 },
+    teaches: ['energy_absorb', 'high_speed'],
+    personality: 'Sharp, unbothered, married into the strangest family on Earth and fits perfectly.',
+    quirk: 'Enters tournaments purely for the prize money.' },
+  { id: 'cell', name: 'Cell', race: 'bioandroid', years: [767, null], home: 'wastes',
+    tags: ['villain', 'threat', 'bioandroid'], temperament: 'vain',
+    power: { 767: 300000000 },
+    teaches: ['kamehameha', 'special_beam_cannon', 'instant_transmission', 'regenerate'],
+    personality: 'Every great fighter\'s cells in one body, with the personality of a man who has read about charisma.',
+    quirk: 'Announces a tournament instead of simply winning.' },
+  { id: 'tao', name: 'Mercenary Tao', race: 'earthling', years: [700, null], home: 'east_city',
+    tags: ['villain', 'assassin', 'crane'], temperament: 'preening',
+    power: { 750: 210, 767: 400 },
+    teaches: ['dodon_ray', 'crane_style'],
+    personality: 'The most expensive killer on Earth, and half of him is now chrome.',
+    quirk: 'Travels by throwing a pillar and riding it.' },
+  { id: 'crane_hermit', name: 'Master Shen', race: 'earthling', years: [440, null], home: 'east_city',
+    tags: ['mentor', 'villain', 'crane'], temperament: 'spiteful',
+    power: { 753: 130 },
+    teaches: ['crane_style', 'dodon_ray'],
+    personality: 'Roshi\'s old rival, who teaches the same arts with all of the kindness removed.',
+    quirk: 'Grades your technique and your loyalty separately.' },
+
+  // ----------------------------------------------------------------- Namekians
+  { id: 'guru', name: 'Grand Elder Guru', race: 'namekian', years: [200, 762], home: 'namek',
+    tags: ['mentor', 'namekian', 'elder'], temperament: 'ancient',
+    power: { 762: 100 },
+    teaches: ['healing', 'ki_control_mastery'], grantsFlags: ['potential_unlocked'],
+    personality: 'Enormously old, enormously fat, and able to unlock any latent potential with a hand on your head.',
+    quirk: 'Falls asleep mid-blessing.' },
+  { id: 'nail', name: 'Nail', race: 'namekian', years: [730, null], home: 'namek',
+    tags: ['ally', 'namekian', 'warrior'], temperament: 'stoic',
+    power: { 762: 42000 },
+    teaches: ['ki_sense', 'stretch_limb', 'regenerate'],
+    personality: 'The last warrior-class Namekian, guarding an elder who is already dying.',
+    quirk: 'Fights losing battles on purpose to buy time.' },
+  { id: 'moori', name: 'Elder Moori', race: 'namekian', years: [400, null], home: 'new_namek',
+    tags: ['ally', 'namekian', 'elder'], temperament: 'gentle',
+    power: { 762: 500 },
+    teaches: ['healing'],
+    personality: 'Leads a village of children and grows the crops himself.',
+    quirk: 'Names every Namekian child after something that grows.' },
+
+  // -------------------------------------------------------------------- Majin
+  { id: 'buu', name: 'Majin Buu', race: 'majin', years: [774, null], home: 'wastes',
+    tags: ['villain', 'threat', 'majin', 'ally'], temperament: 'childish',
+    power: { 774: 800000000 },
+    teaches: ['regenerate', 'absorb'],
+    personality: 'Millions of years old, mind of a toddler, and able to turn a city into confectionery on a whim.',
+    quirk: 'Decides whether to kill you based on whether you shared your snack.' },
+  { id: 'babidi', name: 'Babidi', race: 'other', years: [768, 774], home: 'wastes',
+    tags: ['villain', 'wizard'], temperament: 'petulant',
+    power: { 774: 500 },
+    teaches: ['mind_control', 'life_drain'],
+    personality: 'A small shrieking wizard who inherited a monster from his father and cannot control it.',
+    quirk: 'Puts an M on the forehead of everyone he owns.' },
+  { id: 'bibidi', name: 'Bibidi', race: 'other', years: [200, 500], home: 'hell',
+    tags: ['villain', 'wizard', 'legend'], temperament: 'petulant',
+    power: { 500: 900 },
+    teaches: ['mind_control'],
+    personality: "Babidi's father, dead ages before his son ever put an M on anyone. Everything Babidi does with a mind, he learned from a lesson he never lived to finish teaching.",
+    quirk: 'Nobody left alive remembers his voice, only his handiwork.' },
+  { id: 'garlic', name: 'Garlic Jr.', race: 'other', years: [700, null], home: 'wastes',
+    tags: ['villain', 'wizard', 'immortal'], temperament: 'petty',
+    power: { 749: 200, 774: 4000 },
+    teaches: ['life_drain'],
+    personality: 'Immortal, furious about it in the specific way of someone who wanted to be feared instead, and endlessly patient because eternity gives him no other choice.',
+    quirk: 'Introduces the Dead Zone into every conversation whether it is relevant or not.' },
+  { id: 'dabura', name: 'Dabura', race: 'other', years: [770, 774], home: 'makai',
+    tags: ['villain', 'demon'], temperament: 'haughty',
+    power: { 774: 4000000 },
+    teaches: ['basic_martial_arts', 'dodon_ray'],
+    personality: 'King of the Demon Realm, serving a wizard he privately despises.',
+    quirk: 'Spits, and you become stone.' },
+
+  // ------------------------------------------------------------------- Others
+  { id: 'hit', name: 'Hit', race: 'other', years: [740, null], home: 'tournament_u6',
+    tags: ['rival', 'assassin', 'u6'], temperament: 'professional',
+    power: { 779: 3e11, 780: 2e12 },
+    teaches: ['time_skip'],
+    personality: 'A thousand years of contract killing, and the calm that comes from never having lost.',
+    quirk: 'Improves in the middle of a fight, every fight.' },
+  { id: 'jiren', name: 'Jiren', race: 'other', years: [779, null], home: 'top_arena',
+    tags: ['rival', 'threat', 'u11'], temperament: 'silent',
+    power: { 780: 6e13 },
+    teaches: ['basic_martial_arts', 'iron_body', 'ki_suppress'],
+    personality: 'Stronger than his universe\'s God of Destruction, and entirely alone with it.',
+    quirk: 'Meditates through your entire best attack.' },
+  { id: 'yardrat_elder', name: 'Elder Pybara', race: 'yardratian', years: [600, null], home: 'yardrat',
+    tags: ['mentor', 'spirit'], temperament: 'serene',
+    power: { 762: 8000 },
+    teaches: ['instant_transmission', 'spirit_control', 'ki_control_mastery'],
+    personality: 'Teaches spirit control to anyone patient enough to sit still for a decade.',
+    quirk: 'Answers before you have asked.' },
+  { id: 'metamoran_elder', name: 'Elder Migren', race: 'metamoran', years: [640, null], home: 'metamor',
+    tags: ['mentor'], temperament: 'jovial',
+    power: { 762: 400 },
+    teaches: ['fusion_dance'],
+    personality: 'Taught the Fusion Dance to every Metamoran child for three generations, and still cannot do the pose without laughing.',
+    quirk: 'Corrects your stance by literally moving your limbs for you.' },
+  { id: 'pilaf', name: 'Emperor Pilaf', race: 'earthling', years: [720, null], home: 'east_city',
+    tags: ['villain', 'comic', 'tiny'], temperament: 'scheming',
+    power: { 749: 4, 780: 4 },
+    teaches: [],
+    personality: 'Small, blue, and has been three days from world domination for forty years.',
+    quirk: 'Arrives in a robot that is always slightly too small.' },
+  { id: 'oolong', name: 'Oolong', race: 'other', years: [733, null], home: 'kame_house',
+    tags: ['ally', 'comic', 'shapeshifter'], temperament: 'craven',
+    power: { 749: 3, 780: 3 },
+    teaches: [],
+    personality: 'A shapeshifting pig with no courage and a well-developed sense of self-preservation.',
+    quirk: 'Can only hold a form for five minutes and always picks badly.' },
+  { id: 'puar', name: 'Puar', race: 'other', years: [733, null], home: 'west_city',
+    tags: ['ally', 'shapeshifter', 'loyal'], temperament: 'sweet',
+    power: { 749: 5, 780: 5 },
+    teaches: [],
+    personality: 'Yamcha\'s oldest friend, and shapeshifting school\'s star pupil.',
+    quirk: 'Turns into whatever will help, immediately, without being asked.' },
+  { id: 'shenron', name: 'Shenron', race: 'dragon', years: [1, null], home: 'wastes',
+    tags: ['divine', 'dragon', 'wish'], temperament: 'impatient',
+    power: { 780: 1 },
+    teaches: [],
+    personality: 'A god-dragon in the shape of a green ribbon across the sky. Grants wishes, briskly.',
+    quirk: 'Asks you to hurry up and state the wish.' },
+  { id: 'porunga', name: 'Porunga', race: 'dragon', years: [1, null], home: 'namek',
+    tags: ['divine', 'dragon', 'wish'], temperament: 'imperious',
+    power: { 780: 1 },
+    teaches: [],
+    personality: 'The Namekian dragon. Three wishes, but you must ask in the old language.',
+    quirk: 'Will not grant a wish that is beyond his creator\'s power, and says so rudely.' },
+];
+
+export const CANON_BY_ID = Object.fromEntries(CANON.map((c) => [c.id, c]));
+
+export function getCanon(id) {
+  return CANON_BY_ID[id];
+}
+
+/** Effective combat power of a canon character in a given Age. */
+export function canonPower(char, year) {
+  const keys = Object.keys(char.power).map(Number).sort((a, b) => a - b);
+  if (!keys.length) return 1;
+  if (year <= keys[0]) {
+    // Before the first documented keyframe, ramp up from a small childhood
+    // baseline at their actual birth year instead of flatly handing out the
+    // keyframe's power to a newborn - Cabba's first keyframe (8 billion) is
+    // 19 years after he is born, and a flat return read as an 8-billion-
+    // power-level toddler.
+    const birth = char.years[0];
+    const first = keys[0];
+    if (first <= birth) return char.power[first];
+    if (year <= birth) return 5;
+    const t = (year - birth) / (first - birth);
+    const lo = Math.log(5);
+    const hi = Math.log(Math.max(5, char.power[first]));
+    return Math.exp(lo + (hi - lo) * t);
+  }
+  if (year >= keys[keys.length - 1]) return char.power[keys[keys.length - 1]];
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (year >= keys[i] && year <= keys[i + 1]) {
+      const a = keys[i], b = keys[i + 1];
+      const t = (year - a) / (b - a);
+      // Interpolate in log space; power levels are exponential in this setting.
+      const la = Math.log(Math.max(1, char.power[a]));
+      const lb = Math.log(Math.max(1, char.power[b]));
+      return Math.exp(la + (lb - la) * t);
+    }
+  }
+  return char.power[keys[keys.length - 1]];
+}
+
+export function canonAlive(char, year) {
+  const [born, died] = char.years;
+  if (year < born) return false;
+  if (died !== null && year > died) return false;
+  return true;
+}
+
+/**
+ * Where somebody actually is in a given Age.
+ *
+ * `home` is where a character is from, not where they have been standing for
+ * seventy years. Goku is on Snake Way in 762, on Namek in 763, on Yardrat
+ * until 767 and dead from 774 to 778, and meeting him in a bar on Yardrat in
+ * 745 is the kind of thing that tells a player nobody thought about it.
+ *
+ * Entries are [fromYear, placeId]. The last one whose year has passed wins.
+ */
+export const ITINERARY = {
+  goku: [[737, 'paozu'], [749, 'paozu'], [761, 'papaya'], [762, 'snake_way'], [763, 'namek'],
+    [764, 'yardrat'], [767, 'paozu'], [774, 'check_in'], [778, 'paozu'], [779, 'beerus_world'], [780, 'paozu']],
+  vegeta: [[732, 'planet_vegeta'], [737, 'planet_frieza_79'], [761, 'east_city'], [762, 'east_city'],
+    [763, 'namek'], [764, 'capsule_corp'], [774, 'check_in'], [775, 'capsule_corp'], [779, 'beerus_world'], [780, 'capsule_corp']],
+  piccolo: [[753, 'wastes'], [762, 'check_in'], [763, 'namek'], [764, 'lookout'], [767, 'satan_city']],
+  gohan: [[757, 'paozu'], [762, 'wastes'], [763, 'namek'], [764, 'paozu'], [774, 'satan_city']],
+  krillin: [[736, 'kame_house'], [763, 'namek'], [764, 'kame_house']],
+  bulma: [[733, 'capsule_corp'], [763, 'namek'], [764, 'capsule_corp']],
+  frieza: [[737, 'planet_frieza_79'], [762, 'namek'], [764, 'planet_frieza_79'], [766, 'check_in'], [779, 'planet_frieza_79']],
+  cell: [[767, 'wastes'], [768, 'check_in']],
+  buu: [[774, 'wastes'], [775, 'satan_city']],
+  whis: [[700, 'beerus_world']],
+  beerus: [[700, 'beerus_world']],
+  king_kai: [[500, 'kai_planet']],
+  supreme_kai: [[500, 'sacred_world']],
+  guru: [[400, 'namek'], [763, 'new_namek']],
+  dende: [[762, 'namek'], [764, 'lookout']],
+  nail: [[740, 'namek']],
+  moori: [[700, 'namek'], [763, 'new_namek']],
+  raditz: [[733, 'planet_frieza_79'], [761, 'east_city'], [762, 'check_in']],
+  nappa: [[700, 'planet_vegeta'], [737, 'planet_frieza_79'], [762, 'east_city']],
+  ginyu: [[740, 'planet_frieza_79'], [763, 'namek']],
+  zarbon: [[740, 'planet_frieza_79'], [763, 'namek']],
+  dodoria: [[740, 'planet_frieza_79'], [763, 'namek']],
+  king_vegeta: [[700, 'planet_vegeta']],
+  bardock: [[720, 'planet_vegeta']],
+  gine: [[720, 'planet_vegeta']],
+  // Vampa has no place of its own in the game; both fall back to their
+  // `home` (the wastes) outside this window rather than pointing at
+  // somewhere that does not exist.
+  broly: [[779, 'planet_frieza_79']],
+  cheelai: [[779, 'planet_frieza_79']],
+  lemo: [[779, 'planet_frieza_79']],
+  cabba: [[770, 'sadala']],
+  caulifla: [[770, 'sadala']],
+  kale: [[770, 'sadala']],
+  hit: [[700, 'tournament_u6']],
+  jiren: [[700, 'universe11']],
+  toppo: [[700, 'universe11']],
+  granolah: [[762, 'cereal']],
+};
+
+/**
+ * Which universe a canon character actually belongs to. An explicit `u6`/
+ * `u9`/`u10`/`u11` tag wins (needed for the handful of characters, like Hit
+ * or Jiren, whose `home` is a neutral tournament arena rather than an actual
+ * world - resolving through place would put them in Universe 7 by default,
+ * which is wrong). Everyone else resolves through their home planet, which
+ * covers Sadala-born Universe 6 Saiyans correctly without needing the tag.
+ */
+export function canonUniverse(char) {
+  const c = typeof char === 'string' ? CANON_BY_ID[char] : char;
+  if (!c) return 7;
+  const tag = (c.tags || []).find((t) => /^u\d+$/.test(t));
+  if (tag) return Number(tag.slice(1));
+  const home = getPlace(c.home);
+  return (home && getPlanet(home.planet).universe) || 7;
+}
+
+// Established, real pairings the story actually commits to - not everyone
+// carrying the 'romance' tag has one of these, and that is fine (a tag alone
+// used to be the whole system: canon_family could pick Chi-Chi and narrate a
+// child without ever naming Goku as the other parent). Listed both ways so a
+// lookup from either side works without a second pass.
+const CANON_PAIRS = {
+  goku: 'chichi', chichi: 'goku',
+  vegeta: 'bulma', bulma: 'vegeta',
+  krillin: 'android_18', android_18: 'krillin',
+  gohan: 'videl', videl: 'gohan',
+  broly: 'cheelai', cheelai: 'broly',
+};
+
+/** Who a canon character is actually paired with, or null. */
+export function canonPartner(canonId) {
+  return CANON_PAIRS[canonId] || null;
+}
+
+/** The place id a canon character is standing in, in this Age. */
+export function canonPlace(char, year) {
+  const c = typeof char === 'string' ? CANON_BY_ID[char] : char;
+  if (!c) return null;
+  const route = ITINERARY[c.id];
+  if (!route || !route.length) return c.home;
+  let at = c.home;
+  for (const [from, placeId] of route) {
+    if (year >= from) at = placeId;
+    else break;
+  }
+  return at;
+}
+
+export function canonAvailable(year, filter = () => true) {
+  return CANON.filter((c) => canonAlive(c, year) && filter(c));
+}
+
+export function mentorsAvailable(year) {
+  return canonAvailable(year, (c) => c.teaches && c.teaches.length > 0);
+}

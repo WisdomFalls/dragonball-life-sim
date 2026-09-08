@@ -1,0 +1,2091 @@
+// Turn-based combat.
+//
+// Fights you care about are played, not rolled. Power level still decides most
+// of it - a hundredfold gap is not something tactics fix - but inside a
+// plausible band, stance, ki management, technique choice and when you
+// transform all move the result.
+
+import { clamp } from './rng.js';
+import { render } from './text.js';
+import { combatPower, powerTier, zenkaiBoost, winChance, healthMaxFor, staminaMaxFor, trainingRate, equippedWeapon } from './stats.js';
+import { masteryMult, masteryDrain, masteryOf, trainMastery } from './mastery.js';
+import { TECH_BY_ID, techniquePurity, techniqueDisplayName } from '../data/techniques.js';
+import { getTransformation, ladderFor } from '../data/transformations.js';
+import { getPlace } from '../data/places.js';
+import { getRace, hasPerk } from '../data/races.js';
+import { numberish } from './text.js';
+import { damageGear, lootFromDefeated, npcBag } from './inventory.js';
+import { spreadWord, DEED_SCALE } from './settlement.js';
+import { maim } from './body.js';
+import { makeCanonNpc, makeNpc } from './npc.js';
+import { addNpc } from './state.js';
+import { openThread } from './memory.js';
+import { getCanon } from '../data/canon.js';
+import { getFaction } from '../data/factions.js';
+
+/**
+ * What people say mid-fight. Nobody in this setting fights silently: they
+ * comment on a form, they gloat, they concede, they get insulted at being
+ * held back against. The bank is keyed by what just happened and picked from
+ * by the speaker's temperament.
+ */
+const VOICE = {
+  proud: {
+    form: ['"So that is what you have been hiding."', '"Do it again. Slower."', '"Finally."'],
+    hurt: ['"That one counted."', '"Good. Again."', 'They spit and do not look away.'],
+    winning: ['"Is this all of it?"', '"You are not going to reach me."', '"Stand up."'],
+    losing: ['"I am not finished."', '"You have not won anything yet."', 'They will not go down and will not say why.'],
+    insulted: ['"Do not do that." Their voice has changed. "Do not hold back on me."', '"I know what you are doing. Stop it."'],
+    beaten: ['"...Fine. You were better."', 'They laugh, which is somehow worse.'],
+    fleeing: ['"This is not a retreat." It plainly is.', 'They will not say the word, but they are already gone.'],
+    caught: ['"...Fine. Again, then."', 'They stop running like it never happened.'],
+  },
+  cheerful: {
+    form: ['"Whoa! What is that one?"', '"That is amazing. Can you teach me?"', 'They are grinning at it.'],
+    hurt: ['"Okay! Okay. That hurt."', '"You are strong!"', 'They shake it off, delighted.'],
+    winning: ['"Come on, you can do better than that!"', '"This is fun!"'],
+    losing: ['"I am not done yet!"', '"Just getting warmed up."'],
+    insulted: ['"You are going easy on me. Do not do that, it is boring."'],
+    beaten: ['"That was great. Let us do it again some time."'],
+    fleeing: ['"Okay, nope, bye!"', '"Rain check!" They are already three streets away.'],
+    caught: ['"Oh, come ON."', '"Worth a try!" They do not sound sorry.'],
+  },
+  cruel: {
+    form: ['"How quaint."', '"Do you think that changes anything?"', 'They look bored.'],
+    hurt: ['Their face does something unpleasant.', '"You will regret that."'],
+    winning: ['"I want you to understand how far apart we are."', '"Beg. It will not help."'],
+    losing: ['"This is not possible."', '"You are nothing. You are NOTHING."'],
+    insulted: ['"Restraint? From you?" They are furious.'],
+    beaten: ['"This is not over. It is never over."'],
+    fleeing: ['"You have not earned the right to chase me." They go anyway.', '"Remember this the next time you think you have won something."'],
+    caught: ['"Get OFF —" It does not help them.', 'They come up swinging, which tells you everything.'],
+  },
+  professional: {
+    form: ['They note it and adjust.', '"Interesting. Not enough."'],
+    hurt: ['They acknowledge it with a nod.', 'They reassess, visibly.'],
+    winning: ['"You are outmatched. I would stop."'],
+    losing: ['They stop talking entirely.'],
+    insulted: ['"Fight properly or do not fight."'],
+    beaten: ['"Noted." They mean it.'],
+    fleeing: ['"This engagement is no longer favourable." They are gone before they finish the sentence.', 'No parting line. Just the decision, already made.'],
+    caught: ['"Acceptable." They reset their stance and nothing else.', 'They do not waste breath on it.'],
+  },
+  frightened: {
+    form: ['"What ARE you?"', 'They take a step back and do not know they did.'],
+    hurt: ['They make a sound they did not intend to.'],
+    winning: ['"Stay down. Please stay down."'],
+    losing: ['"Wait — wait, listen —"'],
+    insulted: ['"Why are you playing with me?"'],
+    beaten: ['They are already apologising.'],
+    fleeing: ['"I am sorry, I am so sorry —" They are not looking where they are going.', 'No line at all. Just gone.'],
+    caught: ['"Please —" It comes out too fast to be a real word.', 'Whatever fight was left in them was already spent on running.'],
+  },
+};
+
+/** Something to say, if this fighter is the sort who says things. */
+export function voiceLine(battle, rng, kind) {
+  const v = battle.them.voice;
+  if (!v) return null;
+  const bank = VOICE[v] || VOICE.professional;
+  const set = bank[kind];
+  if (!set || !set.length) return null;
+  if (!rng.chance(0.55)) return null;
+  return `${battle.them.name}: ${rng.pick(set)}`.replace(/^([^:]+): (They|Their)/, '$2');
+}
+
+/** What you can say back, given what just happened. */
+export const REPLIES = [
+  { id: 'taunt', label: 'Taunt them', text: '"Is that it?"', effect: { theirRage: 12, myFocus: 0 } },
+  { id: 'respect', label: 'Give them their due', text: '"You are better than they said."', effect: { theirRage: -10, myFocus: 4 } },
+  { id: 'warn', label: 'Warn them off', text: '"Walk away. I am asking once."', effect: { theirRage: -6, surrender: 0.12 } },
+  { id: 'silent', label: 'Say nothing', text: '', effect: { myFocus: 6 } },
+  // Sparring words, not fighting words - only means anything against
+  // somebody who was actually holding back, and only lands as a request
+  // between people who are not trying to kill each other.
+  { id: 'demand_full', label: 'Tell them to stop holding back', text: '"All of it. Right now."',
+    effect: { theirRage: 8, dropRestraint: true } },
+];
+
+export const STANCES = {
+  neutral: { name: 'Neutral', desc: 'No commitment either way.', atk: 1, def: 1, dodge: 0, kiRegen: 1, stamRegen: 1 },
+  aggressive: { name: 'Aggressive', desc: 'Hit harder. Get hit harder.', atk: 1.38, def: 0.72, dodge: -0.05, kiRegen: 0.8, stamRegen: 0.8 },
+  defensive: { name: 'Defensive', desc: 'Weather it. Wait for the opening.', atk: 0.78, def: 1.45, dodge: 0.05, kiRegen: 1.2, stamRegen: 1.5 },
+  evasive: { name: 'Evasive', desc: 'Do not be where the fist is.', atk: 0.85, def: 1.05, dodge: 0.26, kiRegen: 1.1, stamRegen: 1.2 },
+  focused: { name: 'Focused', desc: 'Read them. Build the shot.', atk: 1.05, def: 0.9, dodge: 0.02, kiRegen: 1.9, stamRegen: 1.0, crit: 0.14 },
+};
+
+/** Does this technique do anything a turn can express? */
+function usableInBattle(e) {
+  return !!(e.atk || e.blind || e.heal || e.drain || e.escape || e.multiplier || e.absorb || e.regen);
+}
+
+const PHYSICAL = [
+  { id: 'jab', name: 'Quick strike', base: 9, stamina: 6, speedWeight: 1.3, hit: 0.92, hands: 1 },
+  { id: 'combo', name: 'Combination', base: 17, stamina: 13, speedWeight: 1.0, hit: 0.82, hands: 1 },
+  { id: 'heavy', name: 'Heavy blow', base: 28, stamina: 21, speedWeight: 0.7, hit: 0.68, stagger: 0.3, hands: 1 },
+  { id: 'grapple', name: 'Grapple and throw', base: 14, stamina: 15, speedWeight: 0.8, hit: 0.74, stagger: 0.5, hands: 2 },
+  // What is left once an arm stops answering. A knee or a kick does not need
+  // a working hand at all; a headbutt does not need a working leg either -
+  // it is worse than either of the above, but it is never off the table.
+  { id: 'kick', name: 'Knee or kick', base: 12, stamina: 10, speedWeight: 0.9, hit: 0.8, hands: 0, legMove: true },
+  { id: 'headbutt', name: 'Headbutt', base: 6, stamina: 7, speedWeight: 0.5, hit: 0.55, hands: 0 },
+];
+
+/**
+ * How many working hands/arms a technique needs to actually throw. Missing
+ * here means 1, the ordinary case - a fist, a beam thrown one-handed, a
+ * touch. An explicit 2 is for the techniques canon always shows charged or
+ * released with both hands together (a Kamehameha, a Spirit Bomb). An
+ * explicit 0 is for anything that does not run through the hands at all -
+ * an aura state, a mental lock-on, a body-wide detonation, a race's own
+ * automatic regrowth.
+ */
+const TECH_HANDS = {
+  kamehameha: 2, super_kamehameha: 2, masenko: 2, final_flash: 2, tri_beam: 2,
+  spirit_bomb: 2, death_ball: 2, solar_flare: 2, dragon_throw: 2,
+  kaioken: 0, regenerate: 0, instant_transmission: 0, kai_kai: 0,
+  suicide_blast: 0, god_ki: 0,
+};
+function techHands(id) {
+  return TECH_HANDS[id] ?? 1;
+}
+
+/** How many hands a side currently has to work with, 0 to 2. */
+function handsLeft(side) {
+  return Math.max(0, 2 - (side.armsBroken || 0));
+}
+
+// A jab does not have to just be fast - it can be aimed. Trading raw
+// accuracy for exactly where it lands is how Frieza's finger blasts or
+// Moro's absorbing touch actually work in the show: not a bigger hit, a
+// smarter one. What the strike actually does to the body still runs
+// through the same blade/blunt/ranged bucket as everything else (see
+// playerAttackType below), a blade just makes the piece it exploits count
+// for more.
+const AIMED_STRIKES = [
+  { id: 'aim_head', name: 'Aim for the head', location: 'head', base: 10, stamina: 9, speedWeight: 1.1, hit: 0.58, hands: 1 },
+  { id: 'aim_joint', name: 'Aim for a joint', location: 'joint', base: 10, stamina: 9, speedWeight: 1.0, hit: 0.64, hands: 1 },
+  { id: 'aim_vitals', name: 'Aim for the throat', location: 'vitals', base: 15, stamina: 12, speedWeight: 0.9, hit: 0.5, crit: 0.12, hands: 1 },
+];
+
+function sideTemplate(name, power, opts = {}) {
+  return {
+    name,
+    power,
+    basePower: power,
+    hp: opts.hpMax ?? 100,
+    hpMax: opts.hpMax ?? 100,
+    ki: opts.ki ?? 100,
+    kiMax: opts.kiMax ?? 100,
+    stamina: opts.staminaMax ?? 100,
+    staminaMax: opts.staminaMax ?? 100,
+    stance: 'neutral',
+    form: null,
+    formName: null,
+    // A second transformation held through the first rather than replacing
+    // it - keep your tail, go Great Ape, then push Super Saiyan on top of
+    // that once you actually have control of the ape. Only certain forms
+    // (transformations.js's `layerOn`) can be stacked, and only onto the
+    // specific base forms they name.
+    layerForm: null,
+    layerFormName: null,
+    guarding: false,
+    // A one-shot bet: give up landing anything yourself this exchange, but
+    // whatever they throw that actually connects gets punished properly
+    // instead of just absorbed. Same reset-every-turn lifecycle as guarding.
+    countering: false,
+    charged: 0,
+    staggered: 0,
+    blinded: 0,
+    // What this fight has broken outright, not merely bruised - 0/1/2 good
+    // arms, and whether the legs still hold weight properly. Resets between
+    // fights: by the next time anyone sees this fighter, it has set (or been
+    // set, or been given a senzu bean), the same way every other bruise from
+    // an ordinary fight already does off-screen.
+    armsBroken: 0,
+    legBroken: false,
+    infiniteStamina: !!opts.infiniteStamina,
+    regenerates: !!opts.regenerates,
+    techniques: opts.techniques || [],
+    forms: opts.forms || [],
+    raceId: opts.raceId || 'other',
+    speedStat: opts.speedStat ?? 50,
+    instinct: opts.instinct ?? 50,
+    // What they say when things happen. Filled in by the caller.
+    voice: opts.voice || null,
+    mastery: opts.mastery || null,
+    // What fraction of themselves an NPC opponent is actually showing - a
+    // casual spar partner rarely swings at full strength. Always 1 for a
+    // serious or lethal fight; only sparring foes carry anything less.
+    restraint: opts.restraint ?? 1,
+    // Somebody in the fight who is not you and not the enemy in front of you.
+    down: false,
+    // Got clean away. Different from being downed - alive, out of the fight,
+    // and not something standingFoes() should keep counting against you.
+    fledAway: false,
+  };
+}
+
+/** Set up a battle between the player and one opponent. */
+export function createBattle(state, rng, opts = {}) {
+  const c = state.character;
+  const race = getRace(c.raceId);
+  const place = getPlace(opts.placeId || c.placeId);
+  const foeSpec = opts.foe || { name: 'a stranger', power: combatPower(c) };
+
+  const me = sideTemplate(c.name, combatPower(c, { form: null }), {
+    speedStat: c.stats.speed,
+    instinct: c.battleInstinct ?? 50,
+    ki: c.vitals.ki,
+    kiMax: Math.max(20, c.vitals.kiMax),
+    infiniteStamina: hasPerk(c, 'infiniteStamina'),
+    regenerates: hasPerk(c, 'regeneration'),
+    techniques: c.techniques.slice(),
+    forms: c.transformations.slice(),
+    raceId: c.raceId,
+    mastery: c.formMastery || {},
+  });
+  me.hpMax = Math.max(20, Math.round(c.vitals.healthMax || healthMaxFor(c)));
+  me.hp = clamp(c.vitals.health, 5, me.hpMax);
+  me.staminaMax = Math.max(40, Math.round(c.vitals.staminaMax || staminaMaxFor(c)));
+  me.stamina = me.staminaMax;
+
+  // Mastered/Perfected Ultra Instinct is not something you reach for mid-
+  // fight the way every other form is - once it stops being a decision, the
+  // player can leave it standing open (toggle_ui_overlay) and a fight simply
+  // starts already inside it, the same way the real thing does not wait for
+  // a first exchange to show up.
+  if (c.flags.uiOverlay) {
+    const overlayId = c.transformations.includes('ui_mastered') ? 'ui_mastered'
+      : c.transformations.includes('ui_perfected') ? 'ui_perfected' : null;
+    const overlay = overlayId && getTransformation(overlayId);
+    if (overlay) {
+      me.form = overlayId;
+      me.formName = overlay.name;
+      me.ki = Math.max(0, me.ki - overlay.drain * masteryDrain(c, overlayId));
+    }
+  }
+
+  const makeFoe = (spec) => sideTemplate(spec.name, Math.max(1, spec.power), {
+    hpMax: spec.hpMax ?? Math.round(clamp(70 + Math.log10(Math.max(10, spec.power)) * 14, 70, 260)),
+    speedStat: spec.speedStat ?? 50,
+    instinct: spec.instinct ?? 50,
+    voice: spec.voice || null,
+    techniques: spec.techniques || [],
+    forms: spec.forms || [],
+    restraint: opts.stakes === 'spar' ? (spec.restraint ?? 1) : 1,
+    mastery: spec.mastery || null,
+    raceId: spec.raceId || 'other',
+    infiniteStamina: spec.raceId === 'android',
+    regenerates: ['namekian', 'majin', 'bioandroid'].includes(spec.raceId),
+  });
+
+  // One enemy or a squad. Everything below treats `them` as whoever you are
+  // currently looking at; `squad` is everybody still on their feet.
+  const specs = (opts.foes && opts.foes.length) ? opts.foes.slice() : [foeSpec];
+  const squad = specs.map((spec, i) => {
+    const side = makeFoe(spec);
+    side.slot = i;
+    side.ref = { canonId: spec.canonId || null, npcId: spec.npcId || null };
+    return side;
+  });
+  const them = squad[0];
+
+  // A crowd is not the sum of its parts. Everyone past the first fights at a
+  // discount, because they get in each other's way - which is exactly why the
+  // series lets one strong fighter hold off six weaker ones.
+  if (squad.length > 1) {
+    for (let i = 1; i < squad.length; i += 1) squad[i].crowdPenalty = 1 - Math.min(0.45, i * 0.09);
+  }
+
+  return {
+    id: 'battle_' + (state.stats.fights + 1),
+    me,
+    them,
+    squad,
+    allies: (opts.allies || []).map((spec) => {
+      const side = makeFoe(spec);
+      side.ally = true;
+      side.ref = { canonId: spec.canonId || null, npcId: spec.npcId || null };
+      return side;
+    }),
+    foeRef: { canonId: foeSpec.canonId || null, npcId: foeSpec.npcId || null },
+    intro: foeSpec.intro || '',
+    round: 1,
+    log: [],
+    over: false,
+    outcome: null,
+    stakes: opts.stakes || 'serious',       // spar | serious | lethal
+    reason: opts.reason || 'fight',
+    placeId: place.id,
+    civilians: !!(place.tags.includes('urban') || place.tags.includes('civilised')),
+    destruction: 0,
+    relocated: false,
+    zenkai: 0,
+    fled: false,
+    // Whether the foe currently in front of you has broken off (mid-decision
+    // to run) and whether one actually got away clean - those are different
+    // things, and only the second one means the fight is really over.
+    foeFleeing: false,
+    foeFled: false,
+    surrendered: false,
+    protecting: !!opts.protecting,
+    // How much of yourself you are using. Holding back keeps a fight going,
+    // tests somebody without ending them, and is how half the cast fights.
+    restraint: opts.restraint ?? (opts.stakes === 'spar' ? 0.5 : 1),
+    // Tournament rules. A ring changes what winning means: you do not have to
+    // put somebody down, you have to put them outside.
+    ringOut: !!(opts.context && opts.context.ringOut),
+    noKilling: !!(opts.context && opts.context.noKilling),
+    context: opts.context || { reason: opts.reason || 'fight' },
+  };
+}
+
+function effectivePower(side, battle) {
+  const form = side.form ? getTransformation(side.form) : null;
+  // A form is worth what you can hold of it, not what the book says.
+  const mult = form ? form.mult * (side.mastery ? masteryMult({ formMastery: side.mastery }, form.id) : 1) : 1;
+  // A layered form is real, but stacking it onto a base form that is
+  // already reshaping your body is a harder, less complete grip than
+  // wearing either one alone - roughly half of what the layer would be
+  // worth if it were the only thing active.
+  const layer = side.layerForm ? getTransformation(side.layerForm) : null;
+  const layerMult = layer ? 1 + (layer.mult - 1) * 0.5 : 1;
+  const condition = clamp(0.45 + (side.hp / side.hpMax) * 0.55, 0.45, 1);
+  const kiFactor = clamp(0.6 + (side.ki / Math.max(1, side.kiMax)) * 0.4, 0.6, 1);
+  // Whatever you are keeping in reserve does not land on them - and an NPC
+  // sparring you at less than everything they have is doing the same thing.
+  const held = battle && side === battle.me ? (battle.restraint ?? 1) : (side.restraint ?? 1);
+  const crowd = side.crowdPenalty ?? 1;
+  return Math.max(1, side.basePower * mult * layerMult * condition * kiFactor * held * crowd);
+}
+
+/** The gap that decides whether somebody can be touched at all. */
+export function speedGap(a, b) {
+  const mine = (a.speedStat ?? 50) * (a.form ? 1.4 : 1);
+  const theirs = (b.speedStat ?? 50) * (b.form ? 1.4 : 1);
+  return mine / Math.max(1, theirs);
+}
+
+function ratioOf(attacker, defender, battle) {
+  return effectivePower(attacker, battle) / Math.max(1, effectivePower(defender, battle));
+}
+
+/** Damage scaling: power dominates, but never to the point of certainty. */
+function scaleByPower(ratio) {
+  return clamp(Math.pow(ratio, 0.45), 0.12, 6.5);
+}
+
+function stanceOf(side) {
+  return STANCES[side.stance] || STANCES.neutral;
+}
+
+/** Everybody on the other side still standing - and still actually here. */
+export function standingFoes(battle) {
+  return (battle.squad || [battle.them]).filter((f) => f.hp > 0 && !f.fledAway);
+}
+
+/** Pick a new focus when the one you were looking at goes down. */
+function refocus(battle) {
+  const up = standingFoes(battle);
+  if (!up.length) return null;
+  if (battle.them.hp > 0) return battle.them;
+  battle.them = up[0];
+  return battle.them;
+}
+
+/**
+ * The lockout. Past a certain speed gap the slower fighter is not losing, they
+ * are not participating: they swing at afterimages. This is the difference
+ * between a hard fight and Frieza standing still while Krillin punches him.
+ */
+export function lockout(attacker, defender, battle) {
+  const gap = speedGap(defender, attacker) * Math.pow(ratioOf(defender, attacker, battle), 0.2);
+  if (gap > 2.6) return 'gone';       // cannot be touched at all
+  if (gap > 1.8) return 'hard';       // most things miss
+  return null;
+}
+
+// --------------------------------------------------------------- available
+
+export function battleActions(state, battle) {
+  const c = state.character;
+  const me = battle.me;
+  const out = [];
+
+  // They just broke off the fight. There is nothing to swing at - the only
+  // real decision left is whether to go after them.
+  if (battle.foeFleeing) {
+    return [
+      {
+        id: 'chase', kind: 'move', label: 'Chase them down',
+        hint: speedGap(me, battle.them) >= 1
+          ? 'You are fast enough to close this.' : 'They have the edge on speed. This is a gamble.',
+      },
+      { id: 'let_go', kind: 'move', label: 'Let them go', hint: 'Whatever this was, it is over.' },
+    ];
+  }
+
+  // A broken arm or two takes options off the table outright, not just for
+  // the enemy across from you - the same fight can do it to you.
+  const handsGot = handsLeft(me);
+  for (const move of PHYSICAL) {
+    const cost = me.infiniteStamina ? 0 : move.stamina;
+    const handsOk = (move.hands || 0) <= handsGot;
+    const legOk = !(move.legMove && me.legBroken);
+    out.push({
+      id: 'phys:' + move.id,
+      kind: 'physical',
+      label: move.name,
+      hint: `${cost ? cost + ' stamina' : 'free'} - ${move.base} base`
+        + (move.hands === 2 ? ' - needs both arms' : ''),
+      disabled: me.stamina < cost || !handsOk || !legOk,
+      reason: !handsOk ? 'You do not have the arm for that right now'
+        : !legOk ? 'Your leg will not hold you for that'
+          : (me.stamina < cost ? 'Not enough stamina' : null),
+    });
+  }
+
+  // A coordinated finish: whoever is fighting alongside you gets a hold on
+  // the one thing you are both looking at, and if it lands you get to throw
+  // the actual finish instead of just another exchange. Only makes sense
+  // against a single, focused target - a crowd has nowhere clean to grab.
+  if ((battle.allies || []).some((a) => a.hp > 0)) {
+    const single = standingFoes(battle).length === 1;
+    const pinCost = me.infiniteStamina ? 0 : 13;
+    out.push({
+      id: 'pin_combo', kind: 'physical', label: 'Signal the pin',
+      hint: single
+        ? `${pinCost ? pinCost + ' stamina' : 'free'} - they hold your target down. If it lands, a near-guaranteed finish; if it does not, a normal exchange.`
+        : 'Only works on one clear target - too many of them standing for a coordinated hold.',
+      disabled: !single || me.stamina < pinCost,
+      reason: !single ? 'Too many of them standing for a coordinated hold' : (me.stamina < pinCost ? 'Not enough stamina' : null),
+    });
+  }
+
+  // Aimed strikes: less likely to land than just swinging, but where they
+  // land matters. Always on the table - you do not need a weapon to aim for
+  // an eye - a blade equipped through equippedWeapon() just makes what
+  // happens at that spot count for more.
+  const AIM_HINTS = {
+    head: 'Low odds. Blinds them for a moment if it lands.',
+    joint: 'Aimed at the knee or the working arm. Can stagger, or break it outright.',
+    vitals: 'The riskiest of the three. Hits hard when it lands.',
+  };
+  for (const move of AIMED_STRIKES) {
+    const cost = me.infiniteStamina ? 0 : move.stamina;
+    const handsOk = (move.hands || 1) <= handsGot;
+    out.push({
+      id: 'phys:' + move.id,
+      kind: 'physical',
+      label: move.name,
+      hint: `${cost ? cost + ' stamina' : 'free'} - ${AIM_HINTS[move.location]}`,
+      disabled: me.stamina < cost || !handsOk,
+      reason: !handsOk ? 'You do not have the arm for that right now' : (me.stamina < cost ? 'Not enough stamina' : null),
+    });
+  }
+
+  for (const id of me.techniques) {
+    const tech = TECH_BY_ID[id];
+    if (!tech || !tech.effect) continue;
+    const e = tech.effect;
+    if (!usableInBattle(e)) continue;
+    const cost = e.kiCost || 0;
+    const needs = techHands(id);
+    const handsOk = needs <= handsGot;
+    out.push({
+      id: 'tech:' + id,
+      kind: 'ki',
+      label: techniqueDisplayName(c, id),
+      hint: [
+        e.atk ? `${e.atk} power` : null,
+        cost ? `${cost} ki` : 'no ki',
+        e.pierce ? 'pierces guard' : null,
+        e.chargeTurns ? `${e.chargeTurns} turn charge` : null,
+        e.blind ? 'blinds' : null,
+        e.heal ? 'heals' : null,
+        e.escape ? 'escape' : null,
+        needs === 2 ? 'needs both arms' : null,
+      ].filter(Boolean).join(' - '),
+      disabled: me.ki < cost || !handsOk,
+      reason: !handsOk ? 'You do not have the arm for that right now' : (me.ki < cost ? 'Not enough ki' : null),
+    });
+  }
+
+  // Who you are looking at. In a crowd this is the whole game: pick off the
+  // dangerous one first, or keep the weak ones between you and it.
+  const up = standingFoes(battle);
+  if (up.length > 1) {
+    for (const f of up) {
+      if (f === battle.them) continue;
+      out.push({
+        id: 'target:' + f.slot, kind: 'target', label: `Turn on ${f.name}`,
+        hint: `${Math.round((f.hp / f.hpMax) * 100)}% standing`,
+      });
+    }
+  }
+
+  out.push({ id: 'guard', kind: 'defend', label: 'Guard', hint: 'Cut the next hit hard, recover stamina' });
+  out.push({
+    id: 'counter', kind: 'defend', label: 'Ready a counter',
+    hint: 'Land nothing yourself this exchange - but whatever they land on you, you land right back, harder.',
+    disabled: me.stamina < 10, reason: me.stamina < 10 ? 'Not enough stamina' : null,
+  });
+  // Charging is not a free hit for them if you are far enough ahead: at that
+  // gap you are simply not where the punch lands.
+  const foe = battle.them;
+  const edge = speedGap(me, foe) * Math.pow(ratioOf(me, foe, battle), 0.25);
+  out.push({
+    id: 'charge', kind: 'defend', label: 'Charge ki',
+    hint: edge > 1.8 ? 'You can afford to. They will not reach you.'
+      : edge > 1.2 ? 'Risky. You are faster, but not by much.'
+        : 'Big ki gain, and they get a free swing.',
+  });
+
+  // How much of yourself you are using. This is how you test somebody, drag a
+  // fight out, or stop pretending.
+  const held = battle.restraint ?? 1;
+  const steps = [
+    { v: 0.25, label: 'Barely trying', hint: 'A quarter of you. They will think they are doing well.' },
+    { v: 0.5, label: 'Hold back', hint: 'Half. Enough to test them properly.' },
+    { v: 0.75, label: 'Most of it', hint: 'Nearly everything.' },
+    { v: 1, label: 'Stop holding back', hint: 'All of it. No more of this.' },
+  ];
+  for (const step of steps) {
+    if (Math.abs(step.v - held) < 0.01) continue;
+    out.push({
+      id: 'restraint:' + step.v, kind: 'stance',
+      label: step.label, hint: step.hint,
+    });
+  }
+
+  for (const key of Object.keys(STANCES)) {
+    if (key === me.stance) continue;
+    out.push({
+      id: 'stance:' + key,
+      kind: 'stance',
+      label: STANCES[key].name,
+      hint: STANCES[key].desc,
+    });
+  }
+
+  const availableForms = me.forms
+    .map((id) => getTransformation(id))
+    .filter((f) => f && f.id !== me.form)
+    .sort((a, b) => a.mult - b.mult);
+  for (const form of availableForms) {
+    out.push({
+      id: 'form:' + form.id,
+      kind: 'form',
+      label: `Transform: ${form.name}`,
+      hint: `x${numberish(form.mult)} power - ${form.drain} ki upkeep`,
+      disabled: me.ki < form.drain * 2,
+      reason: me.ki < form.drain * 2 ? 'Not enough ki to hold it' : null,
+    });
+  }
+  if (me.form) {
+    out.push({ id: 'form:none', kind: 'form', label: 'Drop the form', hint: 'Stop the ki drain' });
+  }
+
+  // Some forms do not replace what you are already holding - they stack on
+  // top of it, if you actually have control of the base shape. Keep your
+  // tail, go Great Ape, and once you have real mastery of the ape itself,
+  // push Super Saiyan on top of that instead of losing the ape to get it.
+  if (me.form) {
+    const baseMastery = (c.formMastery && c.formMastery[me.form]) || 0;
+    const layerCandidates = me.forms
+      .map((id) => getTransformation(id))
+      .filter((f) => f && f.layerOn && f.layerOn.includes(me.form) && f.id !== me.layerForm);
+    for (const form of layerCandidates) {
+      const ready = baseMastery >= 60;
+      out.push({
+        id: 'layer:' + form.id,
+        kind: 'form',
+        label: `Hold ${form.name} through it`,
+        hint: ready
+          ? `Stack on top of ${getTransformation(me.form).name} - x${numberish(form.mult)} more, unstable - ${form.drain} ki upkeep`
+          : `Needs real control of ${getTransformation(me.form).name} first (${Math.round(baseMastery)}/60% mastery)`,
+        disabled: !ready || me.ki < form.drain * 2,
+        reason: !ready ? 'Not enough control over the base form yet' : (me.ki < form.drain * 2 ? 'Not enough ki to hold it' : null),
+      });
+    }
+    if (me.layerForm) {
+      out.push({
+        id: 'layer:none', kind: 'form',
+        label: `Let go of ${getTransformation(me.layerForm).name}`,
+        hint: `Drop the layer, keep ${getTransformation(me.form).name}.`,
+      });
+    }
+  }
+
+  if (c.senzu > 0) {
+    out.push({ id: 'senzu', kind: 'item', label: 'Eat a senzu bean', hint: `Full heal - ${c.senzu} left` });
+  }
+
+  if (battle.ringOut) {
+    // Throwing somebody out of the ring is a real option against a fighter
+    // you could never knock down, and it is how most tournaments end - but
+    // it takes a leg to plant with, same as the throw itself does.
+    const off = them_off_balance(battle);
+    const canThrow = off && !me.legBroken;
+    out.push({
+      id: 'ringout',
+      kind: 'move',
+      label: 'Throw them out of the ring',
+      hint: me.legBroken ? 'Your leg will not let you plant for a throw.'
+        : off ? 'They are off balance. Take the chance.' : 'Needs them staggered, hurt, or blinded first.',
+      disabled: !canThrow,
+      reason: me.legBroken ? 'Your leg will not hold for that' : (off ? null : 'They are still set'),
+    });
+  }
+
+  if (battle.civilians && !battle.relocated && c.techniques.includes('instant_transmission')) {
+    out.push({
+      id: 'relocate', kind: 'move', label: 'Take it somewhere empty',
+      hint: 'Instant Transmission. Nobody down there has to die for this.',
+    });
+  }
+  out.push({
+    id: 'flee', kind: 'move', label: 'Break off and run',
+    hint: c.techniques.includes('instant_transmission') ? 'Instant Transmission out' : 'Speed against theirs',
+  });
+  if (battle.stakes !== 'spar') {
+    out.push({ id: 'surrender', kind: 'move', label: 'Yield', hint: 'Stop fighting. Hope they accept it.' });
+  }
+  if (battle.them.voice) {
+    for (const r of REPLIES) {
+      out.push({ id: 'say:' + r.id, kind: 'talk', label: r.label, hint: r.text || 'Let it stand.' });
+    }
+  }
+
+  return out;
+}
+
+/** Is the opponent in a state where a throw could actually put them out? */
+function them_off_balance(battle) {
+  const them = battle.them;
+  return !!(them.staggered > 0 || them.blinded > 0 || them.hp <= them.hpMax * 0.45);
+}
+
+// ------------------------------------------------------------------- turn
+
+/**
+ * A god-ki or instinct-driven form is not just a fuel tank - some of them
+ * (transformations.js's negative `control`) are not fully yours yet, and
+ * even with ki to spare a fighter can lose the thread and drop straight out
+ * of one under pressure. Positive-control forms (a mastered Super Saiyan 2,
+ * Blue with an angel's teaching behind it) do not carry this risk at all;
+ * that is what makes them mastered rather than merely reached.
+ */
+function isUnstableForm(formId) {
+  if (!formId) return false;
+  const form = getTransformation(formId);
+  return !!(form && form.control < 0);
+}
+
+function holdCheck(side, formId, rng) {
+  const form = getTransformation(formId);
+  if (!form || !(form.control < 0)) return false;
+  const mastery = side.mastery ? masteryOf({ formMastery: side.mastery }, formId) : 0;
+  const steadiness = clamp(((side.instinct ?? 50) - 50) / 150, -0.2, 0.2);
+  const chance = clamp((-form.control / 100) * 0.55 * (1 - (mastery / 100) * 0.9) - steadiness, 0.01, 0.5);
+  return rng.chance(chance);
+}
+
+function applyUpkeep(side, lines, rng) {
+  if (side.form) {
+    const form = getTransformation(side.form);
+    if (form) {
+      side.ki -= form.drain * (side.mastery ? masteryDrain({ formMastery: side.mastery }, form.id) : 1);
+      if (side.ki <= 0) {
+        side.ki = 0;
+        side.form = null;
+        side.formName = null;
+        // Nothing to layer on top of once the base form is gone.
+        side.layerForm = null;
+        side.layerFormName = null;
+        lines.push(`${side.name} cannot hold the form any longer and drops out of it.`);
+      } else if (holdCheck(side, side.form, rng)) {
+        lines.push(`${side.name} loses the thread of it. ${side.formName || form.name} slips away mid-fight.`);
+        side.form = null;
+        side.formName = null;
+        side.layerForm = null;
+        side.layerFormName = null;
+      }
+    }
+  }
+  // A layered form is a harder grip than the base one - it drains, and
+  // slips first if the ki runs short, well before the base form itself does.
+  if (side.form && side.layerForm) {
+    const layer = getTransformation(side.layerForm);
+    if (layer) {
+      side.ki -= layer.drain * 0.6 * (side.mastery ? masteryDrain({ formMastery: side.mastery }, layer.id) : 1);
+      if (side.ki <= 0) {
+        side.ki = 0;
+        side.layerForm = null;
+        side.layerFormName = null;
+        lines.push(`${side.name} cannot hold both any longer. The second form slips first.`);
+      } else if (holdCheck(side, side.layerForm, rng)) {
+        lines.push(`${side.name} cannot keep both at once. ${side.layerFormName || layer.name} slips first.`);
+        side.layerForm = null;
+        side.layerFormName = null;
+      }
+    }
+  }
+  const stance = stanceOf(side);
+  side.ki = clamp(side.ki + 5 * stance.kiRegen, 0, side.kiMax);
+  if (!side.infiniteStamina) side.stamina = clamp(side.stamina + 11 * stance.stamRegen, 0, side.staminaMax);
+  else side.stamina = side.staminaMax;
+  if (side.regenerates && side.hp > 0) side.hp = clamp(side.hp + 3, 0, side.hpMax);
+  if (side.staggered > 0) side.staggered -= 1;
+  if (side.blinded > 0) side.blinded -= 1;
+}
+
+function strike(attacker, defender, battle, rng, spec) {
+  const stance = stanceOf(attacker);
+  const dstance = stanceOf(defender);
+  const ratio = ratioOf(attacker, defender, battle);
+
+  const lock = lockout(attacker, defender, battle);
+  if (lock === 'gone' && !spec.tracking) {
+    return { miss: true, damage: 0, lockedOut: true };
+  }
+
+  let hitChance = (spec.hit ?? 0.85) * stance.atk;
+  if (lock === 'hard') hitChance *= 0.35;
+  hitChance -= dstance.dodge;
+  if (defender.blinded > 0) hitChance += 0.3;
+  if (attacker.blinded > 0) hitChance -= 0.35;
+  if (defender.staggered > 0) hitChance += 0.2;
+  // A leg that will not hold weight properly costs you the footing to land
+  // things and costs them the footing to get out of the way.
+  if (attacker.legBroken) hitChance -= 0.15;
+  if (defender.legBroken) hitChance += 0.18;
+  // Going for a joint that already gave out this fight is not a fresh
+  // gamble - they are already favouring it, already flinching to protect
+  // it, and it is already broken. A weak point stays a weak point.
+  const reinjury = spec.location === 'joint' && ((defender.armsBroken || 0) > 0 || defender.legBroken);
+  if (reinjury) hitChance += 0.14;
+  hitChance = clamp(hitChance, 0.05, 0.97);
+
+  if (!rng.chance(hitChance)) {
+    return { miss: true, damage: 0 };
+  }
+
+  let dmg = spec.base * scaleByPower(ratio) * stance.atk;
+  dmg /= dstance.def;
+  if (defender.guarding && !spec.pierce) dmg *= 0.38;
+  if (reinjury) dmg *= 1.4;
+  if (attacker.charged > 0) {
+    dmg *= 1 + attacker.charged * 0.35;
+    attacker.charged = 0;
+  }
+  const crit = rng.chance((stance.crit || 0) + (spec.crit || 0));
+  if (crit) dmg *= 1.7;
+  dmg *= rng.float(0.85, 1.18);
+
+  if (!Number.isFinite(dmg)) dmg = spec.base || 8;
+  const raw = Math.max(1, Math.round(dmg));
+  const damage = Math.min(raw, Math.max(1, Math.round(defender.hp)));
+  defender.hp = Math.max(0, defender.hp - raw);
+  if (spec.stagger && rng.chance(spec.stagger)) defender.staggered = 2;
+
+  // A hit big enough does not just land - it puts somebody through
+  // something solid. That costs them the same beat to recover as a
+  // staggering strike, and it is not the landscape's fault they were there.
+  let terrainCrash = false;
+  if (damage > defender.hpMax * 0.22 && rng.chance(0.3)) {
+    defender.staggered = Math.max(defender.staggered, 2);
+    terrainCrash = true;
+  }
+
+  // Big exchanges wreck the landscape, and somebody lives here.
+  battle.destruction = clamp(battle.destruction + damage * (spec.blast ? 0.9 : 0.35) / 10
+    + (terrainCrash ? rng.int(5, 12) : 0), 0, 100);
+
+  // Something can just plain break, not merely stagger. Android 18 did not
+  // hit Vegeta especially hard breaking his arm - she went for the joint
+  // outright. A strike aimed at one does that far more often than a blow
+  // that just happens to land heavy, but either can do it.
+  let limbBreak = null;
+  const goodArm = (defender.armsBroken || 0) < 2;
+  const goodLeg = !defender.legBroken;
+  if (goodArm || goodLeg) {
+    const jointShot = spec.location === 'joint';
+    const breakChance = jointShot ? (crit ? 0.4 : 0.18) : (damage > defender.hpMax * 0.32 ? 0.07 : 0);
+    if (breakChance && rng.chance(breakChance)) {
+      const pool = [];
+      if (goodArm) pool.push('arm', 'arm');
+      if (goodLeg) pool.push('leg');
+      const kind = rng.pick(pool);
+      if (kind === 'arm') { defender.armsBroken = (defender.armsBroken || 0) + 1; limbBreak = 'arm'; }
+      else { defender.legBroken = true; limbBreak = 'leg'; }
+    }
+  }
+  return { miss: false, damage, crit, terrainCrash, limbBreak, reinjury };
+}
+
+/**
+ * Two template sets, because "You lands the heavy blow" is the kind of thing
+ * that tells a reader nobody looked at the output.
+ */
+function describeStrike(res, attackerName, defenderName, moveName, rng, byPlayer) {
+  const slots = { a: attackerName, d: defenderName, m: moveName.toLowerCase() };
+  if (res.lockedOut) {
+    return render(byPlayer
+      ? `{[d] is simply not there. You are hitting the place they were standing|You cannot land on [d]. Your [m] goes through empty air where they used to be|There is no version of the [m] that reaches [d]}.`
+      : `{You are not there. [a] hits the place you were standing|[a] cannot touch you. The [m] goes through air|[a] is not fast enough to reach you and knows it}.`,
+    slots, rng);
+  }
+  if (res.miss) {
+    return render(byPlayer
+      ? `{You go for the [m] and find nothing|[d] is not there when your [m] arrives|Your [m] misses}.`
+      : `{[a] goes for the [m] and finds nothing|You are not there when the [m] arrives|The [m] misses you}.`,
+    slots, rng);
+  }
+  const heavy = res.damage > 30;
+  const shown = Math.round(res.damage);
+  const template = byPlayer
+    ? (heavy
+      ? `{You land the [m] and [d] folds around it|Your [m] connects properly and [d] gets up slower|You put everything into the [m]}.`
+      : `{You catch [d] with the [m]|Your [m] lands|You get the [m] through}.`)
+    : (heavy
+      ? `{[a] lands the [m] and you fold around it|The [m] connects properly and you get up slower|[a] puts everything into the [m]}.`
+      : `{[a] catches you with the [m]|The [m] lands|[a] gets the [m] through}.`);
+  let text = render(`${template} (${shown})`, slots, rng);
+  if (res.terrainCrash) {
+    text += ' ' + render(byPlayer
+      ? `{[d] goes through whatever was standing behind them|A wall, a rock face, a building - [d] finds out the hard way|[d] hits something solid on the way down, and it does not hold}. {A second to get their bearings back|That costs them the recovery|They are not ready for what comes next}.`
+      : `{You go through whatever was standing behind you|A wall, a rock face, a building - you find out the hard way|You hit something solid on the way down, and it does not hold}. {A second to get your bearings back|That costs you the recovery|You are not ready for what comes next}.`,
+    slots, rng);
+  }
+  if (res.limbBreak) {
+    const part = res.limbBreak;
+    text += ' ' + render(byPlayer
+      ? `{Something in [d]'s ${part} gives with a sound you feel more than hear|[d]'s ${part} bends wrong and stays that way|That did not just hurt - [d]'s ${part} is broken}. {They are fighting on what is left now|Whatever they do next, they are doing it without that|That is not coming back for the rest of this}.`
+      : `{Something in your ${part} gives with a sound you feel more than hear|Your ${part} bends wrong and stays that way|That did not just hurt - your ${part} is broken}. {You are fighting on what is left now|Whatever you do next, you are doing it without that|That is not coming back for the rest of this}.`,
+    slots, rng);
+  } else if (res.reinjury) {
+    text += ' ' + render(byPlayer
+      ? `{Right where it already gave out|You go straight for what is already broken|They flinch protecting it before you even connect, and it does not help}.`
+      : `{Right where it already gave out|[a] goes straight for what is already broken|You flinch protecting it before the hit even lands, and it does not help}.`,
+    slots, rng);
+  }
+  return text;
+}
+
+/**
+ * A one-shot payoff for the 'counter' action - called right after any foe
+ * strike lands on the player. Only fires once (countering is cleared the
+ * instant it pays off), and only ever punishes a hit that actually
+ * connected: a miss or a locked-out swing gives you nothing to answer.
+ */
+function maybeCounter(battle, rng, lines, res, foeName) {
+  const me = battle.me;
+  const them = battle.them;
+  if (!me.countering || res.miss || res.lockedOut || me.hp <= 0 || them.hp <= 0) return;
+  me.countering = false;
+  const back = strike(me, them, battle, rng, { base: 22, hit: 0.92, stagger: 0.3 });
+  lines.push(render(`{You do not even try to block it - you were never going to. The counter lands instead|`
+    + `${foeName} commits and you are already moving|The opening was the point}.`, {}, rng));
+  lines.push(describeStrike(back, 'you', them.name, 'counter', rng, true));
+}
+
+/** The opponent's move. Simple, but it escalates when it is losing. */
+function foeTurn(state, battle, rng, actor) {
+  const them = actor || battle.them;
+  const me = battle.me;
+  if (them.hp <= 0) return [];
+  const lines = [];
+  const hurt = them.hp / them.hpMax;
+  const losing = ratioOf(them, me, battle) < 0.8;
+  // Some people do not wait until they are losing to transform - a proud or
+  // cheerful fighter in a spar (nothing on the line) is often just glad of
+  // the excuse to show somebody what they can do.
+  const showingOff = actor === battle.them && battle.stakes === 'spar' && battle.round <= 3
+    && ['proud', 'cheerful'].includes(them.voice) && rng.chance(0.3);
+
+  // Escalate: transform when hurt, outmatched, or just showing off.
+  if (them.forms.length && !them.form && (hurt < 0.6 || losing || showingOff) && rng.chance(0.55)) {
+    const form = them.forms
+      .map((id) => getTransformation(id))
+      .filter(Boolean)
+      .sort((a, b) => b.mult - a.mult)[0];
+    if (form && them.ki > form.drain * 3) {
+      them.form = form.id;
+      them.formName = form.name;
+      lines.push(showingOff && !losing && hurt >= 0.6
+        ? `${them.name} grins and transforms, entirely unprompted. ${form.desc}`
+        : `${them.name} transforms. ${form.desc}`);
+      return lines;
+    }
+  }
+
+  // In a ring, they will take the same shortcut you can.
+  if (battle.ringOut && !battle.over) {
+    const meOff = me.staggered > 0 || me.blinded > 0 || me.hp <= me.hpMax * 0.45;
+    if (meOff && rng.chance(0.42)) {
+      const chance = clamp(0.3 + Math.pow(ratioOf(them, me, battle), 0.3) * 0.28
+        + (me.staggered ? 0.18 : 0) + (1 - me.hp / me.hpMax) * 0.22, 0.1, 0.9);
+      if (rng.chance(chance)) {
+        lines.push(`${them.name} gets under you and puts you over the edge. You land outside the ring.`);
+        battle.byRingOut = true;
+        battle.foeRingOut = true;
+        finish(state, battle, rng, 'lost');
+        return lines;
+      }
+      lines.push(`${them.name} tries to throw you out and you break the grip.`);
+      return lines;
+    }
+  }
+
+  // Desperate and outmatched: this is where somebody decides whether running
+  // is even on the table. Race and temperament answer that before speed does -
+  // a Saiyan (Universe 7's proud, hostile conquerors) or a cruel/proud fighter
+  // would rather go down swinging; someone frightened, professional, or simply
+  // perceptive (high instinct) reads a lost cause for what it is and takes it.
+  let lastResort = false;
+  const desperate = actor === battle.them && !battle.foeFleeing && losing &&
+    (hurt < 0.22 || (them.ki < them.kiMax * 0.15 && them.stamina < them.staminaMax * 0.15));
+  if (desperate) {
+    let willFlee = 0.5;
+    if (them.raceId === 'saiyan') willFlee -= 0.42;
+    if (them.voice === 'proud' || them.voice === 'cruel') willFlee -= 0.2;
+    if (them.voice === 'frightened') willFlee += 0.3;
+    if (them.voice === 'professional') willFlee += 0.12;
+    willFlee += ((them.instinct ?? 50) - 50) / 200;
+    willFlee = clamp(willFlee, 0.03, 0.92);
+
+    if (rng.chance(willFlee)) {
+      const speedEdge = speedGap(them, me);
+      const chance = clamp(0.25 + (speedEdge - 1) * 0.4
+        - Math.log10(Math.max(1, ratioOf(me, them, battle))) * 0.15, 0.05, 0.95);
+      if (rng.chance(chance)) {
+        battle.foeFleeing = true;
+        lines.push(voiceLine(battle, rng, 'fleeing') || rng.pick([
+          `${them.name} breaks off. This is not a fight they can win, and they know it.`,
+          `${them.name} throws up a screen of light and is gone from where they stood.`,
+          `${them.name} decides, all at once, that this is over. They run.`,
+        ]));
+        return lines;
+      }
+      lines.push(`${them.name} tries to break off and cannot find the room.`);
+      them.stance = 'aggressive';
+      return lines;
+    }
+    lastResort = true;
+  }
+
+  if (hurt < 0.35 && rng.chance(0.35)) {
+    them.stance = 'defensive';
+  } else if (losing && rng.chance(0.4)) {
+    them.stance = 'aggressive';
+  }
+
+  // A hand missing outright takes whatever needs it off the table, for them
+  // exactly the same way it does for you.
+  const handsGot = handsLeft(them);
+  const kiMoves = them.techniques
+    .map((id) => TECH_BY_ID[id])
+    .filter((t) => t && t.effect && t.effect.atk > 0 && (t.effect.kiCost || 0) <= them.ki && techHands(t.id) <= handsGot);
+
+  if (lastResort && kiMoves.length) {
+    const tech = kiMoves.slice().sort((a, b) => (b.effect.atk || 0) - (a.effect.atk || 0))[0];
+    them.ki -= tech.effect.kiCost || 0;
+    const res = strike(them, me, battle, rng, {
+      base: tech.effect.atk * 1.2, hit: 0.7, pierce: tech.effect.pierce > 0.5, blast: true,
+    });
+    lines.push(`${them.name} is not holding anything back. This is everything they have left.`);
+    lines.push(describeStrike(res, them.name, 'you', tech.name, rng, false));
+    maybeCounter(battle, rng, lines, res, them.name);
+    return lines;
+  }
+
+  // A capable opponent goes for a joint outright the same way you can - not
+  // a bigger hit, a smarter one, and it costs you exactly what it would cost
+  // them: a hand or a leg that stops answering for the rest of this fight.
+  const jointCapable = (them.techniques || []).length >= 2 || (them.instinct ?? 50) > 60;
+  if (jointCapable && !lastResort && handsGot >= 1 && rng.chance(0.14)) {
+    const move = AIMED_STRIKES[1]; // aim_joint
+    if (!them.infiniteStamina) them.stamina = Math.max(0, them.stamina - move.stamina);
+    const res = strike(them, me, battle, rng, move);
+    lines.push(describeStrike(res, them.name, 'you', move.name, rng, false));
+    if (!res.miss && !res.lockedOut && !res.limbBreak) {
+      me.staggered = Math.max(me.staggered, 2);
+      lines.push(`Something in your joint gives. You are not standing right after that.`);
+    }
+    maybeCounter(battle, rng, lines, res, them.name);
+    return lines;
+  }
+
+  if (kiMoves.length && rng.chance(0.4)) {
+    const tech = rng.pick(kiMoves);
+    them.ki -= tech.effect.kiCost || 0;
+    const res = strike(them, me, battle, rng, {
+      base: tech.effect.atk * 0.7, hit: 0.8, pierce: tech.effect.pierce > 0.5, blast: true,
+    });
+    lines.push(describeStrike(res, them.name, 'you', tech.name, rng, false));
+    maybeCounter(battle, rng, lines, res, them.name);
+    return lines;
+  }
+
+  const move = rng.weighted(PHYSICAL, (m) => (
+    them.stamina >= m.stamina && (m.hands || 0) <= handsGot && !(m.legMove && them.legBroken) ? m.base : 0
+  ));
+  if (!them.infiniteStamina) them.stamina = Math.max(0, them.stamina - move.stamina);
+  const res = strike(them, me, battle, rng, move);
+  lines.push(describeStrike(res, them.name, 'you', move.name, rng, false));
+  maybeCounter(battle, rng, lines, res, them.name);
+  return lines;
+}
+
+function finish(state, battle, rng, outcome) {
+  battle.over = true;
+  battle.outcome = outcome;
+  const c = state.character;
+
+  c.vitals.ki = Math.round(clamp(battle.me.ki, 0, c.vitals.kiMax));
+  // Losing a fight leaves you wrecked, not dead. Only a fight with lethal
+  // stakes is allowed to take the last of your health, because otherwise
+  // every defeat became a coin flip on the following new year.
+  const floor = (battle.stakes === 'lethal' && outcome === 'lost') ? 0 : 6;
+  c.vitals.health = clamp(Math.round(Math.max(battle.me.hp, floor)), 0, healthMaxFor(c));
+
+  if (battle.me.hp <= 12 && outcome !== 'fled') {
+    c.flags.brink_of_death = true;
+    if (hasPerk(c, 'zenkai') || hasPerk(c, 'zenkaiWeak')) {
+      battle.zenkai = zenkaiBoost(c, rng, battle.me.hp <= 4 ? 1.3 : 0.9);
+    }
+  }
+  if (outcome === 'lost') {
+    c.flags.fury = true;
+    if (ratioOf(battle.them, battle.me, battle) > 4) c.flags.humiliated = true;
+    if (battle.protecting) c.flags.protected_someone = true;
+  }
+  return battle;
+}
+
+/**
+ * Play one exchange. `actionId` comes from `battleActions`.
+ * Returns the lines to show plus whether the fight has ended.
+ */
+export function takeTurn(state, battle, rng, actionId, params = {}) {
+  if (battle.over) return { lines: [], over: true, outcome: battle.outcome };
+  const c = state.character;
+  const me = battle.me;
+  const them = battle.them;
+  const lines = [];
+  let skipFoe = false;
+  let freeSwing = false;
+
+  me.guarding = false;
+  me.countering = false;
+
+  if (actionId.startsWith('stance:')) {
+    const key = actionId.slice(7);
+    if (STANCES[key]) {
+      me.stance = key;
+      lines.push(`You shift to ${STANCES[key].name.toLowerCase()}. ${STANCES[key].desc}`);
+    }
+  } else if (actionId.startsWith('form:')) {
+    const id = actionId.slice(5);
+    if (id === 'none') {
+      me.form = null;
+      me.formName = null;
+      // Nothing left to layer on top of.
+      me.layerForm = null;
+      me.layerFormName = null;
+      lines.push('You let the form go. The drain stops.');
+    } else {
+      const form = getTransformation(id);
+      if (form && me.forms.includes(id)) {
+        me.form = id;
+        me.formName = form.name;
+        me.ki = Math.max(0, me.ki - form.drain * masteryDrain(c, form.id));
+        // Whatever was layered onto the old base does not carry over onto a
+        // different one unless the new base can actually hold it too.
+        if (me.layerForm) {
+          const layer = getTransformation(me.layerForm);
+          if (!layer || !layer.layerOn || !layer.layerOn.includes(id)) {
+            me.layerForm = null;
+            me.layerFormName = null;
+          }
+        }
+        battle.formRounds = battle.formRounds || {};
+        lines.push(`${form.name}. ${form.desc}`);
+        const worn = masteryMult(c, form.id);
+        if (worn < 0.95) lines.push('It fights you. You are wearing something that does not fit yet.');
+        const said = voiceLine(battle, rng, 'form');
+        if (said) lines.push(said);
+        else if (them.hp / them.hpMax > 0.5) {
+          lines.push(`${them.name} ${rng.pick(['takes a step back', 'stops smiling', 'says nothing', 'looks at you differently'])}.`);
+        }
+      }
+    }
+  } else if (actionId.startsWith('layer:')) {
+    const id = actionId.slice(6);
+    if (id === 'none') {
+      lines.push(me.layerForm
+        ? `You let ${getTransformation(me.layerForm).name} go. ${getTransformation(me.form)?.name || 'The base form'} holds on its own.`
+        : 'Nothing layered to drop.');
+      me.layerForm = null;
+      me.layerFormName = null;
+    } else {
+      const form = getTransformation(id);
+      const baseMastery = (c.formMastery && c.formMastery[me.form]) || 0;
+      if (form && me.form && me.forms.includes(id) && form.layerOn && form.layerOn.includes(me.form) && baseMastery >= 60) {
+        me.layerForm = id;
+        me.layerFormName = form.name;
+        me.ki = Math.max(0, me.ki - form.drain * masteryDrain(c, form.id));
+        lines.push(`${form.name}, held through ${getTransformation(me.form).name} rather than instead of it. ${form.desc}`);
+        const said = voiceLine(battle, rng, 'form');
+        if (said) lines.push(said);
+      }
+    }
+  } else if (actionId.startsWith('say:')) {
+    const reply = REPLIES.find((r) => r.id === actionId.slice(4));
+    if (reply) {
+      if (reply.text) lines.push(`You: ${reply.text}`);
+      const e = reply.effect;
+      if (e.theirRage) {
+        them.stance = e.theirRage > 0 ? 'aggressive' : 'defensive';
+        lines.push(e.theirRage > 0
+          ? `${them.name} comes at you harder for that.`
+          : `${them.name} steadies. Whatever that was, it landed.`);
+      }
+      if (e.myFocus) me.ki = clamp(me.ki + e.myFocus, 0, me.kiMax);
+      if (e.surrender && them.hp / them.hpMax < 0.4 && rng.chance(e.surrender * 3)) {
+        lines.push(`${them.name} stops. "...All right. All right."`);
+        return { lines, over: true, outcome: finish(state, battle, rng, 'won').outcome };
+      }
+      // Only means anything against somebody who was actually pulling
+      // punches, and only in a fight where "stop holding back" is a request
+      // rather than something they were already forced past.
+      if (e.dropRestraint && battle.stakes === 'spar' && (them.restraint ?? 1) < 1) {
+        them.restraint = 1;
+        lines.push(voiceLine(battle, rng, 'insulted') || `${them.name} does not argue. Whatever they were keeping back, they stop.`);
+      } else if (e.dropRestraint) {
+        lines.push(`${them.name} was not holding anything back to begin with.`);
+      }
+    }
+  } else if (actionId.startsWith('restraint:')) {
+    const to = Number(actionId.slice(10));
+    const was = battle.restraint ?? 1;
+    battle.restraint = clamp(to, 0.15, 1);
+    lines.push(to > was
+      ? rng.pick([
+        'You stop holding back.',
+        'You stop being careful with them.',
+        'Whatever you were keeping back, you stop keeping it back.',
+      ])
+      : rng.pick([
+        'You ease off. Let us see what they do with the room.',
+        'You take it down a level and wait.',
+        'You stop trying to finish it.',
+      ]));
+    if (to < was && them.hp / them.hpMax > 0.5) {
+      lines.push(voiceLine(battle, rng, 'insulted') || `${them.name} notices, and does not thank you for it.`);
+    }
+    skipFoe = false;
+  } else if (actionId === 'ringout' && me.legBroken) {
+    lines.push('Your leg will not let you get under them for that.');
+  } else if (actionId === 'ringout') {
+    // Strength and technique against their weight and whatever balance they
+    // have left. Failing it puts you in a bad spot, which is the trade.
+    const ratio = ratioOf(me, them, battle);
+    const chance = clamp(0.32 + Math.pow(ratio, 0.3) * 0.28
+      + (them.staggered ? 0.18 : 0) + (them.blinded ? 0.14 : 0)
+      + (1 - them.hp / them.hpMax) * 0.25, 0.1, 0.94);
+    const ringFormMult = me.form ? masteryDrain(c, me.form) : 1;
+    me.stamina = Math.max(0, me.stamina - (me.infiniteStamina ? 0 : Math.round(18 * ringFormMult)));
+    if (rng.chance(chance)) {
+      lines.push(render(`{You get under them and put them over the edge|You take their balance and throw|You lift them off the stone and let go}. `
+        + `{They land outside|Both feet outside the ring|Out}.`, {}, rng));
+      battle.byRingOut = true;
+      return { lines, over: true, outcome: finish(state, battle, rng, 'won').outcome };
+    }
+    lines.push(render(`{They plant and you cannot move them|The throw does not come off|You get a grip and they break it}. `
+      + `{You are wide open now|That cost you the position|You have given them the inside}.`, {}, rng));
+    freeSwing = true;
+  } else if (actionId.startsWith('phys:')) {
+    const moveId = actionId.slice(5);
+    const handsGot = handsLeft(me);
+    // A move your body cannot currently throw does not just fail - it
+    // becomes whatever you can still manage. This is the backstop for
+    // anything that reaches takeTurn without going through the UI's own
+    // disabling first (autoResolve included).
+    let move = PHYSICAL.find((m) => m.id === moveId);
+    let aim = move ? null : AIMED_STRIKES.find((m) => m.id === moveId);
+    let downgraded = false;
+    if (move && ((move.hands || 0) > handsGot || (move.legMove && me.legBroken))) {
+      move = PHYSICAL.find((m) => m.id === 'headbutt');
+      downgraded = true;
+    } else if (aim && (aim.hands || 1) > handsGot) {
+      move = PHYSICAL.find((m) => m.id === 'headbutt');
+      aim = null;
+      downgraded = true;
+    }
+    if (downgraded) lines.push(`You do not have the arm for that. You get a headbutt in instead.`);
+    // A form you have actually worn in stops wasting your motion, the same
+    // way it stops wasting your ki - an unmastered one costs more of both.
+    const formStaminaMult = me.form ? masteryDrain(c, me.form) : 1;
+    if (move) {
+      const cost = me.infiniteStamina ? 0 : Math.round(move.stamina * formStaminaMult);
+      me.stamina = Math.max(0, me.stamina - cost);
+      const res = strike(me, them, battle, rng, move);
+      lines.push(describeStrike(res, 'You', them.name, move.name, rng, true));
+    } else if (aim) {
+      const cost = me.infiniteStamina ? 0 : Math.round(aim.stamina * formStaminaMult);
+      me.stamina = Math.max(0, me.stamina - cost);
+      const type = playerAttackType(c);
+      const res = strike(me, them, battle, rng, { ...aim, pierce: type === 'blade' });
+      lines.push(describeStrike(res, 'You', them.name, aim.name, rng, true));
+      if (!res.miss && !res.lockedOut) {
+        if (aim.location === 'head') {
+          them.blinded = Math.max(them.blinded, 2);
+          lines.push(type === 'blade'
+            ? `The point finds an eye. ${them.name} is not seeing out of that side for a while.`
+            : `It catches ${them.name} right across the eyes. They cannot see anything right now.`);
+        } else if (aim.location === 'joint') {
+          them.staggered = Math.max(them.staggered, 2);
+          lines.push(type === 'blade'
+            ? `The edge finds the joint and ${them.name}'s leg does not hold weight properly anymore.`
+            : `Something in ${them.name}'s knee gives. They are not standing right after that.`);
+        } else if (aim.location === 'vitals') {
+          lines.push(type === 'blade'
+            ? `The blade goes in at the throat and comes back out. ${them.name} is fighting hurt now, in the way that matters.`
+            : `You catch ${them.name} square in the throat. That is going to slow everything they do for the rest of this.`);
+        }
+      }
+    }
+  } else if (actionId === 'pin_combo') {
+    const cost = me.infiniteStamina ? 0 : 13;
+    me.stamina = Math.max(0, me.stamina - cost);
+    const allies = (battle.allies || []).filter((a) => a.hp > 0);
+    const ally = allies.length ? allies.reduce((best, a) => (effectivePower(a, battle) > effectivePower(best, battle) ? a : best)) : null;
+    if (!ally) {
+      lines.push('Nobody is close enough to help with that.');
+    } else {
+      const pinChance = clamp(0.3 + (ratioOf(ally, them, battle) - 1) * 0.3, 0.15, 0.9);
+      if (rng.chance(pinChance)) {
+        them.staggered = Math.max(them.staggered, 2);
+        lines.push(rng.pick([
+          `${ally.name} gets a lock on them and does not let go.`,
+          `${ally.name} grabs both arms from behind and pins them there.`,
+          `${ally.name} drives them down and holds the legs. They are not going anywhere.`,
+        ]));
+        const res = strike(me, them, battle, rng, { base: 30, hit: 0.98, pierce: true, crit: 0.3 });
+        lines.push(describeStrike(res, 'You', them.name, 'the finish', rng, true));
+      } else {
+        lines.push(rng.pick([
+          `${ally.name} goes for the hold and does not get it.`,
+          `${ally.name} is half a second too slow.`,
+          `${ally.name} cannot get a grip on them.`,
+        ]));
+        const move = PHYSICAL.find((m) => m.id === 'combo');
+        const res = strike(me, them, battle, rng, move);
+        lines.push(describeStrike(res, 'You', them.name, move.name, rng, true));
+      }
+      // The automatic end-of-turn ally pass below should not have this one
+      // swing again - it already acted, on the pin, this exchange.
+      ally.pinnedThisTurn = true;
+    }
+  } else if (actionId.startsWith('tech:')) {
+    const tech = TECH_BY_ID[actionId.slice(5)];
+    if (tech && techHands(tech.id) > handsLeft(me)) {
+      lines.push(`You do not have the arm for that right now. It fizzles out unthrown.`);
+    } else if (tech) {
+      const e = tech.effect;
+      const name = techniqueDisplayName(c, tech.id);
+      // A once-removed version is not just a worse number on the character
+      // sheet - it is a weaker technique the moment it actually gets thrown,
+      // the same way techniquePower() already discounts it there.
+      const purity = techniquePurity(c, tech.id);
+      me.ki = Math.max(0, me.ki - (e.kiCost || 0));
+      if (e.heal || e.regen) {
+        const amount = Math.round((e.heal || Math.round(me.hpMax * e.regen)) * purity);
+        me.hp = clamp(me.hp + amount, 0, me.hpMax);
+        lines.push(e.regen
+          ? `Torn tissue closes over in seconds. (+${amount})`
+          : `You put your own energy back into yourself. (+${amount})`);
+      } else if (e.blind) {
+        them.blinded = 2;
+        lines.push(`${name}. ${them.name} cannot see a thing for a moment.`);
+      } else if (e.escape) {
+        lines.push(`You lock onto a signature somewhere else and are simply gone.`);
+        return { lines, over: true, outcome: finish(state, battle, rng, 'fled').outcome };
+      } else if (e.drain || e.absorb) {
+        // Absorption takes their energy rather than trading blows for it.
+        const stolen = Math.round(Math.min(them.ki, 18 + (e.drain || 0.3) * 40) * purity);
+        them.ki = Math.max(0, them.ki - stolen);
+        me.ki = clamp(me.ki + stolen, 0, me.kiMax);
+        const res = strike(me, them, battle, rng, { base: 6, hit: 0.9 });
+        lines.push(`You take ${stolen} ki straight out of them. ${describeStrike(res, 'You', them.name, name, rng, true)}`);
+      } else if (e.multiplier) {
+        me.basePower = Math.round(me.basePower * (1 + (e.multiplier - 1) * purity));
+        me.hp = Math.max(1, me.hp - (e.healthCost || 8));
+        lines.push(`${name}. Everything multiplies, and your body starts paying for it.`);
+      } else {
+        if (e.healthCost) me.hp = Math.max(1, me.hp - e.healthCost);
+        const res = strike(me, them, battle, rng, {
+          base: (e.atk || 8) * purity, hit: 0.82, pierce: (e.pierce || 0) > 0.5, crit: e.crit || 0, blast: true,
+        });
+        lines.push(describeStrike(res, 'You', them.name, name, rng, true));
+        if (e.healthCost) lines.push('It costs you as much as it costs them.');
+      }
+    }
+  } else if (actionId.startsWith('target:')) {
+    const slot = Number(actionId.slice(7));
+    const pick = (battle.squad || []).find((f) => f.slot === slot && f.hp > 0);
+    if (pick) {
+      battle.them = pick;
+      lines.push(rng.pick([
+        `You stop caring about the others and look at ${pick.name}.`,
+        `You put ${pick.name} in front of everything else.`,
+        `${pick.name}. That is the one that matters.`,
+      ]));
+      skipFoe = false;
+    }
+  } else if (actionId === 'guard') {
+    me.guarding = true;
+    me.stamina = clamp(me.stamina + 22, 0, me.staminaMax);
+    lines.push('You cover up and wait for it.');
+  } else if (actionId === 'counter') {
+    me.countering = true;
+    me.stamina = clamp(me.stamina - 10, 0, me.staminaMax);
+    lines.push('You give up the exchange and wait for them to commit to something.');
+  } else if (actionId === 'charge') {
+    // Somebody far enough ahead in speed and power simply is not there when
+    // the punch arrives. This is the whole point of Ultra Instinct.
+    const edge = speedGap(me, them) * Math.pow(ratioOf(me, them, battle), 0.25);
+    if (edge > 1.8 || (me.form && /Ultra Instinct/.test(me.formName || ''))) {
+      me.ki = clamp(me.ki + 34 + Math.round(c.stats.kiControl * 0.4), 0, me.kiMax);
+      lines.push(rng.pick([
+        'You stand still and gather. They come, and you are not where they swing.',
+        'You do not even watch them. Your body moves and the rest of you charges.',
+        `${them.name} throws everything at where you were.`,
+      ]));
+      me.charged = Math.min(3, me.charged + 1);
+      skipFoe = true;
+    } else {
+      me.ki = clamp(me.ki + 34, 0, me.kiMax);
+      me.charged = Math.min(3, me.charged + 1);
+      freeSwing = true;
+      lines.push('You plant your feet and pull everything inward. The air goes tight.');
+    }
+  } else if (actionId === 'senzu') {
+    if (c.senzu > 0) {
+      c.senzu -= 1;
+      me.hp = me.hpMax;
+      me.ki = me.kiMax;
+      me.stamina = me.staminaMax;
+      battle.timesHealed = (battle.timesHealed || 0) + 1;
+      lines.push('One bean. Everything closes at once.');
+    }
+  } else if (actionId === 'relocate') {
+    battle.relocated = true;
+    battle.civilians = false;
+    battle.placeId = 'wastes';
+    skipFoe = true;
+    lines.push('You take hold of them and the city is simply not there any more. Bare rock, no witnesses, nothing left to break that matters.');
+  } else if (actionId === 'flee') {
+    const speedEdge = (c.stats.speed || 50) / 100 + (c.techniques.includes('instant_transmission') ? 1 : 0);
+    const chance = clamp(0.25 + speedEdge * 0.4 - Math.log10(Math.max(1, ratioOf(them, me, battle))) * 0.2, 0.05, 0.95);
+    if (rng.chance(chance)) {
+      lines.push('You break off and go, and they do not follow.');
+      return { lines, over: true, outcome: finish(state, battle, rng, 'fled').outcome };
+    }
+    lines.push('You turn to run and they are already in front of you.');
+    them.stance = 'aggressive';
+  } else if (actionId === 'chase') {
+    const speedEdge = speedGap(me, them) + ((c.battleInstinct ?? 50) - 50) / 200;
+    const chance = clamp(0.3 + (speedEdge - 1) * 0.45, 0.05, 0.95);
+    if (rng.chance(chance)) {
+      battle.foeFleeing = false;
+      lines.push(rng.pick([
+        'You close the gap before they clear it. They are still here.',
+        'You catch up to them mid-stride and the fight is not over after all.',
+      ]));
+      const said = voiceLine(battle, rng, 'caught');
+      if (said) lines.push(said);
+      const res = strike(me, them, battle, rng, { base: 22, hit: 0.95, stagger: 0.4 });
+      lines.push(describeStrike(res, 'You', them.name, 'a caught-them-cold strike', rng, true));
+      skipFoe = true;
+    } else {
+      lines.push(`${them.name} is faster, or simply luckier, and is gone.`);
+      battle.foeFleeing = false;
+      them.fledAway = true;
+      const next = refocus(battle);
+      if (!next) {
+        battle.foeFled = true;
+        return { lines, over: true, outcome: finish(state, battle, rng, 'won').outcome };
+      }
+      lines.push(`That leaves ${standingFoes(battle).length}. ${next.name} is still here.`);
+    }
+  } else if (actionId === 'let_go') {
+    battle.foeFleeing = false;
+    them.fledAway = true;
+    lines.push(`${them.name} is gone. You let it be.`);
+    const next = refocus(battle);
+    if (!next) {
+      battle.foeFled = true;
+      return { lines, over: true, outcome: finish(state, battle, rng, 'won').outcome };
+    }
+    lines.push(`That leaves ${standingFoes(battle).length}. ${next.name} is still here.`);
+  } else if (actionId === 'surrender') {
+    battle.surrendered = true;
+    const merciful = rng.chance(0.55 + (c.karma > 30 ? 0.2 : 0) - (battle.stakes === 'lethal' ? 0.35 : 0));
+    if (merciful) {
+      lines.push(`${them.name} stops. Whatever this was, it is finished.`);
+      return { lines, over: true, outcome: finish(state, battle, rng, 'yielded').outcome };
+    }
+    lines.push(`${them.name} does not accept it.`);
+  }
+
+  if (battle.them.hp <= 0) {
+    const downed = battle.them;
+    const parting = voiceLine(battle, rng, 'beaten');
+    if (parting) lines.push(parting);
+    lines.push(`${downed.name} goes down and does not get back up.`);
+    battle.defeated = battle.defeated || [];
+    if (!battle.defeated.includes(downed)) battle.defeated.push(downed);
+    const next = refocus(battle);
+    if (!next) {
+      return { lines, over: true, outcome: finish(state, battle, rng, 'won').outcome };
+    }
+    lines.push(rng.pick([
+      `${next.name} steps over ${downed.name} without looking down.`,
+      `That leaves ${standingFoes(battle).length}. ${next.name} is closest.`,
+      `${next.name} does not appear to have found that discouraging.`,
+    ]));
+  }
+
+  if (!skipFoe) {
+    if (freeSwing) lines.push(`${battle.them.name} does not wait for you to finish.`);
+    // Everyone still on their feet gets a turn, not just the one you are
+    // looking at. This is what makes being surrounded actually dangerous.
+    for (const foe of standingFoes(battle)) {
+      lines.push(...foeTurn(state, battle, rng, foe));
+      // Time spent in a form works on them too - tracked per foe so a
+      // spar partner who is keen on maintaining a form gets more efficient
+      // with it the same way you do.
+      if (foe.form) {
+        foe.formHeldRounds = foe.formHeldRounds || {};
+        foe.formHeldRounds[foe.form] = (foe.formHeldRounds[foe.form] || 0) + 1;
+      }
+      if (battle.over) return { lines, over: true, outcome: battle.outcome };
+      if (me.hp <= 0) break;
+    }
+    // And anybody fighting on your side answers back - unless they already
+    // spent this exchange on a pin (pin_combo), in which case that was
+    // their turn.
+    for (const ally of (battle.allies || [])) {
+      if (ally.pinnedThisTurn) { ally.pinnedThisTurn = false; continue; }
+      if (ally.hp <= 0) continue;
+      const mark = standingFoes(battle)[0];
+      if (!mark) break;
+      const move = rng.weighted(PHYSICAL, (m) => m.base);
+      const res = strike(ally, mark, battle, rng, move);
+      lines.push(describeStrike(res, ally.name, mark.name, move.name, rng, false));
+      if (mark.hp <= 0) {
+        lines.push(`${mark.name} is down. ${ally.name} did that one.`);
+        refocus(battle);
+        if (!standingFoes(battle).length) {
+          return { lines, over: true, outcome: finish(state, battle, rng, 'won').outcome };
+        }
+      }
+    }
+  }
+
+  if (me.hp <= 0) {
+    lines.push('Everything goes white at the edges.');
+    return { lines, over: true, outcome: finish(state, battle, rng, 'lost').outcome };
+  }
+
+  // They talk while it happens, which is most of what a Dragon Ball fight is.
+  if (battle.round % 3 === 0) {
+    const state2 = them.hp / them.hpMax;
+    const said = voiceLine(battle, rng, state2 < 0.35 ? 'losing' : me.hp / me.hpMax < 0.45 ? 'winning' : 'hurt');
+    if (said) lines.push(said);
+  }
+
+  // Time spent inside a form is how a form gets worn in.
+  if (me.form) {
+    battle.formRounds = battle.formRounds || {};
+    battle.formRounds[me.form] = (battle.formRounds[me.form] || 0) + 1;
+  }
+
+  applyUpkeep(me, lines, rng);
+  applyUpkeep(them, lines, rng);
+  battle.round += 1;
+  battle.log.push(...lines);
+  if (battle.log.length > 60) battle.log = battle.log.slice(-60);
+
+  if (battle.round > 40) {
+    lines.push('Neither of you can finish this. You break apart, both still standing.');
+    return { lines, over: true, outcome: finish(state, battle, rng, 'draw').outcome };
+  }
+
+  return { lines, over: false, outcome: null };
+}
+
+/** A short readout for the UI header. */
+export function battleStatus(battle) {
+  return {
+    round: battle.round,
+    me: {
+      hp: Math.round(battle.me.hp), hpMax: Math.round(battle.me.hpMax),
+      ki: Math.round(battle.me.ki), kiMax: Math.round(battle.me.kiMax),
+      stamina: Math.round(battle.me.stamina), staminaMax: Math.round(battle.me.staminaMax),
+      form: battle.me.formName, layerForm: battle.me.layerFormName, stance: STANCES[battle.me.stance].name,
+      power: Math.round(effectivePower(battle.me, battle)),
+      unstable: isUnstableForm(battle.me.form) || isUnstableForm(battle.me.layerForm),
+      armsBroken: battle.me.armsBroken || 0, legBroken: !!battle.me.legBroken,
+    },
+    them: {
+      name: battle.them.name,
+      hp: Math.round(battle.them.hp), hpMax: Math.round(battle.them.hpMax),
+      ki: Math.round(battle.them.ki),
+      form: battle.them.formName, layerForm: battle.them.layerFormName, stance: STANCES[battle.them.stance].name,
+      power: Math.round(effectivePower(battle.them, battle)),
+      tier: powerTier(effectivePower(battle.them, battle)),
+      armsBroken: battle.them.armsBroken || 0, legBroken: !!battle.them.legBroken,
+    },
+    destruction: Math.round(battle.destruction),
+    civilians: battle.civilians,
+    gap: ratioOf(battle.me, battle.them, battle),
+    lockedOut: lockout(battle.me, battle.them, battle),
+    lockingThem: lockout(battle.them, battle.me, battle),
+    squad: (battle.squad || []).map((f) => ({
+      slot: f.slot, name: f.name, hp: Math.round(f.hp), hpMax: Math.round(f.hpMax),
+      down: f.hp <= 0, focus: f === battle.them, form: f.formName,
+      power: Math.round(effectivePower(f, battle)),
+    })),
+    allies: (battle.allies || []).map((a) => ({
+      name: a.name, hp: Math.round(a.hp), hpMax: Math.round(a.hpMax), down: a.hp <= 0,
+    })),
+    restraint: battle.restraint ?? 1,
+  };
+}
+
+export function describeMatchup(battle) {
+  const up = standingFoes(battle);
+  if (up.length > 1) {
+    const total = up.reduce((n, f) => n + effectivePower(f, battle), 0);
+    const r2 = effectivePower(battle.me, battle) / Math.max(1, total);
+    if (r2 > 6) return `${up.length} of them, and it will not matter.`;
+    if (r2 > 1.4) return `${up.length} of them. You can take them, if they let you take them one at a time.`;
+    if (r2 > 0.5) return `${up.length} of them, and together they are a real problem.`;
+    return `${up.length} of them. You are going to have to pick which one you can afford to fight.`;
+  }
+  const r = ratioOf(battle.me, battle.them, battle);
+  if (r > 30) return 'They are not in your class and you both know it.';
+  if (r > 6) return 'You are clearly stronger.';
+  if (r > 1.6) return 'You have the edge.';
+  if (r > 0.62) return 'This is close to even.';
+  if (r > 0.16) return 'They are stronger than you.';
+  if (r > 0.02) return 'They are far beyond you. Tactics will not close this.';
+  return 'This is suicide.';
+}
+
+
+/**
+ * How deserving whoever you just beat was, from -100 (a genuine monster) to
+ * +100 (an innocent, or actively lawful). Killing a Frieza Force grunt and
+ * killing a Galactic Patrol officer used to cost the same flat karma - this
+ * is what lets them not.
+ */
+export function moralAlignmentOf(state, battle) {
+  const ctxInfo = battle.context || {};
+  if (ctxInfo.canonId) {
+    const canon = getCanon(ctxInfo.canonId);
+    if (canon && canon.tags) {
+      if (canon.tags.includes('villain')) return -70;
+      if (canon.tags.includes('hero') || canon.tags.includes('ally') || canon.tags.includes('mentor')) return 60;
+    }
+  }
+  if (ctxInfo.factionId) {
+    const faction = getFaction(ctxInfo.factionId);
+    if (faction) return clamp(faction.alignment, -100, 100);
+  }
+  const npc = ctxInfo.npcId ? state.npcs[ctxInfo.npcId] : null;
+  if (npc && npc.relation === 'rival') return -10;
+  // An ordinary stranger, no case made against them either way - killing
+  // them reads closer to murder than to justice.
+  return 20;
+}
+
+/**
+ * What killing whoever you just beat should cost (or, rarely, earn) in
+ * karma. Scaled off moralAlignmentOf() so ridding the world of something
+ * genuinely evil barely registers - or reads as a mercy - while killing
+ * somebody with a real claim to being good costs a great deal more than
+ * killing a nobody does.
+ */
+export function killKarmaDelta(state, battle) {
+  const alignment = moralAlignmentOf(state, battle);
+  return clamp(Math.round(-22 - alignment * 0.35), -55, 15);
+}
+
+/**
+ * Actually kill whoever was downed in a lethal win: recorded to Hell's
+ * roster, marked dead on their NPC record if they have one. Called either
+ * automatically (a headless fight has nobody to ask) or from the "Finish
+ * them" choice once the player has actually chosen it - never implicitly
+ * just because the fight ended, or "Let them live" would be a lie.
+ *
+ * Looting is not part of this any more. Whoever is left with a body worth
+ * going through is listed on `battle.lootable`, for whichever caller can
+ * actually ask the player about it - going through a corpse is its own
+ * decision, not something that happens automatically because you won.
+ */
+export function finishLethalWin(state, rng, battle) {
+  const c = state.character;
+  const lines = [];
+  const year = c.birthYear + c.age;
+  battle.lootable = [];
+  for (const foe of (battle.squad || [battle.them])) {
+    if (foe.hp > 0) continue;
+    state.stats.kills += 1;
+    state.world.ended = state.world.ended || [];
+    // Whether they were ever going to be more than they were. Most people
+    // are not - Hell does not manufacture potential, it just gives whoever
+    // already had some nothing else to do with the time. Stronger opponents
+    // were more likely to have room left to grow in the first place.
+    const potential = rng.chance(clamp(0.16 + Math.log10(Math.max(10, foe.basePower || 1)) * 0.07, 0.1, 0.68));
+    state.world.ended.push({
+      name: foe.name,
+      power: Math.round(foe.basePower || 1),
+      year,
+      canonId: (foe.ref && foe.ref.canonId) || battle.foeRef.canonId || null,
+      npcId: (foe.ref && foe.ref.npcId) || battle.foeRef.npcId || null,
+      raceId: foe.raceId || 'other',
+      how: battle.reason || 'a fight',
+      potential,
+      // How fast they use it, once they start. Rolled once, so the same
+      // person is not a slow burn one visit and a prodigy the next.
+      pace: rng.float(0.7, 1.6),
+    });
+    const refCanonId = (foe.ref && foe.ref.canonId) || battle.foeRef.canonId;
+    let npc = ((foe.ref && foe.ref.npcId) && state.npcs[foe.ref.npcId])
+      || (battle.foeRef.npcId && state.npcs[battle.foeRef.npcId])
+      || (refCanonId && state.npcs['canon_' + refCanonId]);
+    // A canon fighter you never formally "met" before the fight still needs a
+    // real record once you kill them - otherwise the kill lands nowhere and
+    // they read as untouched (alive, and never even acknowledged as fought).
+    if (!npc && refCanonId) {
+      npc = makeCanonNpc(rng, refCanonId, year, 'acquaintance');
+      if (npc) state.npcs[npc.id] = npc;
+    }
+    if (npc && npc.alive) {
+      npc.alive = false;
+      npc.mourned = true;
+      npc.deadSince = year;
+      npc.causeOfDeath = 'killed by you';
+      npc.killedByPlayer = true;
+      npcBag(rng, npc);
+      if (npc.bag && npc.bag.length) battle.lootable.push(npc.id);
+    }
+  }
+  if (state.world.ended.length > 40) state.world.ended = state.world.ended.slice(-40);
+  return lines;
+}
+
+/**
+ * Going through what somebody left behind, once the player actually
+ * chooses to. Taking a life and taking their things are not the same
+ * decision - this one carries its own risk: somebody notices what you are
+ * carrying, or somebody who mattered to the dead finds out who took it.
+ */
+export function lootDefeatedNpc(state, rng, npcId) {
+  const c = state.character;
+  const npc = state.npcs[npcId];
+  if (!npc) return { looted: false, text: 'There is nothing left to go through.' };
+  const loot = lootFromDefeated(rng, npc, c);
+  if (!loot) return { looted: false, text: `${npc.name} was not carrying anything worth taking.` };
+
+  const lines = [loot];
+  const notability = clamp((npc.fame || 0) / 100 + (npc.canonId ? 0.35 : 0)
+    + Math.log10(Math.max(10, npc.power || 10)) / 40, 0, 0.9);
+  const recognized = rng.chance(notability);
+  if (recognized) {
+    c.karma = clamp(c.karma - 8, -100, 100);
+    spreadWord(state, { scale: DEED_SCALE.street * 2, karma: -6 });
+    lines.push('Somebody recognises what you are carrying. Taking a life is one thing - people notice when you walk away wearing what used to be theirs.');
+  }
+
+  let avenger = null;
+  const revengeChance = clamp(0.12 + (npc.fame || 0) / 300 + (npc.canonId ? 0.15 : 0), 0.05, 0.55);
+  if (rng.chance(revengeChance)) {
+    avenger = makeNpc(rng, {
+      year: c.birthYear + c.age, placeId: c.placeId, raceId: npc.raceId,
+      relation: 'enemy', tension: 80, minAge: 18, maxAge: 60,
+    });
+    avenger.power = Math.max(1, Math.round((npc.power || avenger.power) * rng.float(0.7, 1.2)));
+    addNpc(state, avenger);
+    openThread(state.memory, {
+      kind: 'vendetta', subject: avenger.id, year: c.age,
+      title: `${avenger.name} wants what you took back`,
+      maxStage: 3, heat: 65,
+    });
+    lines.push(`${npc.name} was somebody's. ${avenger.name} finds out what happened to them, and to what they had.`);
+  }
+
+  return { looted: true, recognized, avenger, text: lines.join(' ') };
+}
+
+/**
+ * What the world does about a finished fight. Applied once, whether the fight
+ * was played turn by turn or resolved headlessly.
+ */
+export function battleAftermath(state, rng, battle, opts = {}) {
+  const c = state.character;
+  const lines = [];
+  const outcome = battle.outcome;
+
+  state.stats.fights += 1;
+  if (outcome === 'won') state.stats.wins += 1;
+  else if (outcome === 'lost') state.stats.losses += 1;
+
+  if (battle.zenkai) {
+    lines.push(`Your body rebuilds heavier than it was. Power level up ${numberish(battle.zenkai)}.`);
+  }
+
+  // Rounds held inside a form are the only thing that really masters it. A
+  // hard fight teaches more than an easy one.
+  for (const [formId, rounds] of Object.entries(battle.formRounds || {})) {
+    const pressure = outcome === 'won' ? 1 : 1.4;
+    const gain = trainMastery(c, formId, Math.min(9, rounds * 0.55 * pressure));
+    if (gain >= 3) {
+      const form = getTransformation(formId);
+      lines.push(`${form ? form.name : 'The form'} sits better on you than it did this morning.`);
+    }
+  }
+
+  // The same wearing-in works on whoever you fought, if they are a real NPC
+  // and not a one-off generated opponent - somebody keen on maintaining a
+  // form gets more efficient with it whether or not they are the one you are
+  // playing.
+  for (const foe of (battle.squad || [battle.them])) {
+    if (!foe.formHeldRounds) continue;
+    const npcId = (foe.ref && foe.ref.npcId) || null;
+    const npc = npcId ? state.npcs[npcId] : null;
+    if (!npc) continue;
+    for (const [formId, rounds] of Object.entries(foe.formHeldRounds)) {
+      trainMastery(npc, formId, Math.min(9, rounds * 0.5));
+    }
+  }
+
+  // Clothes and kit take the same beating you do.
+  const severity = battle.outcome === 'lost' ? 1.6 : battle.me.hp < 40 ? 1.2 : 0.6;
+  for (const line of damageGear(c, rng, severity * (battle.stakes === 'spar' ? 0.4 : 1))) {
+    lines.push(line);
+  }
+
+  // What the fight leaves on you. Regeneration closes almost everything; a
+  // body that does not regenerate keeps a record of the fights it nearly lost.
+  const scarred = markBody(state, rng, battle);
+  if (scarred) lines.push(scarred);
+
+  // Whoever fought beside you is not exempt from what a fight can cost -
+  // they came home from something serious carrying the same real risk you
+  // did, and a lost limb here is the reason mechanization exists at all.
+  for (const ally of (battle.allies || [])) {
+    if (ally.hp > ally.hpMax * 0.25) continue;
+    const npcId = (ally.ref && ally.ref.npcId) || null;
+    const allyNpc = npcId ? state.npcs[npcId] : null;
+    if (!allyNpc || hasPerk(allyNpc, 'regeneration')) continue;
+    const chance = clamp(0.14 + (battle.stakes === 'lethal' ? 0.16 : 0), 0.05, 0.4);
+    if (rng.chance(chance)) {
+      const type = foeAttackType(state, battle);
+      const table = (MAIM_BY_TYPE[type] || MAIM_BY_TYPE.blunt).moderate.slice();
+      const line = maim(allyNpc, rng, rng.pick(table), battle.them.name);
+      if (line) lines.push(`${allyNpc.name}: ${line}`);
+    }
+  }
+
+  // Collateral. Fighting over a city is a choice, and it is remembered.
+  if (battle.civilians && battle.destruction > 25) {
+    const severity = battle.destruction > 70 ? 'most of a district' : 'several streets';
+    const karma = -Math.round(battle.destruction / 6);
+    c.karma = clamp(c.karma + karma, -100, 100);
+    c.fame = clamp(c.fame + Math.round(battle.destruction / 12), 0, 100);
+    c.flags.collateral = true;
+    lines.push(`You fought it out over ${severity} of a populated place. People were in those buildings.`);
+    if (battle.destruction > 55) c.flags.hunted_by_defenders = true;
+  } else if (battle.relocated) {
+    c.karma = clamp(c.karma + 4, -100, 100);
+    lines.push('Nobody had to die for this one. That was your doing.');
+  }
+
+  if (outcome === 'won') {
+    // How far the story travels depends on what you beat, not on you.
+    const theirs = (battle.squad || [battle.them]).reduce((n, f) => n + (f.basePower || 0), 0) || 1;
+    const scale = theirs > 1e12 ? DEED_SCALE.god_beaten
+      : theirs > 1e8 ? DEED_SCALE.city
+        : theirs > 1e5 ? DEED_SCALE.tournament : DEED_SCALE.street;
+    const word = spreadWord(state, { scale });
+    if (word.gained > 100000) {
+      lines.push(word.pending > 0
+        ? `Word of this starts moving - it will reach about ${numberish(word.gained)} people who were not there, but not all at once.`
+        : `Word of this reaches about ${numberish(word.gained)} people who were not there.`);
+    }
+    c.fame = clamp(c.fame + (opts.fameGain ?? 4), 0, 100);
+  } else if (outcome === 'lost' && battle.stakes === 'lethal' && rng.chance(0.55)) {
+    return { lines, text: lines.join(' '), death: `Killed by ${battle.them.name}` };
+  }
+
+  // Somebody you finished is somebody who is now somewhere - but only once it
+  // is actually decided. A lethal win is a decision point (spare or finish
+  // them), so unless the caller says the decision was already made (or there
+  // is no decision to make - an auto-resolved background fight), this does
+  // not touch anyone's life yet. finishLethalWin() below is what the "Finish
+  // them" choice calls once the player has actually chosen it.
+  if (outcome === 'won' && battle.stakes === 'lethal' && !opts.deferKillDecision) {
+    lines.push(...finishLethalWin(state, rng, battle));
+  }
+
+  // Whoever you fought, and why, decides what the fight changed.
+  const ctxInfo = battle.context || {};
+
+  // A faction that keeps losing to you does not keep sending the same
+  // lone officer - it sends more people, and better ones, the next time.
+  // Actually getting you (a loss, or being taken in) is what resets that:
+  // as far as they are concerned, the problem is handled.
+  if (ctxInfo.factionId) {
+    c.flags.factionGrudge = c.flags.factionGrudge || {};
+    if (outcome === 'won') {
+      c.flags.factionGrudge[ctxInfo.factionId] = (c.flags.factionGrudge[ctxInfo.factionId] || 0) + 1;
+    } else if (outcome === 'lost') {
+      c.flags.factionGrudge[ctxInfo.factionId] = 0;
+    }
+  }
+
+  // A spar is controlled, but it is still real training, for whoever is in
+  // it - not just the relationship bump it used to be. Rounds actually
+  // fought decide how much: a mismatch that ends in one exchange teaches
+  // less than a real back-and-forth does, win or lose either way.
+  if (battle.stakes === 'spar') {
+    const effort = clamp(0.08 + (battle.round - 1) * 0.045, 0.08, 0.4);
+    const myRate = trainingRate(c, { intensity: effort });
+    const myGain = Math.max(1, Math.round(c.power * myRate));
+    c.power += myGain;
+    c.peakPower = Math.max(c.peakPower || 0, c.power);
+    lines.push(`The spar itself teaches you something. Power level up ${numberish(myGain)}.`);
+  }
+
+  const npc = ctxInfo.npcId ? state.npcs[ctxInfo.npcId] : (ctxInfo.canonId ? state.npcs['canon_' + ctxInfo.canonId] : null);
+  if (npc) {
+    npc.respect = clamp((npc.respect || 0) + (outcome === 'won' ? 16 : 22), 0, 100);
+    npc.knowledge = Math.min(4, (npc.knowledge || 0) + 1);
+    if (ctxInfo.reason === 'rival') {
+      npc.tension = clamp(npc.tension + (outcome === 'won' ? -8 : 12), 0, 100);
+      npc.power = Math.round(npc.power * (outcome === 'won' ? 1.15 : 1.3));
+    }
+    if (ctxInfo.reason === 'spar') {
+      npc.closeness = clamp(npc.closeness + 8, 0, 100);
+      npc.trust = clamp((npc.trust ?? 30) + 5, 0, 100);
+      // A spar is controlled, but it is still real training for whoever is
+      // capable of growing from it - both of you push each other, not just
+      // whoever wins. Every race trains at its own rate (trainingRate already
+      // knows that); a spar just trains lighter than a dedicated session.
+      const npcLike = { raceId: npc.raceId, stats: npc.stats, power: npc.power,
+        age: npc.age, extraPerks: npc.extraPerks, vitals: { health: 100, happiness: 65 } };
+      const npcRate = trainingRate(npcLike, { intensity: 0.4 });
+      npc.power += Math.max(1, Math.round(npc.power * npcRate));
+    }
+    if (outcome === 'won' && ctxInfo.reason !== 'spar') {
+      // Beating somebody is the start of a relationship in this setting, not
+      // the end of one. Half of them come back wanting a rematch as friends.
+      if (npc.isCanon && rng.chance(0.5)) {
+        npc.closeness = clamp(npc.closeness + 18, 0, 100);
+        lines.push(`${npc.name} gets up, grins, and asks when you can do that again.`);
+      } else if (rng.chance(0.3)) {
+        npc.relation = 'rival';
+        lines.push(`${npc.name} will be back, and better.`);
+      }
+    }
+  }
+
+  if (ctxInfo.timelineId && outcome === 'won') {
+    state.world.divergences.push({ year: state.character.birthYear + c.age, event: ctxInfo.timelineId, how: 'you settled it' });
+    if (['namek_war', 'golden_frieza'].includes(ctxInfo.timelineId)) state.world.flags.frieza_dead = true;
+    if (ctxInfo.timelineId === 'androids') state.world.flags.gero_dead = true;
+    if (ctxInfo.timelineId === 'cell_games') state.world.flags.cell_dead = true;
+    if (ctxInfo.timelineId === 'buu_freed') state.world.flags.babidi_dead = true;
+    c.karma = clamp(c.karma + 15, -100, 100);
+    c.fame = clamp(c.fame + 25, 0, 100);
+    lines.push('History will record this differently because you were standing there.');
+  }
+
+  return { lines, text: lines.join(' ') };
+}
+
+const SCAR_MARKS = ['scar_cheek', 'scar_brow', 'scar_chest', 'scar_arm', 'scar_eye', 'burn_arm', 'burn_face'];
+// Matches the names portrait.js's MARK_PRESETS gives these same mark ids -
+// "A scar from Vegeta" named nothing about where it actually was, on a body
+// that otherwise draws every one of these in a specific, different spot.
+const SCAR_NAMES = {
+  scar_cheek: 'a scar across the cheek',
+  scar_brow: 'a split eyebrow',
+  scar_chest: 'a scar across the chest',
+  scar_arm: 'an old cut down the arm',
+  scar_eye: 'a scar through one eye',
+  burn_arm: 'burn scars up the forearms',
+  burn_face: 'a burn along the jaw',
+};
+
+// What actually marks you is shaped by what hit you. A blade cuts and takes
+// pieces; a blunt weapon (or bare hands, which are blunt force by nature)
+// breaks what is under the skin without taking anything off; a blast burns
+// and cauterises rather than cutting. Both the permanent injury table and
+// the lighter scar pool below read off the same three buckets.
+const SCARS_BY_TYPE = {
+  blade: ['scar_cheek', 'scar_brow', 'scar_chest', 'scar_arm', 'scar_eye'],
+  ranged: ['burn_arm', 'burn_face'],
+  blunt: ['scar_brow', 'scar_chest'],
+};
+const MAIM_BY_TYPE = {
+  blade: {
+    severe: ['lost_arm', 'lost_hand', 'lost_eye', 'missing_fingers'],
+    moderate: ['lost_eye', 'missing_fingers', 'lost_hand'],
+  },
+  blunt: {
+    severe: ['broken_back', 'lost_leg', 'shattered_knee'],
+    moderate: ['shattered_knee', 'broken_back'],
+  },
+  ranged: {
+    severe: ['ruined_lungs', 'lost_eye', 'burned_badly'],
+    moderate: ['ruined_lungs', 'burned_badly'],
+  },
+};
+
+/** The same read as foeAttackType, but for what the player is actually
+ * hitting with. A bladed weapon cuts, a blunt one (or nothing at all,
+ * which is a fist) breaks, a technique burns. */
+function playerAttackType(character) {
+  const weapon = equippedWeapon(character);
+  if (weapon && weapon.item.weaponType) {
+    const map = { blade: 'blade', ranged: 'ranged', blunt: 'blunt', whip: 'blade', thrown: 'blade', gauntlet: 'blunt' };
+    return map[weapon.item.weaponType] || 'blunt';
+  }
+  return 'blunt';
+}
+
+/** What kind of hurt the fight in front of you actually deals - read off
+ * whoever you are up against, since maim()/markBody() only ever mark the
+ * player, and it is always the opponent who put them in this state. */
+function foeAttackType(state, battle) {
+  const npcId = (battle.them.ref && battle.them.ref.npcId) || (battle.foeRef && battle.foeRef.npcId) || null;
+  const npc = npcId ? state.npcs[npcId] : null;
+  const weapon = npc ? equippedWeapon(npc) : null;
+  if (weapon && weapon.item.weaponType) {
+    // whip/gauntlet/thrown are their own thing in the shop, but for what a
+    // hit actually does to a body they read as blade (whip/thrown cut and
+    // pierce), blunt (gauntlet) or blade respectively.
+    const map = { blade: 'blade', ranged: 'ranged', blunt: 'blunt', whip: 'blade', thrown: 'blade', gauntlet: 'blunt' };
+    return map[weapon.item.weaponType] || 'blunt';
+  }
+  // No weapon: somebody who actually knows techniques is throwing ki, which
+  // burns rather than cuts or breaks. Somebody with none is fighting with
+  // their hands, which is blunt force whichever way you look at it.
+  return (battle.them.techniques || []).length > 0 ? 'ranged' : 'blunt';
+}
+
+function markBody(state, rng, battle) {
+  const c = state.character;
+  const nearDeath = battle.me.hp <= 12 && battle.outcome !== 'fled';
+  // A fight is not only as hard as its last exchange. One dragged out over
+  // many rounds, or kept alive on senzu beans and healing, wears on a body
+  // the same way genuine near-death does - "the more fatigued and hurt you
+  // are, and the longer a fight is prolonged... a chance of severely
+  // injuring yourself and possibly leaving a permanent scar."
+  const rounds = battle.round || 1;
+  const fatigue = 1 - clamp((battle.me.stamina || 0) / Math.max(1, battle.me.staminaMax || 1), 0, 1);
+  const hurtFrac = 1 - clamp((battle.me.hp || 0) / Math.max(1, battle.me.hpMax || 1), 0, 1);
+  // A controlled spar going long is not the same thing as a real fight
+  // going long - real accidents still happen, just far less of the time.
+  const sparDamping = battle.stakes === 'spar' ? 0.35 : 1;
+  const grind = (clamp((rounds - 5) / 25, 0, 1) + (battle.timesHealed || 0) * 0.15) * sparDamping;
+  const worthMarking = nearDeath || grind > 0.15 || (fatigue > 0.7 && hurtFrac > 0.4);
+  if (!worthMarking) return null;
+  c.scars = c.scars || [];
+  const have = new Set(c.scars.map((s) => s.mark));
+  const from = battle.them.name;
+  const year = c.birthYear + c.age;
+
+  // Losing badly to something lethal can cost more than skin, and so - less
+  // often, because you were the one left standing - can winning one at the
+  // very edge of your own hp. This is the part of the series everybody
+  // remembers: Gohan's arm, Vegeta's tail, Yamcha's leg. The result of the
+  // fight is not what decides whether you walk away whole; how outclassed
+  // and outskilled you were is.
+  if (battle.stakes === 'lethal' && (battle.outcome === 'lost' || battle.outcome === 'won')) {
+    // Raw power at the start of the fight, not what is left of either side
+    // now - a beaten opponent's current hp says nothing about how dangerous
+    // they actually were. Technique count stands in for skill: nobody gets
+    // this close to killing you by luck alone. Your own durability is the
+    // one thing actively working against all of it.
+    const gap = battle.them.basePower / Math.max(1, battle.me.basePower);
+    const theirSkill = (battle.them.techniques || []).length;
+    const durability = clamp((c.stats.durability || 50) / 100, 0.25, 1.4);
+    const base = battle.outcome === 'lost' ? 0.2 : 0.07;
+    const chance = clamp((base + theirSkill * 0.02 + Math.max(0, Math.log10(Math.max(1, gap))) * 0.05) / durability, 0.02, 0.6);
+    if (rng.chance(chance)) {
+      const type = foeAttackType(state, battle);
+      const table = (gap > 6 ? MAIM_BY_TYPE[type].severe : MAIM_BY_TYPE[type].moderate).slice();
+      if (c.tail && rng.chance(0.3)) table.unshift('lost_tail');
+      const line = maim(c, rng, rng.pick(table), from);
+      if (line) return line;
+    }
+  }
+
+  // Past that, a body that puts itself back together keeps no record.
+  if (hasPerk(c, 'regeneration') || c.raceId === 'android') return null;
+  // How close a call it actually was, not a flat coin flip: a fight that
+  // barely qualified as worth marking carries little risk, one that was
+  // both long and brutal carries a lot.
+  const scarChance = clamp(0.16 + grind * 0.4 + fatigue * 0.22 + hurtFrac * 0.18 + (nearDeath ? 0.22 : 0), 0.05, 0.78);
+  if (rng.chance(scarChance)) {
+    const type = foeAttackType(state, battle);
+    let open = (SCARS_BY_TYPE[type] || SCAR_MARKS).filter((m) => !have.has(m));
+    if (!open.length) open = SCAR_MARKS.filter((m) => !have.has(m));
+    if (!open.length) return null;
+    const mark = rng.pick(open);
+    c.scars.push({ year, mark, from, text: `Carries ${SCAR_NAMES[mark] || 'a scar'}, from ${from}.` });
+    const lines = {
+      blade: [`The cut does not close properly. A scar, then, and a story to go with it.`,
+        `It heals badly. You will carry ${from} on your skin for the rest of your life.`],
+      ranged: [`It cauterises as it happens and scars over wrong. Ki does that.`,
+        `The burn never quite fades. You will carry ${from} on your skin for the rest of your life.`],
+      blunt: [`Something in that fight is going to show for good, even without a mark to point at.`,
+        `It heals, mostly. Not all the way, and not where you cannot feel it.`],
+    };
+    return rng.pick(lines[type] || lines.blade);
+  }
+  return null;
+}
+
+/** Headless resolution, for the soak harness and for background fights. */
+export function autoResolve(state, rng, battle) {
+  let guard = 0;
+  while (!battle.over && guard++ < 60) {
+    const me = battle.me;
+    const options = [];
+    if (me.forms.length && !me.form && me.hp < 70) options.push('form:' + me.forms[me.forms.length - 1]);
+    const kiMoves = me.techniques.filter((id) => {
+      const t = TECH_BY_ID[id];
+      return t && t.effect && t.effect.atk && (t.effect.kiCost || 0) <= me.ki;
+    });
+    if (kiMoves.length && rng.chance(0.4)) options.push('tech:' + rng.pick(kiMoves));
+    if (me.hp < 25 && rng.chance(0.4)) options.push('guard');
+    if (me.ki < 20 && rng.chance(0.5)) options.push('charge');
+    options.push('phys:' + rng.pick(PHYSICAL).id);
+    takeTurn(state, battle, rng, rng.pick(options));
+  }
+  if (!battle.over) {
+    battle.over = true;
+    battle.outcome = 'draw';
+  }
+  return battle;
+}
