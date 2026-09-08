@@ -6,6 +6,7 @@
 // or, later, an authored sprite rig.
 
 import { getItem } from '../data/items.js';
+import { ageStageFor, TRANSFORMATION_VISUAL_MAPS } from '../engine/visuals.js';
 
 const ITEM_ACCESSORIES = {
   scouter: 'scouter', potara: 'potara', z_sword: 'sword', power_pole: 'pole',
@@ -78,6 +79,9 @@ export function visualProfileFor(character = {}, opts = {}) {
   const resolved = resolveAppearance(character, opts);
   const a = resolved.appearance;
   const custom = a.visualProfile || {};
+  const savedIdentity = character.visualIdentity || null;
+  const personal = character.personalAppearance || {};
+  const behavior = character.visualBehavior || null;
   const expression = opts.expression || custom.expression || a.expression || 'neutral';
   const cybernetics = distinct([
     ...(custom.cybernetics || a.cybernetics || []),
@@ -98,7 +102,7 @@ export function visualProfileFor(character = {}, opts = {}) {
       eyeColour: custom.eyeColour || a.eyeColour,
       hairStyle: custom.hairStyle || a.hairStyle,
       hairColour: custom.hairColour || a.hairColour,
-      facialHair: custom.facialHair || a.facialHair || 'none',
+      facialHair: personal.facialHair || custom.facialHair || a.facialHair || 'none',
       speciesFeatures: distinct(custom.speciesFeatures || a.speciesFeatures || []),
     },
     styling: {
@@ -118,6 +122,10 @@ export function visualProfileFor(character = {}, opts = {}) {
       expression,
     },
     transformation: resolved.form && resolved.form.id || null,
+    biologicalIdentity: savedIdentity && savedIdentity.biological || null,
+    personalAppearance: personal,
+    learnedBehavior: behavior,
+    visualState: resolved.visualState,
   };
 }
 
@@ -189,6 +197,7 @@ export function resolveAppearance(character = {}, opts = {}) {
     outfit: equipment.outfit || (character.appearance && character.appearance.outfit) || 'casual',
   };
   const mode = opts.mode || 'profile';
+  const visualState = resolveVisualState(character, { marks, accessories: equipment.accessories, form, expression: opts.expression, mode });
   return {
     character,
     appearance,
@@ -199,6 +208,23 @@ export function resolveAppearance(character = {}, opts = {}) {
     expression: opts.expression,
     mode,
     rig: rigFor(character, appearance, form, mode),
+    visualState,
+  };
+}
+
+/** Translate authoritative simulation facts into presentation facts only. */
+export function resolveVisualState(character = {}, opts = {}) {
+  const injuryRecords = (character.injuries || []).map((entry) => ({ id: typeof entry === 'string' ? entry : entry.id, side: entry.side || null, prosthetic: entry.prosthetic || null }));
+  const health = character.vitals && character.vitals.health;
+  const healthMax = character.vitals && character.vitals.healthMax;
+  const fatigue = health === undefined || !healthMax ? 'normal' : health / healthMax < 0.25 ? 'critical' : health / healthMax < 0.55 ? 'hurt' : 'normal';
+  const map = opts.form && TRANSFORMATION_VISUAL_MAPS[opts.form.id] || null;
+  return {
+    ageStage: ageStageFor(character),
+    acquired: { marks: (opts.marks || []).slice(), injuries: injuryRecords, prosthetics: injuryRecords.filter((entry) => entry.prosthetic).map((entry) => entry.prosthetic) },
+    temporary: { fatigue, expression: opts.expression || 'neutral', afterlife: !!character.inAfterlife, formId: opts.form && opts.form.id || null, aura: map && map.overrides.aura || null },
+    attachments: (opts.accessories || []).slice(),
+    alternateRig: map && map.rigOverride || null,
   };
 }
 
