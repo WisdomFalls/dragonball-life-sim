@@ -52,6 +52,75 @@ const STANCE_POSES = {
   demon: 'aggressive', formless: 'neutral', custom: 'neutral',
 };
 
+// Versioned presentation data.  This is intentionally additive: old saves
+// have only `appearance`, while newly authored characters may opt into a
+// visual profile without making the simulation depend on image filenames.
+export const VISUAL_PROFILE_VERSION = 1;
+
+function distinct(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function injuryIds(character) {
+  const raw = character.injuries || character.injury || [];
+  return distinct((Array.isArray(raw) ? raw : [raw]).map((injury) => (
+    typeof injury === 'string' ? injury : injury.id || injury.type || injury.mark
+  )));
+}
+
+/**
+ * A renderer-neutral description of one character's identity.  It describes
+ * *what* must remain recognisable between a 220px sheet and a 96px sprite;
+ * the art manifest decides *how* that identity is drawn.  Fields deliberately
+ * use ids and palette names, never generated image URLs.
+ */
+export function visualProfileFor(character = {}, opts = {}) {
+  const resolved = resolveAppearance(character, opts);
+  const a = resolved.appearance;
+  const custom = a.visualProfile || {};
+  const expression = opts.expression || custom.expression || a.expression || 'neutral';
+  const cybernetics = distinct([
+    ...(custom.cybernetics || a.cybernetics || []),
+    ...(resolved.accessories.includes('cyber_eye') ? ['cyber_eye'] : []),
+  ]);
+  const profileId = custom.id || a.visualProfileId || character.visualProfileId || character.id || character.name || 'generated';
+  return {
+    version: VISUAL_PROFILE_VERSION,
+    id: String(profileId),
+    rig: resolved.rig,
+    identity: {
+      raceId: character.raceId || 'unknown',
+      bodyFamily: resolved.rig.family,
+      build: custom.build || a.buildShape || 'balanced',
+      skin: custom.skin || a.skin,
+      face: custom.face || a.face,
+      eyeShape: custom.eyeShape || a.eyeShape,
+      eyeColour: custom.eyeColour || a.eyeColour,
+      hairStyle: custom.hairStyle || a.hairStyle,
+      hairColour: custom.hairColour || a.hairColour,
+      facialHair: custom.facialHair || a.facialHair || 'none',
+      speciesFeatures: distinct(custom.speciesFeatures || a.speciesFeatures || []),
+    },
+    styling: {
+      // Worn equipment wins over a saved cosmetic preference.
+      outfit: a.outfit,
+      footwear: custom.footwear || a.footwear || 'default',
+      accessories: resolved.accessories,
+      palette: custom.palette || a.palette || 'default',
+    },
+    condition: {
+      marks: resolved.marks,
+      injuries: injuryIds(character),
+      cybernetics,
+    },
+    pose: {
+      stance: a.stance || 'formless',
+      expression,
+    },
+    transformation: resolved.form && resolved.form.id || null,
+  };
+}
+
 function addUnique(list, value) {
   if (value && !list.includes(value)) list.push(value);
 }
