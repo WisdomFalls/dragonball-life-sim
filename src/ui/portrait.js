@@ -3,6 +3,7 @@
 // and the aura appears, lose the tail and the tail is gone.
 
 import { resolveAppearance, resolvedAccessoryIds, resolvedMarkIds } from './appearance.js';
+import { portraitAssetPlan } from './portrait-assets.js';
 
 export const HAIR_STYLES = [
   { id: 'spiked', name: 'Spiked upward' },
@@ -705,6 +706,7 @@ function formVisualsFallback(form) {
  */
 export function portraitSvg(character, opts = {}) {
   const resolved = resolveAppearance(character, opts);
+  const assetPlan = portraitAssetPlan(character, opts);
   const a = resolved.appearance;
   character = { ...character, appearance: a, maturityRate: resolved.maturityRate };
   let skin = look(SKIN_TONES, a.skin, 'light').hex;
@@ -1019,7 +1021,7 @@ export function portraitSvg(character, opts = {}) {
     hasHair, hairColour: finalHair, outfit, stage,
   });
 
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Character portrait" data-rig="${resolved.rig.id}" data-rig-family="${resolved.rig.family}" data-rig-scale="${resolved.rig.scale}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Character portrait" data-rig="${resolved.rig.id}" data-rig-family="${resolved.rig.family}" data-rig-scale="${resolved.rig.scale}" data-renderer="${assetPlan.renderer}" data-asset-variant="${assetPlan.variant}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
 }
 
 const SCAR = 'rgba(60,20,20,.55)';
