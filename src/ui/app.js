@@ -2778,14 +2778,14 @@ function renderBattle() {
     // pre-transformed.
     const foeForm = BATTLE.them.form ? getTransformation(BATTLE.them.form) : null;
     foeFace.innerHTML = foeNpc
-      ? npcPortrait(foeNpc, { maturityRate: getRace(foeNpc.raceId).maturityRate ?? 1, form: foeForm })
+      ? npcPortrait(foeNpc, { maturityRate: getRace(foeNpc.raceId).maturityRate ?? 1, form: foeForm, mode: 'battle' })
       : '';
     foeFace.hidden = !foeNpc;
   }
   const meFace = $('me-face');
   if (meFace) {
     const myForm = BATTLE.me.form ? getTransformation(BATTLE.me.form) : null;
-    meFace.innerHTML = portraitSvg(GAME.character, { form: myForm });
+    meFace.innerHTML = portraitSvg(GAME.character, { form: myForm, mode: 'battle' });
   }
   $('foe-name').textContent = st.them.name;
   const foeLimbState = st.them.armsBroken >= 2 ? 'both arms broken'
@@ -3365,3 +3365,4 @@ async function boot() {
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
+
