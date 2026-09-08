@@ -7,9 +7,11 @@
   "scripts": {
     "build": "node build/bundle.mjs",
     "test": "node --test test/*.test.mjs",
-    "sim": "node tools/soak.mjs"
+    "sim": "node tools/soak.mjs",
+    "check:art": "node tools/check-art-assets.mjs"
   },
   "dependencies": {
     "playwright": "^1.49.1"
   }
 }
+
