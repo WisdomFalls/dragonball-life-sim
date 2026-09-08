@@ -63,6 +63,15 @@ test('emotion system: shifts emotion incrementally', () => {
   assert.equal(state.amused, 50);
 });
 
+test('emotion system: opposing emotions suppress each other', () => {
+  let state = createEmotionalState();
+  state = setEmotion(state, 'confident', 60);
+  state = setEmotion(state, 'afraid', 80);
+  // Raising afraid should pull confident down (opposing pair), not just leave it untouched
+  assert.equal(state.afraid, 80);
+  assert.equal(state.confident, 20);  // max(0, 60 - |80-0|*0.5)
+});
+
 test('emotion system: gets dominant emotions in order', () => {
   let state = createEmotionalState();
   state = setEmotion(state, 'furious', 80);
@@ -122,6 +131,25 @@ test('emotion system: handles dual-emotion expressions', () => {
   const expr = emotionToExpression(state);
   // Should recognize the affectionate+flustered combo
   assert.ok(expr.primary === 'affectionate_flustered' || expr.primary === 'affectionate');
+});
+
+test('emotion system: handles furious+determined dual-emotion expression', () => {
+  let state = createEmotionalState();
+  state = setEmotion(state, 'furious', 85);
+  state = setEmotion(state, 'determined', 70);
+  const expr = emotionToExpression(state);
+  assert.equal(expr.primary, 'furious_determined');
+  assert.equal(expr.secondary, null);
+  assert.equal(expr.intensity, 85);
+});
+
+test('emotion system: handles afraid+confident as courageous expression', () => {
+  let state = createEmotionalState();
+  state = setEmotion(state, 'confident', 50);
+  state = setEmotion(state, 'afraid', 70);
+  const expr = emotionToExpression(state);
+  assert.equal(expr.primary, 'courageous');
+  assert.equal(expr.secondary, 'afraid');
 });
 
 test('emotion system: syncs character emotions from mood', () => {
