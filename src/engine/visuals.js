@@ -153,6 +153,64 @@ export function ensureVisualContracts(character = {}, opts = {}) {
   return character;
 }
 
+/**
+ * Current saves use `visualIdentity`; semantically it is body-owned. A future
+ * Person/Body model may persist it on `bodyVisualIdentity` without changing
+ * presentation callers. We intentionally do not create a second saved copy.
+ */
+export function bodyVisualIdentityFor(body = {}, opts = {}) {
+  return body.bodyVisualIdentity || body.visualIdentity || generateVisualIdentity(body, null, opts);
+}
+
+/** Person-owned, non-biological tendencies. Styling here is a preference;
+ * `personalAppearance` remains the physically present haircut/grooming. */
+export function personVisualProfileFor(person = {}) {
+  return person.personVisualProfile || {
+    id: person.personId || person.id || null,
+    stylingPreferences: person.stylingPreferences || {},
+  };
+}
+
+/**
+ * Presentation derives movement vocabulary from simulation facts. The legacy
+ * saved `visualBehavior` is a compatible cache/seed, never gameplay truth.
+ */
+export function deriveVisualBehavior(person = {}, opts = {}) {
+  const base = person.visualBehavior || initialVisualBehavior(person);
+  const techniques = person.techniques || [];
+  const mentors = person.mentors || [];
+  const weaponAware = base.combat.weaponStyles.length || techniques.some((id) => /sword|blade|staff|weapon/i.test(id));
+  return {
+    ...base,
+    combat: { ...base.combat, origins: [...new Set([...(base.combat.origins || []), ...mentors.map((id) => `mentor:${id}`)])], weaponStyles: weaponAware ? base.combat.weaponStyles.length ? base.combat.weaponStyles : ['basic'] : [] },
+    derivedFrom: { fightingStyle: person.fightingStyle || 'martial_arts', techniqueCount: techniques.length, mentorCount: mentors.length },
+  };
+}
+
+/**
+ * Pure presentation input for a future Person -> Body binding. It never gives
+ * the occupant body-owner techniques, memories, or mastery.
+ */
+export function resolveVisualBinding({ person = {}, body = person, familiarity = 1, state = {} } = {}) {
+  const bodyIdentity = bodyVisualIdentityFor(body);
+  const safeFamiliarity = Math.max(0, Math.min(1, familiarity));
+  return {
+    personId: person.personId || person.id || null,
+    bodyId: body.bodyId || body.id || null,
+    bodyIdentity,
+    personProfile: personVisualProfileFor(person),
+    learnedBehavior: deriveVisualBehavior(person),
+    familiarity: safeFamiliarity,
+    execution: safeFamiliarity < 0.35 ? 'unfamiliar' : safeFamiliarity < 0.75 ? 'adapting' : 'familiar',
+    state,
+  };
+}
+
+// Simulation may emit these semantic fields. Presentation maps them to camera,
+// animation and effects independently; no sprite/camera instructions belong
+// in the simulation contract.
+export const SEMANTIC_BEAT_FIELDS = Object.freeze(['sceneId', 'type', 'participants', 'actor', 'target', 'action', 'outcome', 'emotion', 'dialogue', 'technique', 'movementIntent', 'emphasis', 'pace', 'scale', 'tone', 'salience', 'stakes', 'ordering', 'branching', 'context']);
+
 export function ageStageFor(character = {}, year = null) {
   const race = getRace(character.raceId); const age = character.age ?? (year && character.birthYear ? year - character.birthYear : 18);
   const scaled = age * (race && race.agingRate || 1);
