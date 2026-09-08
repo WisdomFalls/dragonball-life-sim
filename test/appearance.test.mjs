@@ -92,3 +92,11 @@ test('every declared race resolves to a deliberate visual family', async () => {
   assert.equal(bodyFamilyFor('vezrin'), 'vezrin');
   assert.equal(HAIRLESS_RACES.has('vezrin'), true);
 });
+
+
+test('portrait markup advertises the requested sprite or sheet variant', async () => {
+  const { portraitSvg } = await import('../src/ui/portrait.js');
+  const character = { raceId: 'earthling', appearance: {} };
+  assert.match(portraitSvg(character, { variant: 'sprite' }), /data-asset-variant="sprite"/);
+  assert.match(portraitSvg(character, { variant: 'sheet' }), /data-asset-variant="sheet"/);
+});
