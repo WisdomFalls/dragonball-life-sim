@@ -4,6 +4,7 @@
 
 import { hashSeed } from './rng.js';
 import { getRace } from '../data/races.js';
+import { getItem } from '../data/items.js';
 
 export const VISUAL_IDENTITY_VERSION = 1;
 export const VISUAL_BEHAVIOR_VERSION = 1;
@@ -27,6 +28,24 @@ const SPECIES_FEATURES = {
   majin: ['head_tendril_01'], bioandroid: ['chitin_01'], saiyan: ['tail_standard'], halfsaiyan: ['tail_standard'],
 };
 
+const RIG_FAMILIES = {
+  saiyan: 'humanoid', halfsaiyan: 'humanoid', earthling: 'humanoid', android: 'humanoid', half_android: 'humanoid', tuffle: 'humanoid', cerealian: 'humanoid', half_cerealian: 'humanoid', shinjin: 'humanoid', metamoran: 'humanoid', unrecorded: 'humanoid', driftkin: 'humanoid',
+  namekian: 'namekian', frostdemon: 'frost_demon', half_frostkin: 'frost_demon', frost_android: 'frost_demon', majin: 'majin', bioandroid: 'bioandroid', yardratian: 'yardratian', kryllian: 'kryllian', vezrin: 'vezrin', beast: 'beast',
+};
+
+// A compatibility adapter for existing item ids. New item definitions may put
+// the same shape under `item.visual`; both routes produce one contract.
+const LEGACY_ATTACHMENT_VISUALS = Object.freeze({
+  scouter: { slot: 'face', anchor: 'eye_left', layer: 'foreground_face', assetSet: 'accessory/scouter' },
+  z_sword: { slot: 'weapon', anchor: 'back', layer: 'behind_body', assetSet: 'weapon/z_sword' },
+  power_pole: { slot: 'weapon', anchor: 'hand_front', layer: 'foreground_hand', assetSet: 'weapon/power_pole' },
+  cyber_eye: { slot: 'prosthetic', anchor: 'eye_left', layer: 'foreground_face', assetSet: 'prosthetic/mech_eye_left' },
+});
+
+const WEAR_SLOTS = Object.freeze({
+  headband: ['head', 'forehead', 'foreground_head'], bandana: ['head', 'forehead', 'foreground_head'], glasses: ['face', 'eyes', 'foreground_face'], sunglasses: ['face', 'eyes', 'foreground_face'], earrings: ['ear', 'ear_left', 'foreground_face'], necklace: ['neck', 'chest', 'foreground_body'], cape: ['back', 'back', 'behind_body'], scarf: ['neck', 'neck', 'foreground_body'], wristbands: ['wrist', 'wrist_left', 'foreground_hand'], belt: ['waist', 'waist', 'foreground_body'], shell: ['back', 'back', 'behind_body'], halo: ['head', 'head_top', 'foreground_head'], eyepatch: ['face', 'eye_left', 'foreground_face'],
+});
+
 function pick(rng, values, fallback) { return rng && rng.pick ? rng.pick(values) : values[Math.abs(hashSeed(String(fallback))) % values.length]; }
 function idFor(character, prefix = 'visual') { return `${prefix}:${character.id || character.canonId || character.name || hashSeed(JSON.stringify(character.appearance || {}))}:v1`; }
 function baseAppearance(character) { return character.appearance || {}; }
@@ -34,13 +53,57 @@ function baseAppearance(character) { return character.appearance || {}; }
 export function visualConstraintsFor(raceId = 'unknown') {
   const hairless = HAIRLESS.has(raceId);
   return {
-    raceId, hairless, bodyFamilies: [raceId],
+    raceId, hairless, bodyFamilies: [RIG_FAMILIES[raceId] || 'generated_humanoid'],
     allowedHairFamilies: hairless ? [] : VISUAL_TOKEN_CATALOG.hair.naturalFamily,
     speciesFeatures: SPECIES_FEATURES[raceId] || [],
     // A future hybrid pack supplies authored rules here; unknown pairings use
     // only explicitly shared components rather than silently mixing rigs.
     hybridPolicy: ['halfsaiyan', 'half_android', 'half_cerealian', 'half_frostkin'].includes(raceId) ? 'authored_hybrid' : 'single_species',
   };
+}
+
+/** Enforce starter token and attachment compatibility before persistence. */
+export function isVisualTokenCompatible({ raceId = 'unknown', rigFamily, category, tokenId, attachment } = {}) {
+  const rules = visualConstraintsFor(raceId);
+  if (rigFamily && !rules.bodyFamilies.includes(rigFamily) && !['great_ape', 'giant'].includes(rigFamily)) return false;
+  if (category === 'hair') return !rules.hairless && rules.allowedHairFamilies.includes(tokenId);
+  if (category === 'speciesFeature') return rules.speciesFeatures.includes(tokenId);
+  if (category === 'attachment') {
+    const candidate = attachment || tokenId;
+    return !!candidate && (!candidate.compatibleRigs || candidate.compatibleRigs.includes('*') || candidate.compatibleRigs.includes(rigFamily || rules.bodyFamilies[0]));
+  }
+  if (category === 'body') return VISUAL_TOKEN_CATALOG.body.frame.includes(tokenId) || VISUAL_TOKEN_CATALOG.body.posture.includes(tokenId);
+  if (category === 'face') return Object.values(VISUAL_TOKEN_CATALOG.face).flat().includes(tokenId);
+  if (category === 'transformationRig') return !tokenId || tokenId.startsWith(`${rules.bodyFamilies[0]}:`) || (raceId === 'saiyan' || raceId === 'halfsaiyan') && tokenId.startsWith('great_ape:') || raceId === 'namekian' && tokenId.startsWith('namekian:giant:');
+  return false;
+}
+
+export function filterCompatibleVisualTokens(tokens = [], context = {}) {
+  return tokens.filter((token) => isVisualTokenCompatible({ ...context, tokenId: typeof token === 'string' ? token : token.id, attachment: context.category === 'attachment' ? token : undefined }));
+}
+
+/** Normalize new and legacy item data into one renderer-facing attachment. */
+export function visualAttachmentFor(itemOrId, opts = {}) {
+  const item = typeof itemOrId === 'string' ? getItem(itemOrId) : itemOrId;
+  const id = item && item.id || String(itemOrId || 'unknown');
+  const declared = item && item.visual || {};
+  const legacy = LEGACY_ATTACHMENT_VISUALS[id] || {};
+  const wear = item && item.wear || opts.wear || id;
+  const [slot = item && item.weaponType ? 'weapon' : 'accessory', anchor = slot, layer = 'foreground_body'] = WEAR_SLOTS[wear] || [];
+  return {
+    id: declared.id || id, slot: declared.slot || legacy.slot || slot, anchor: declared.anchor || legacy.anchor || anchor,
+    layer: declared.layer || legacy.layer || layer, compatibleRigs: declared.compatibleRigs || legacy.compatibleRigs || ['*'],
+    assetSet: declared.assetSet || legacy.assetSet || `${item && item.cat === 'weapon' ? 'weapon' : 'accessory'}/${wear}`,
+    stateVariants: declared.stateVariants || legacy.stateVariants || ['intact'], state: opts.state || 'intact',
+  };
+}
+
+export function visualAttachmentsFor(itemIds = [], opts = {}) {
+  const ids = [...itemIds, ...(opts.legacyIds || [])];
+  return [...new Map(ids.filter(Boolean).map((id) => {
+    const attachment = visualAttachmentFor(id, opts);
+    return [attachment.id, attachment];
+  })).values()].filter((attachment) => isVisualTokenCompatible({ raceId: opts.raceId, rigFamily: opts.rigFamily, category: 'attachment', attachment }));
 }
 
 /** Generate once and persist. It deliberately excludes scars and injuries. */
