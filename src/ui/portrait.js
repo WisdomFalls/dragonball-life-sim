@@ -1019,7 +1019,7 @@ export function portraitSvg(character, opts = {}) {
     hasHair, hairColour: finalHair, outfit, stage,
   });
 
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Character portrait" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Character portrait" data-rig="${resolved.rig.id}" data-rig-family="${resolved.rig.family}" data-rig-scale="${resolved.rig.scale}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
 }
 
 const SCAR = 'rgba(60,20,20,.55)';
