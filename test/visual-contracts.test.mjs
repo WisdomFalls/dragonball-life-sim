@@ -5,7 +5,7 @@ import { Rng } from '../src/engine/rng.js';
 import {
   ageStageFor, ensureVisualContracts, generateInheritedVisualIdentity,
   generateVisualIdentity, initialVisualBehavior, visualAttachmentFor, visualAttachmentsFor,
-  visualConstraintsFor, isVisualTokenCompatible, filterCompatibleVisualTokens,
+  visualConstraintsFor, isVisualTokenCompatible, filterCompatibleVisualTokens, resolveVisualBinding,
 } from '../src/engine/visuals.js';
 
 test('visual identity preserves biological traits separately from acquired history', () => {
@@ -105,5 +105,22 @@ test('version 3 saves migrate visual contracts without replacing legacy appearan
   assert.equal(migrated.character.appearance.hairStyle, 'cropped');
   assert.equal(migrated.character.personalAppearance.hairstyle.family, 'cropped');
   assert.equal(migrated.character.visualIdentity.biological.face.head, 'round_01');
+});
+
+test('person-body visual binding keeps body morphology and person behaviour separate', () => {
+  const gokuBody = { id: 'body_goku', raceId: 'saiyan', appearance: { face: 'square' } };
+  gokuBody.visualIdentity = generateVisualIdentity(gokuBody, new Rng(2));
+  const ginyu = { id: 'person_ginyu', fightingStyle: 'weapons', techniques: ['body_change'], appearance: {} };
+  const binding = resolveVisualBinding({ person: ginyu, body: gokuBody, familiarity: 0.1 });
+  assert.equal(binding.bodyIdentity.raceId, 'saiyan');
+  assert.equal(binding.learnedBehavior.derivedFrom.fightingStyle, 'weapons');
+  assert.equal(binding.execution, 'unfamiliar');
+  assert.equal(binding.learnedBehavior.derivedFrom.techniqueCount, 1);
+});
+
+test('semantic expression guidance is adapted without becoming simulation state', async () => {
+  const { resolveVisualExpression } = await import('../src/ui/appearance.js');
+  assert.deepEqual(resolveVisualExpression({ primary: 'affectionate_flustered', secondary: 'excited', intensity: 75 }), { primary: 'affectionate_flustered', secondary: 'excited', intensity: 75 });
+  assert.deepEqual(resolveVisualExpression('furious'), { primary: 'furious', secondary: null, intensity: 50 });
 });
 
