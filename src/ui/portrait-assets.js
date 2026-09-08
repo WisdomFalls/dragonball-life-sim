@@ -26,6 +26,7 @@ function anatomyKey(resolved) {
  * identity; a scouter therefore cannot vanish between screens.
  */
 export function portraitAssetPlan(character = {}, opts = {}) {
+  const manifest = opts.manifest || PORTRAIT_ASSET_MANIFEST;
   const resolved = resolveAppearance(character, opts);
   const a = resolved.appearance;
   const variant = opts.variant === 'sprite' ? 'sprite' : 'sheet';
@@ -51,7 +52,7 @@ export function portraitAssetPlan(character = {}, opts = {}) {
   if (resolved.form) layers.push(layer('form', `form/${resolved.form.id}`, { required: false }));
   if (resolved.form) layers.push(layer('effect', `aura/${resolved.form.id}`, { required: false }));
 
-  const missing = layers.filter((entry) => entry.required && !PORTRAIT_ASSET_MANIFEST[entry.key]);
+  const missing = layers.filter((entry) => entry.required && !manifest[entry.key]);
   return {
     version: PORTRAIT_ASSET_VERSION,
     variant,
@@ -64,12 +65,19 @@ export function portraitAssetPlan(character = {}, opts = {}) {
   };
 }
 
+/** Return the keys an art pack must provide before it may be activated. */
+export function requiredAssetKeys(character = {}, opts = {}) {
+  return portraitAssetPlan(character, opts).layers
+    .filter((entry) => entry.required)
+    .map((entry) => entry.key);
+}
+
 /** Compose already-approved same-canvas layers into an SVG portrait. */
-export function renderAssetPortrait(plan) {
+export function renderAssetPortrait(plan, manifest = PORTRAIT_ASSET_MANIFEST) {
   if (plan.renderer !== 'asset') return null;
   const canvas = plan.variant === 'sprite' ? '0 0 96 128' : '0 0 220 300';
   const layers = plan.layers
-    .map((entry) => ({ ...entry, asset: PORTRAIT_ASSET_MANIFEST[entry.key] }))
+    .map((entry) => ({ ...entry, asset: manifest[entry.key] }))
     .filter((entry) => entry.asset)
     .map((entry) => `<image data-slot="${entry.slot}" href="${entry.asset.src}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/>`)
     .join('');
