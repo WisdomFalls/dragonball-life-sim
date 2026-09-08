@@ -6,9 +6,9 @@ import { resolveAppearance } from './appearance.js';
 
 export const PORTRAIT_ASSET_VERSION = 'pixel-v1';
 
-// Only entries marked ready are allowed to replace the SVG fallback. The
-// initial list deliberately has no ready art: it prevents a missing or
-// unreviewed generated image from silently appearing in a character sheet.
+// Every approved image is embedded into the single-file game as a data URI.
+// Do not register concepts here: an entry means reviewed, transparent,
+// production-ready art. The initial empty set keeps the legacy SVG live.
 export const PORTRAIT_ASSET_MANIFEST = Object.freeze({});
 
 function layer(slot, key, options = {}) {
@@ -63,3 +63,16 @@ export function portraitAssetPlan(character = {}, opts = {}) {
     missing: missing.map((entry) => entry.key),
   };
 }
+
+/** Compose already-approved same-canvas layers into an SVG portrait. */
+export function renderAssetPortrait(plan) {
+  if (plan.renderer !== 'asset') return null;
+  const canvas = plan.variant === 'sprite' ? '0 0 96 128' : '0 0 220 300';
+  const layers = plan.layers
+    .map((entry) => ({ ...entry, asset: PORTRAIT_ASSET_MANIFEST[entry.key] }))
+    .filter((entry) => entry.asset)
+    .map((entry) => `<image data-slot="${entry.slot}" href="${entry.asset.src}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/>`)
+    .join('');
+  return `<svg viewBox="${canvas}" width="100%" height="100%" role="img" aria-label="Character portrait" data-rig="${plan.rig.id}" data-renderer="asset" data-asset-variant="${plan.variant}" xmlns="http://www.w3.org/2000/svg">${layers}</svg>`;
+}
+
