@@ -70,3 +70,16 @@ test('asset renderer only composes complete reviewed layer sets', async () => {
   assert.match(svg, /viewBox="0 0 96 128"/);
   assert.match(svg, /data-renderer="asset"/);
 });
+
+
+test('an art pack must cover every required layer before it activates', async () => {
+  const { portraitAssetPlan, requiredAssetKeys, renderAssetPortrait } = await import('../src/ui/portrait-assets.js');
+  const character = { raceId: 'earthling', appearance: { face: 'square', eyeShape: 'sharp', eyeColour: 'brown', hairStyle: 'cropped', hairColour: 'black', outfit: 'casual' } };
+  const required = requiredAssetKeys(character);
+  const incomplete = portraitAssetPlan(character, { manifest: {} });
+  assert.equal(incomplete.renderer, 'parametric-fallback');
+  const manifest = Object.fromEntries(required.map((key) => [key, { src: 'data:image/png;base64,approved' }]));
+  const complete = portraitAssetPlan(character, { manifest });
+  assert.equal(complete.renderer, 'asset');
+  assert.match(renderAssetPortrait(complete, manifest), /data-slot="body"/);
+});
