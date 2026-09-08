@@ -50,9 +50,12 @@ export function portraitAssetPlan(character = {}, opts = {}) {
   );
 
   for (const mark of resolved.marks) layers.push(layer('mark', `mark/${mark}`, { required: false }));
-  for (const injury of profile.condition.injuries) layers.push(layer('injury', `injury/${injury}`, { required: false }));
+  for (const injury of profile.visualState.acquired.injuries) {
+    layers.push(layer('injury', `injury/${injury.assetKey}`, { required: false }));
+    if (injury.prostheticKey) layers.push(layer('prosthetic', `prosthetic/${injury.prostheticKey}`, { required: false }));
+  }
   for (const part of profile.condition.cybernetics) layers.push(layer('cybernetic', `cybernetic/${part}`, { required: false }));
-  for (const accessory of resolved.accessories) layers.push(layer('accessory', `accessory/${accessory}`, { required: false }));
+  for (const attachment of profile.visualState.attachments) layers.push(layer('attachment', attachment.assetSet, { required: false }));
   if (profile.pose.expression !== 'neutral') layers.push(layer('expression', `expression/${profile.pose.expression}`, { required: false }));
   if (resolved.form) layers.push(layer('form', `form/${resolved.form.id}`, { required: false }));
   if (resolved.form) layers.push(layer('effect', `aura/${resolved.form.id}`, { required: false }));
