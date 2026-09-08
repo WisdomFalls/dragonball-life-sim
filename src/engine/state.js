@@ -12,8 +12,9 @@ import { inheritTraits, originTraits, traitEffect } from '../data/traits.js';
 import { emptyPurse, currencyFor, priceIn, credit } from '../data/currency.js';
 import { makeFamily, resetNpcCounter } from './npc.js';
 import { STAT_KEYS, kiMaxFor, healthMaxFor, staminaMaxFor, lifeExpectancy, combatPower, powerTier } from './stats.js';
+import { ensureVisualContracts } from './visuals.js';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export const APPEARANCE = {
   hair: ['spiked black', 'long black', 'cropped', 'shaved bald', 'wild and untamed', 'neat side-part',
@@ -192,6 +193,7 @@ export function createGame(creation, seedInput) {
   character.vitals.staminaMax = staminaMaxFor(character);
   character.vitals.stamina = character.vitals.staminaMax;
   character.lifeExpectancy = lifeExpectancy(character, rng);
+  ensureVisualContracts(character, { source: 'player' });
 
   // A body at birth is not a body at eighteen. Without this, height and
   // weight show full adult figures for the entire first year, since
@@ -432,3 +434,4 @@ export function worldFlag(state, name) {
 export function setWorldFlag(state, name, value = true) {
   state.world.flags[name] = value;
 }
+
