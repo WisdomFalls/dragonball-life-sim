@@ -2,7 +2,7 @@
 // layers. This module contains no image decoding or simulation writes: it
 // describes exactly which approved art files a renderer may request.
 
-import { HAIRLESS_RACES, resolveAppearance } from './appearance.js';
+import { HAIRLESS_RACES, resolveAppearance, visualProfileFor } from './appearance.js';
 
 export const PORTRAIT_ASSET_VERSION = 'pixel-v1';
 
@@ -28,27 +28,32 @@ function anatomyKey(resolved) {
 export function portraitAssetPlan(character = {}, opts = {}) {
   const manifest = opts.manifest || PORTRAIT_ASSET_MANIFEST;
   const resolved = resolveAppearance(character, opts);
-  const a = resolved.appearance;
+  const profile = visualProfileFor(character, opts);
   const variant = opts.variant === 'sprite' ? 'sprite' : 'sheet';
   const layers = [
     layer('body', anatomyKey(resolved)),
-    layer('face', `face/${resolved.rig.family}/${a.face}/${a.eyeShape}`, { tint: a.skin }),
-    layer('eyes', `eyes/${a.eyeShape}/${a.eyeColour}`),
+    layer('face', `face/${resolved.rig.family}/${profile.identity.face}/${profile.identity.eyeShape}`, { tint: profile.identity.skin }),
+    layer('eyes', `eyes/${profile.identity.eyeShape}/${profile.identity.eyeColour}`),
   ];
 
   if (!HAIRLESS_RACES.has(character.raceId)) {
-    layers.push(layer('hair', `hair/${a.hairStyle}/${a.hairColour}`, { required: false }));
+    layers.push(layer('hair', `hair/${profile.identity.hairStyle}/${profile.identity.hairColour}`, { required: false }));
   }
+  if (profile.identity.facialHair !== 'none') layers.push(layer('facial-hair', `facial-hair/${profile.identity.facialHair}`, { required: false }));
+  for (const feature of profile.identity.speciesFeatures) layers.push(layer('species-feature', `species/${character.raceId}/${feature}`, { required: false }));
   if (character.tail) layers.push(layer('anatomy', `tail/${resolved.rig.family}`, { required: false }));
 
   layers.push(
-    layer('outfit-body', `outfit/${a.outfit}/body`),
-    layer('outfit-legs', `outfit/${a.outfit}/legs`),
-    layer('outfit-feet', `outfit/${a.outfit}/feet`),
+    layer('outfit-body', `outfit/${profile.styling.outfit}/body`),
+    layer('outfit-legs', `outfit/${profile.styling.outfit}/legs`),
+    layer('outfit-feet', `outfit/${profile.styling.outfit}/feet`),
   );
 
   for (const mark of resolved.marks) layers.push(layer('mark', `mark/${mark}`, { required: false }));
+  for (const injury of profile.condition.injuries) layers.push(layer('injury', `injury/${injury}`, { required: false }));
+  for (const part of profile.condition.cybernetics) layers.push(layer('cybernetic', `cybernetic/${part}`, { required: false }));
   for (const accessory of resolved.accessories) layers.push(layer('accessory', `accessory/${accessory}`, { required: false }));
+  if (profile.pose.expression !== 'neutral') layers.push(layer('expression', `expression/${profile.pose.expression}`, { required: false }));
   if (resolved.form) layers.push(layer('form', `form/${resolved.form.id}`, { required: false }));
   if (resolved.form) layers.push(layer('effect', `aura/${resolved.form.id}`, { required: false }));
 
