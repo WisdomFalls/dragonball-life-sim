@@ -5100,6 +5100,34 @@ const BODY_OUTFITS = {
   gi: 'gi_orange', armour: 'armour_saiyan', casual: 'casual',
 };
 
+// These are art-rig names rather than gameplay race labels. A pixel renderer
+// needs to select a real silhouette before it selects hair or clothing: an
+// ape, a giant Namekian and a Frost Demon cannot be made believable by scaling
+// the same humanoid sprite.
+const BODY_FAMILIES = {
+  saiyan: 'humanoid', halfsaiyan: 'humanoid', earthling: 'humanoid',
+  android: 'humanoid', half_android: 'humanoid', tuffle: 'humanoid',
+  cerealian: 'humanoid', half_cerealian: 'humanoid', shinjin: 'humanoid',
+  namekian: 'namekian', frostdemon: 'frost_demon', half_frostkin: 'frost_demon',
+  frost_android: 'frost_demon', majin: 'majin', bioandroid: 'bioandroid',
+  yardratian: 'yardratian', kryllian: 'kryllian',
+};
+
+const FORM_RIGS = {
+  golden_oozaru: { family: 'great_ape', scale: 'colossal', pose: 'beast' },
+  giant_form: { family: 'namekian', scale: 'giant', pose: 'guard' },
+  spirit_giant: { family: 'yardratian', scale: 'giant', pose: 'guard' },
+  orange_piccolo: { family: 'namekian', scale: 'large', pose: 'ready' },
+  ssj_grade3: { scale: 'large', pose: 'ready' },
+  legendary_ss: { scale: 'large', pose: 'ready' },
+  majin_super: { scale: 'large', pose: 'ready' },
+};
+
+const STANCE_POSES = {
+  turtle: 'guard', crane: 'ready', saiyan: 'ready', namek: 'guard',
+  demon: 'aggressive', formless: 'neutral', custom: 'neutral',
+};
+
 function addUnique(list, value) {
   if (value && !list.includes(value)) list.push(value);
 }
@@ -5137,6 +5165,19 @@ function equip(character, marks) {
   return { accessories, outfit };
 }
 
+function rigFor(character, appearance, form, mode) {
+  const base = BODY_FAMILIES[character.raceId] || 'generated_humanoid';
+  const formRig = form && FORM_RIGS[form.id] || {};
+  return {
+    family: formRig.family || base,
+    scale: formRig.scale || 'standard',
+    pose: formRig.pose || (mode === 'battle' ? STANCE_POSES[appearance.stance] || 'ready' : 'neutral'),
+    // A stable id lets authored sprite manifests target a family and form
+    // without branching on every simulation field in the renderer.
+    id: `${formRig.family || base}:${formRig.scale || 'standard'}:${formRig.pose || (mode === 'battle' ? STANCE_POSES[appearance.stance] || 'ready' : 'neutral')}`,
+  };
+}
+
 /**
  * Resolve all presentation data without changing the character record. `form`
  * is allowed to be a transformation object or its id; battle passes the live
@@ -5154,6 +5195,7 @@ function resolveAppearance(character = {}, opts = {}) {
     ...(character.appearance || {}),
     outfit: equipment.outfit || (character.appearance && character.appearance.outfit) || 'casual',
   };
+  const mode = opts.mode || 'profile';
   return {
     character,
     appearance,
@@ -5162,7 +5204,8 @@ function resolveAppearance(character = {}, opts = {}) {
     form,
     maturityRate: opts.maturityRate ?? character.maturityRate ?? 1,
     expression: opts.expression,
-    mode: opts.mode || 'profile',
+    mode,
+    rig: rigFor(character, appearance, form, mode),
   };
 }
 
@@ -6199,7 +6242,7 @@ function portraitSvg(character, opts = {}) {
     hasHair, hairColour: finalHair, outfit, stage,
   });
 
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Character portrait" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" role="img" aria-label="Character portrait" data-rig="${resolved.rig.id}" data-rig-family="${resolved.rig.family}" data-rig-scale="${resolved.rig.scale}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
 }
 
 const SCAR = 'rgba(60,20,20,.55)';
@@ -9842,93 +9885,8 @@ function createGame(creation, seedInput) {
     character,
     npcs: {},
     world: {
-      year: birthYear,
-      flags: {},
-      resolved: [],
-      divergences: [],
-      activeThreats: [],
-      tournamentWins: 0,
-      dragonBalls: 0,
-      dragonBallSet: null,
-      wishesUsed: [],
-      news: [],
-    },
-    memory: createMemory(),
-    log: [],
-    pending: null,
-    aiEnabled: true,
-    aiCalls: 0,
-    // Headless callers (tests, the soak harness) flip this on so fights resolve
-    // without a UI driving them turn by turn.
-    autoBattle: false,
-    legacy: null,
-    stats: { fights: 0, wins: 0, losses: 0, kills: 0, deaths: 0, yearsPlayed: 0, techniquesLearned: 0 },
-  };
-
-  // Family
-  const family = makeFamily(rng, character, birthYear);
-  for (const npc of family) state.npcs[npc.id] = npc;
-
-  state.rng = rng.toJSON();
-
-  addFact(state.memory, {
-    type: 'birth', year: 0, weight: 5,
-    text: `Born ${race.name.toLowerCase() === 'earthling' ? 'a Human'
-      : (/^[aeiou]/i.test(race.name) ? 'an ' : 'a ') + race.name} on ${getPlace(placeId).name} in Age ${birthYear}.`,
-    tags: ['origin'],
-  });
-  if (family.length) {
-    addFact(state.memory, {
-      type: 'family', year: 0, weight: 4,
-      text: `Raised by ${family.filter((f) => f.relation === 'parent').map((f) => f.name).join(' and ') || 'nobody in particular'}.`,
-      tags: ['origin', 'family'],
-    });
-  }
-
-  return state;
-}
-
-// ------------------------------------------------------------------ helpers
-
-function getRng(state) {
-  return Rng.fromJSON(state.rng);
-}
-
-function saveRng(state, rng) {
-  state.rng = rng.toJSON();
-}
-
-function currentYear(state) {
-  return state.character.birthYear + state.character.age;
-}
-
-function place(state) {
-  return getPlace(state.character.placeId);
-}
-
-function npcList(state, filter = () => true) {
-  return Object.values(state.npcs).filter(filter);
-}
-
-function livingNpcs(state) {
-  return npcList(state, (n) => n.alive);
-}
-
-function npcsByRelation(state, relation) {
-  return npcList(state, (n) => n.relation === relation);
-}
-
-function addNpc(state, npc) {
-  state.npcs[npc.id] = npc;
-  return npc;
-}
-
-function findNpc(state, id) {
-  return state.npcs[id];
-}
-
-... 787357 bytes omitted ...
-than you expected|Somebody higher up signs off without asking why|"Granted." That is the whole conversation}. `
+... 789576 bytes omitted ...
+her up signs off without asking why|"Granted." That is the whole conversation}. `
                   + `New station, new faces, same colours.`,
                 changes,
               };
@@ -20167,14 +20125,14 @@ function renderBattle() {
     // pre-transformed.
     const foeForm = BATTLE.them.form ? getTransformation(BATTLE.them.form) : null;
     foeFace.innerHTML = foeNpc
-      ? npcPortrait(foeNpc, { maturityRate: getRace(foeNpc.raceId).maturityRate ?? 1, form: foeForm })
+      ? npcPortrait(foeNpc, { maturityRate: getRace(foeNpc.raceId).maturityRate ?? 1, form: foeForm, mode: 'battle' })
       : '';
     foeFace.hidden = !foeNpc;
   }
   const meFace = $('me-face');
   if (meFace) {
     const myForm = BATTLE.me.form ? getTransformation(BATTLE.me.form) : null;
-    meFace.innerHTML = portraitSvg(GAME.character, { form: myForm });
+    meFace.innerHTML = portraitSvg(GAME.character, { form: myForm, mode: 'battle' });
   }
   $('foe-name').textContent = st.them.name;
   const foeLimbState = st.them.armsBroken >= 2 ? 'both arms broken'
