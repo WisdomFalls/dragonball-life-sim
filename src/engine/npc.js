@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 13135)
-Total output lines: 1099
-
 // People. Everyone who is not the player is an NPC record: generated strangers,
 // family, and canon characters wrapped in the same shape so every system can
 // treat them identically.
@@ -88,7 +85,7 @@ export function makeAppearance(rng, raceId, sex) {
     shinjin: [150, 46], tuffle: [140, 40], yardratian: [146, 38], cerealian: [172, 66],
     kryllian: [174, 70],
   }[raceId] || [168, 64];
-  const npc = {
+  return {
     skin: sp.skin,
     face: rng.chance(0.5) ? sp.face : rng.pick(['square', 'round', 'angular', 'long']),
     eyeShape: rng.pick(['sharp', 'round', 'narrow', 'heavy', 'wide']),
@@ -106,7 +103,6 @@ export function makeAppearance(rng, raceId, sex) {
     // Some people change how they look; most do not.
     vain: rng.chance(0.22),
   };
-  return npc;
 }
 
 export function makeNpc(rng, opts = {}) {
@@ -532,7 +528,91 @@ export function describeLineage(lineage) {
   }).join(', ');
 }
 
-/** A chi…1135 tokens truncated…pc.name} is wearing something new.`;
+/** A child of the player and a partner, inheriting race and a slice of stats. */
+export function makeChild(rng, character, partner, year) {
+  let raceId = character.raceId;
+  const p = partner ? partner.raceId : character.raceId;
+  const mix = [character.raceId, p].sort().join('+');
+  if (mix === 'earthling+saiyan' || mix === 'earthling+halfsaiyan' || mix === 'halfsaiyan+saiyan') raceId = 'halfsaiyan';
+  else if (character.raceId === 'halfsaiyan' && p === 'halfsaiyan') raceId = 'halfsaiyan';
+  else if (character.raceId === 'half_cerealian' && p === 'half_cerealian') raceId = 'half_cerealian';
+  else if (isEarthlingLike(character.raceId) && p === 'cerealian') raceId = 'half_cerealian';
+  else if (isEarthlingLike(p) && character.raceId === 'cerealian') raceId = 'half_cerealian';
+  else if (isEarthlingLike(character.raceId) && ANDROID_KIN.includes(p)) raceId = 'half_android';
+  else if (isEarthlingLike(p) && ANDROID_KIN.includes(character.raceId)) raceId = 'half_android';
+  else if (isEarthlingLike(character.raceId) && FROST_KIN.includes(p)) raceId = 'half_frostkin';
+  else if (isEarthlingLike(p) && FROST_KIN.includes(character.raceId)) raceId = 'half_frostkin';
+  else if (FROST_KIN.includes(character.raceId) && ANDROID_KIN.includes(p)) raceId = 'frost_android';
+  else if (FROST_KIN.includes(p) && ANDROID_KIN.includes(character.raceId)) raceId = 'frost_android';
+  else if (p && rng.chance(0.5)) raceId = p;
+
+  // Blood keeps thinning generation over generation even where the bucket
+  // above cannot express it: a halfsaiyan grandchild of a halfsaiyan and an
+  // earthling is a quarter-Saiyan, not the same half-and-half mix as their
+  // parent, and enough further dilution finally reads as plain earthling.
+  const lineage = mixLineage(character, partner);
+  const roots = HYBRID_ROOTS[raceId];
+  if (roots) {
+    const kept = roots.reduce((sum, r) => sum + (lineage[r] || 0), 0);
+    if (kept < DILUTION_FLOOR) raceId = 'earthling';
+  }
+
+  const child = makeNpc(rng, {
+    raceId, relation: 'child', year, age: 0,
+    closeness: 70, respect: 40, tension: 0, placeId: character.placeId, metHow: 'family',
+  });
+  child.lineage = lineage;
+  // Children inherit potential, which is why the second generation outclasses the first.
+  const parentPower = Math.max(1, character.power);
+  child.inheritedPower = Math.max(1, Math.round(Math.pow(parentPower, 0.42) * rng.float(0.8, 2.4)));
+  child.power = Math.max(1, Math.round(child.inheritedPower * 0.02));
+  for (const k of Object.keys(child.stats)) {
+    const parentStat = character.stats[k] ?? 50;
+    const otherStat = partner && partner.stats && partner.stats[k] !== undefined ? partner.stats[k] : 50;
+    child.stats[k] = clamp(Math.round(rng.gauss((parentStat + otherStat) / 2, 10, 5, 95)), 1, 99);
+  }
+  child.parentIds = [character.id || 'player', partner ? partner.id : null].filter(Boolean);
+  return child;
+}
+
+const FOCUS_PATHS = ['power', 'technique', 'family', 'money', 'peace'];
+
+/**
+ * An NPC's own year. They train, stall, break through, learn things, get rich,
+ * grow up and choose a direction - so a friend you have known for thirty years
+ * is not the person you met.
+ *
+ * Returns a line of news when something happened worth hearing about.
+ */
+const DRIFT_HAIR = ['spiked', 'wild', 'long', 'ponytail', 'bob', 'cropped', 'mohawk', 'bald', 'braid', 'topknot',
+  'flame', 'pigtails', 'afro', 'buzz', 'sidepart', 'middle_part'];
+
+/**
+ * People change how they look. Not often, and mostly the ones who care: a new
+ * haircut, something they started wearing, a scar that did not heal, and grey
+ * when the species is one that goes grey.
+ */
+export function driftAppearance(rng, npc, year) {
+  const a = npc.appearance;
+  if (!a || npc.isCanon) return null;
+  const race = getRace(npc.raceId);
+  const hairless = ['namekian', 'frostdemon', 'majin', 'bioandroid'].includes(npc.raceId);
+  let news = null;
+
+  if (!hairless && rng.chance(a.vain ? 0.14 : 0.03)) {
+    const was = a.hairStyle;
+    a.hairStyle = rng.pick(DRIFT_HAIR.filter((h) => h !== was));
+    news = `${npc.name} has done something to their hair.`;
+  }
+  if (rng.chance(a.vain ? 0.1 : 0.03)) {
+    a.outfit = rng.pick(['casual', 'coat', 'gi_orange', 'gi_blue', 'gi_black', 'armour_saiyan', 'namek_robe']);
+  }
+  if (rng.chance(0.04)) {
+    const acc = rng.pick(NPC_ACC);
+    a.accessories = a.accessories || [];
+    if (!a.accessories.includes(acc)) {
+      a.accessories.push(acc);
+      if (!news) news = `${npc.name} is wearing something new.`;
     }
   }
   // Grey, once, when the species ages at anything like a human rate.
@@ -1015,4 +1095,3 @@ export function learnAbout(npc, amount = 1) {
   npc.knowledge = Math.min(4, (npc.knowledge || 0) + amount);
   return npc.knowledge;
 }
-
