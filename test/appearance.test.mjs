@@ -40,3 +40,21 @@ test('appearance resolution selects lore-appropriate rigs for major forms', () =
   assert.equal(orange.rig.id, 'namekian:large:ready');
 });
 
+
+
+test('asset plans keep compact sprites and sheet portraits visually identical', async () => {
+  const { portraitAssetPlan } = await import('../src/ui/portrait-assets.js');
+  const character = {
+    raceId: 'saiyan', tail: true, activeForm: { id: 'ssj_grade3' },
+    appearance: { face: 'angular', eyeShape: 'sharp', eyeColour: 'green', hairStyle: 'wild', hairColour: 'black', outfit: 'gi_blue' },
+    bag: [{ id: 'scouter', worn: true }],
+  };
+  const sprite = portraitAssetPlan(character, { variant: 'sprite', mode: 'battle' });
+  const sheet = portraitAssetPlan(character, { variant: 'sheet', mode: 'battle' });
+  assert.equal(sprite.variant, 'sprite');
+  assert.equal(sheet.variant, 'sheet');
+  assert.deepEqual(sprite.layers, sheet.layers);
+  assert.equal(sprite.rig.id, 'humanoid:large:ready');
+  assert.equal(sprite.renderer, 'parametric-fallback');
+  assert.ok(sprite.layers.some((entry) => entry.key === 'accessory/scouter'));
+});
