@@ -83,3 +83,12 @@ test('an art pack must cover every required layer before it activates', async ()
   assert.equal(complete.renderer, 'asset');
   assert.match(renderAssetPortrait(complete, manifest), /data-slot="body"/);
 });
+
+
+test('every declared race resolves to a deliberate visual family', async () => {
+  const { RACES } = await import('../src/data/races.js');
+  const { bodyFamilyFor, HAIRLESS_RACES } = await import('../src/ui/appearance.js');
+  for (const race of RACES) assert.notEqual(bodyFamilyFor(race.id), 'generated_humanoid', race.id);
+  assert.equal(bodyFamilyFor('vezrin'), 'vezrin');
+  assert.equal(HAIRLESS_RACES.has('vezrin'), true);
+});
