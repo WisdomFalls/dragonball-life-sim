@@ -3,7 +3,7 @@
 // and the aura appears, lose the tail and the tail is gone.
 
 import { resolveAppearance, resolvedAccessoryIds, resolvedMarkIds } from './appearance.js';
-import { portraitAssetPlan } from './portrait-assets.js';
+import { portraitAssetPlan, renderAssetPortrait } from './portrait-assets.js';
 
 export const HAIR_STYLES = [
   { id: 'spiked', name: 'Spiked upward' },
@@ -707,6 +707,8 @@ function formVisualsFallback(form) {
 export function portraitSvg(character, opts = {}) {
   const resolved = resolveAppearance(character, opts);
   const assetPlan = portraitAssetPlan(character, opts);
+  const authoredPortrait = renderAssetPortrait(assetPlan);
+  if (authoredPortrait) return authoredPortrait;
   const a = resolved.appearance;
   character = { ...character, appearance: a, maturityRate: resolved.maturityRate };
   let skin = look(SKIN_TONES, a.skin, 'light').hex;
