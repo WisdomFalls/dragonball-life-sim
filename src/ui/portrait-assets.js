@@ -2,7 +2,7 @@
 // layers. This module contains no image decoding or simulation writes: it
 // describes exactly which approved art files a renderer may request.
 
-import { resolveAppearance } from './appearance.js';
+import { HAIRLESS_RACES, resolveAppearance } from './appearance.js';
 
 export const PORTRAIT_ASSET_VERSION = 'pixel-v1';
 
@@ -36,7 +36,7 @@ export function portraitAssetPlan(character = {}, opts = {}) {
     layer('eyes', `eyes/${a.eyeShape}/${a.eyeColour}`),
   ];
 
-  if (!['namekian', 'frostdemon', 'majin', 'bioandroid'].includes(resolved.rig.family)) {
+  if (!HAIRLESS_RACES.has(character.raceId)) {
     layers.push(layer('hair', `hair/${a.hairStyle}/${a.hairColour}`, { required: false }));
   }
   if (character.tail) layers.push(layer('anatomy', `tail/${resolved.rig.family}`, { required: false }));
