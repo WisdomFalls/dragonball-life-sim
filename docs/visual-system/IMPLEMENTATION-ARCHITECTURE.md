@@ -19,6 +19,8 @@
 
 **EXPERIMENTAL — Compatibility families and clothing layering.** Spike #3 shows shared components plus Narrow/Balanced torso/fitted-top variants can prevent full Cartesian sheets. It has not yet proven fitted sleeves under guard/punch, multiple angles, or high-density anatomical seams.
 
+**PROVEN — bounded fitted-sleeve pose layering.** Spike #3B demonstrates, with disposable native-grid components, that Guard and Punch can select explicit authored arm/sleeve pose assets and deterministic rear/front layer profiles. Narrow/Balanced fitted torso components remain structure-specific; fitted sleeves are shared across those frames and tested arm lengths, but vary by view and pose. This does not prove production-density seams, all views, or every garment family.
+
 **PROVEN — Attachment contract.** Equipment attaches to a named semantic hand/wrist anchor after pose and proportion resolution. Spike #3 tests Long Arm + Punch directly.
 
 **EXPERIMENTAL — Deterministic raster composition.** The review prototypes compose native PNGs at integer positions with `imageSmoothingEnabled=false`. Production should preserve this rule; production integration is not yet evidence-backed.
@@ -41,7 +43,7 @@
 
 ## Next evidence needed
 
-**PLANNED.** Test fitted sleeves and outer garment occlusion through guard/punch with authored discrete pose parts; evaluate one side-facing scale; then determine whether `Structure × Clothing × Pose` requires compatibility variants or a composite exception. Only after that review should mass Proportions asset production begin.
+**PLANNED.** Expand the approved hybrid grammar into controlled Proportions visual production, reviewing each garment compatibility family at production density. Spike #3B found no routine `Structure × Clothing × Pose` full-body requirement in its bounded front/right-facing sleeve test; future side directions, garments, and transformations remain evidence gaps.
 
 ## Review Visibility / Engineering Evidence Workflow
 
