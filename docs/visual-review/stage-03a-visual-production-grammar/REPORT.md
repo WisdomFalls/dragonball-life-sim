@@ -5,3 +5,7 @@ All twelve locked physiology categories are represented in the machine-readable 
 The manifest retains the adult-target/developmental-expression distinction, independent tail ownership, transformation presentation rules, palette-vs-geometry separation, and a provenance seam for future research.
 
 No decision blocks 03B.
+
+## Stage 03A.1 correction
+
+Separated BODY-owned inherited `biological_density_profile` from CURRENT_STATE-derived `current_body_mass`. Neither has an independent visual raster representation; 03B remains unblocked.

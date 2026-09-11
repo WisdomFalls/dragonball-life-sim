@@ -12,3 +12,7 @@ The manifest is the production contract for biological identity, PERSON-owned le
 6. 03G Tail / Age / Acquired Feature Catalogue
 7. 03H Procedural Saiyan Population Test
 8. 03I Canon Saiyan Compatibility Test
+
+## Stage 03A.1 mass and density correction
+
+`biological_density_profile` is BODY-owned inherited simulation data. `current_body_mass` is CURRENT_STATE-derived simulation output. Neither independently creates a silhouette, raster family, directional component, or gameplay asset. Rendering resolves the visible causes: height, frame, proportions, muscularity, body fat, sex-linked morphology, age/development, transformations and material modifications.

@@ -86,21 +86,30 @@
       "name": "Body mass and density",
       "traits": [
         {
-          "id": "body_mass_density",
-          "name": "mass/density",
+          "id": "biological_density_profile",
+          "name": "biological density profile",
           "classification": [
-            "STATE_MODIFIER",
+            "NON_VISUAL_SIMULATION"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Inherited tissue/body-density and robustness tendency. Contributes to physical mass calculation; no independent raster silhouette, power, muscle, fat, height, or weight-change meaning. Remains with BODY during swaps."
+        },
+        {
+          "id": "current_body_mass",
+          "name": "current body mass",
+          "classification": [
             "NON_VISUAL_SIMULATION"
           ],
           "owner": "CURRENT_STATE",
           "heritability": "derived",
-          "presentation_tiers": [
-            "portrait",
-            "full_body"
-          ],
+          "presentation_tiers": [],
           "direction_sensitive": false,
           "semantic_ownership": false,
-          "notes": "Does not directly imply power or a gameplay raster family."
+          "notes": "Derived simulation output from stature, frame, proportions, muscularity, body fat, sex-linked morphology, density, age/development, material injuries/modifications and transformation morphology. Renderer depicts causes, never a mass sprite."
         }
       ]
     },

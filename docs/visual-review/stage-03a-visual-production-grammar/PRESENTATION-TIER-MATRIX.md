@@ -9,3 +9,5 @@
 | Congenital mark | visible | conditional | normally omit |
 | Tail | conditional | strong | strong independent component |
 | Acquired feature | detail | conditional | silhouette/significant overlay |
+
+| Density / current mass | omit | omit | omit; render visible causes only |

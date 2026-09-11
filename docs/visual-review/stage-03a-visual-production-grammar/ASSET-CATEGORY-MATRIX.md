@@ -9,3 +9,5 @@
 | Directional components | laterality/silhouette-critical traits | automatic mirror assumptions |
 
 Naive full-raster multiplication of frame × 12 proportion axes × muscle × fat × age × hair × tail × directions × poses is unbounded. Production uses component families, palette resolution, overlays, age families, transformation modifiers, pose families and explicit ownership/depth.
+
+Mass and density are deliberately excluded from raster multiplication: mass is a simulation output, while density is an inherited simulation profile.
