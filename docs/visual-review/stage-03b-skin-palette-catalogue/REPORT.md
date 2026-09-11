@@ -5,3 +5,6 @@ Source proof artwork: `docs/visual-review/visual-proof-character-01/gameplay-sca
 All 35 combinations have stable IDs and six-entry ramps. Geometry is unchanged. Visual combinations remain subject to owner review, especially extreme endpoints and undertone plausibility.
 
 Verdict: YELLOW — data and automated architecture are complete; human visual review remains required. Stage 03C is technically unblocked.
+
+## Stage 03B.1
+Neutral and Cool unchanged. Warm, Golden and Reddish recalibrated toward Neutral. Verdict remains YELLOW pending human review.
