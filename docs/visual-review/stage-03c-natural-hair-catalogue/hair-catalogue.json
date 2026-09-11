@@ -1,0 +1,27 @@
+{
+  "schema_version": "0.1",
+  "owner": "BODY",
+  "approval_states": [
+    "candidate",
+    "review",
+    "approved",
+    "rejected"
+  ],
+  "natural_palettes": [
+    "neutral_black",
+    "warm_black",
+    "brown_black",
+    "blue_black"
+  ],
+  "identities": [],
+  "required_fields": [
+    "id",
+    "approval_state",
+    "morphology",
+    "hairline",
+    "anchor",
+    "directions",
+    "transformation_landmarks",
+    "provenance"
+  ]
+}
