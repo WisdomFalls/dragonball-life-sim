@@ -1,12 +1,63 @@
 {
-  "schema_version":"0.1",
-  "owner":"BODY",
-  "approval_states":["candidate","review","approved","rejected"],
-  "natural_palettes":["neutral_black","warm_black","brown_black","blue_black"],
-  "identities":[
-    {"id":"01","name":"Compact Offset","approval_state":"review","support_sex":"male","provenance":{"asset":"production/review/hair-01-compact-offset-owner-cleaned.png"}},
-    {"id":"05","name":"Fragmented Upward","approval_state":"review","support_sex":"male","provenance":{"asset":"production/review/hair-05-fragmented-upward-owner-cleaned.png"}},
-    {"id":"06","name":"Wide Layered","approval_state":"review","support_sex":"female","provenance":{"asset":"production/review/hair-06-wide-layered-owner-cleaned.png"}}
+  "schema_version": "0.1",
+  "owner": "BODY",
+  "approval_states": [
+    "candidate",
+    "review",
+    "approved",
+    "rejected"
   ],
-  "required_fields":["id","approval_state","morphology","hairline","anchor","directions","transformation_landmarks","provenance"]
+  "natural_palettes": [
+    "neutral_black",
+    "warm_black",
+    "brown_black",
+    "blue_black"
+  ],
+  "identities": [
+    {
+      "id": "01",
+      "name": "Compact Offset",
+      "approval_state": "review",
+      "support_sex": "male",
+      "provenance": {
+        "asset": "production/review/hair-01-compact-offset-owner-cleaned.png"
+      }
+    },
+    {
+      "id": "05",
+      "name": "Fragmented Upward",
+      "approval_state": "review",
+      "support_sex": "male",
+      "provenance": {
+        "asset": "production/review/hair-05-fragmented-upward-owner-cleaned.png"
+      }
+    },
+    {
+      "id": "06",
+      "name": "Wide Layered",
+      "approval_state": "review",
+      "support_sex": "female",
+      "provenance": {
+        "asset": "production/review/hair-06-wide-layered-owner-cleaned.png"
+      }
+    }
+  ],
+  "required_fields": [
+    "id",
+    "approval_state",
+    "morphology",
+    "hairline",
+    "anchor",
+    "directions",
+    "transformation_landmarks",
+    "provenance"
+  ],
+  "founderSet": "u7-saiyan-natural-hair-founders-v1",
+  "founderFrontMasters": {
+    "1": "founders-v1/masters/hair-01-compact-offset-front-master.png",
+    "2": "founders-v1/masters/hair-02-side-biased-layered-front-master.png",
+    "5": "founders-v1/masters/hair-05-fragmented-upward-front-master.png",
+    "6": "founders-v1/masters/hair-06-wide-layered-front-master.png",
+    "9": "founders-v1/masters/hair-09-curved-front-front-master.png"
+  }
 }
