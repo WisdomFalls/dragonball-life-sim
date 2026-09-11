@@ -1,0 +1,4 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import {readFileSync} from 'node:fs';
+const d=JSON.parse(readFileSync(new URL('../docs/visual-review/stage-03b-skin-palette-catalogue/skin-palette-catalogue.json',import.meta.url)));
+test('Stage 03B resolves 35 non-geometry skin palettes',()=>{assert.equal(d.bands.length,7);assert.equal(d.undertones.length,5);assert.equal(d.palettes.length,35);assert.equal(new Set(d.palettes.map(x=>x.id)).size,35);for(const p of d.palettes){assert.deepEqual(Object.keys(p.ramp),d.required_ramp_entries);assert.equal(p.requires_authored_geometry,false);}});
+test('Stage 03B keeps baseline and presentation seams distinct',()=>{assert.match(d.state_seams.uv,/never mutates BODY baseline/);assert.match(d.state_seams.temporary,/CURRENT_STATE/);});

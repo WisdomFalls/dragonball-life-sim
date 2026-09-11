@@ -1,0 +1,1759 @@
+{
+  "schema_version": "0.1.0",
+  "bands": [
+    "very_light",
+    "light",
+    "light_medium",
+    "medium",
+    "medium_deep",
+    "deep",
+    "very_deep"
+  ],
+  "undertones": [
+    "cool",
+    "neutral",
+    "warm",
+    "golden",
+    "reddish"
+  ],
+  "required_ramp_entries": [
+    "outline",
+    "deepest_shadow",
+    "shadow",
+    "base",
+    "light",
+    "highlight"
+  ],
+  "palettes": [
+    {
+      "id": "skin.very_light.cool",
+      "band": "very_light",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          153,
+          126,
+          113,
+          255
+        ],
+        "deepest_shadow": [
+          181,
+          144,
+          125,
+          255
+        ],
+        "shadow": [
+          203,
+          170,
+          154,
+          255
+        ],
+        "base": [
+          226,
+          207,
+          197,
+          255
+        ],
+        "light": [
+          239,
+          230,
+          225,
+          255
+        ],
+        "highlight": [
+          249,
+          247,
+          246,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_light.neutral",
+      "band": "very_light",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          157,
+          129,
+          108,
+          255
+        ],
+        "deepest_shadow": [
+          187,
+          148,
+          119,
+          255
+        ],
+        "shadow": [
+          209,
+          174,
+          148,
+          255
+        ],
+        "base": [
+          230,
+          209,
+          193,
+          255
+        ],
+        "light": [
+          240,
+          231,
+          224,
+          255
+        ],
+        "highlight": [
+          249,
+          247,
+          246,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_light.warm",
+      "band": "very_light",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          162,
+          119,
+          103,
+          255
+        ],
+        "deepest_shadow": [
+          194,
+          134,
+          112,
+          255
+        ],
+        "shadow": [
+          215,
+          162,
+          142,
+          255
+        ],
+        "base": [
+          233,
+          202,
+          190,
+          255
+        ],
+        "light": [
+          242,
+          228,
+          222,
+          255
+        ],
+        "highlight": [
+          249,
+          246,
+          245,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_light.golden",
+      "band": "very_light",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          166,
+          141,
+          99,
+          255
+        ],
+        "deepest_shadow": [
+          200,
+          165,
+          106,
+          255
+        ],
+        "shadow": [
+          220,
+          189,
+          137,
+          255
+        ],
+        "base": [
+          236,
+          218,
+          187,
+          255
+        ],
+        "light": [
+          243,
+          235,
+          221,
+          255
+        ],
+        "highlight": [
+          250,
+          248,
+          245,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_light.reddish",
+      "band": "very_light",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          164,
+          107,
+          101,
+          255
+        ],
+        "deepest_shadow": [
+          196,
+          118,
+          110,
+          255
+        ],
+        "shadow": [
+          217,
+          147,
+          140,
+          255
+        ],
+        "base": [
+          235,
+          193,
+          189,
+          255
+        ],
+        "light": [
+          242,
+          224,
+          222,
+          255
+        ],
+        "highlight": [
+          249,
+          246,
+          245,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light.cool",
+      "band": "light",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          131,
+          106,
+          94,
+          255
+        ],
+        "deepest_shadow": [
+          166,
+          121,
+          99,
+          255
+        ],
+        "shadow": [
+          189,
+          147,
+          127,
+          255
+        ],
+        "base": [
+          213,
+          184,
+          170,
+          255
+        ],
+        "light": [
+          228,
+          213,
+          206,
+          255
+        ],
+        "highlight": [
+          240,
+          236,
+          234,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light.neutral",
+      "band": "light",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          135,
+          109,
+          90,
+          255
+        ],
+        "deepest_shadow": [
+          174,
+          126,
+          91,
+          255
+        ],
+        "shadow": [
+          197,
+          152,
+          119,
+          255
+        ],
+        "base": [
+          218,
+          187,
+          164,
+          255
+        ],
+        "light": [
+          230,
+          215,
+          203,
+          255
+        ],
+        "highlight": [
+          241,
+          237,
+          233,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light.warm",
+      "band": "light",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          139,
+          100,
+          85,
+          255
+        ],
+        "deepest_shadow": [
+          182,
+          110,
+          84,
+          255
+        ],
+        "shadow": [
+          204,
+          137,
+          112,
+          255
+        ],
+        "base": [
+          223,
+          177,
+          159,
+          255
+        ],
+        "light": [
+          233,
+          209,
+          201,
+          255
+        ],
+        "highlight": [
+          242,
+          235,
+          233,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light.golden",
+      "band": "light",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          143,
+          120,
+          82,
+          255
+        ],
+        "deepest_shadow": [
+          188,
+          147,
+          77,
+          255
+        ],
+        "shadow": [
+          211,
+          172,
+          106,
+          255
+        ],
+        "base": [
+          228,
+          201,
+          155,
+          255
+        ],
+        "light": [
+          235,
+          222,
+          198,
+          255
+        ],
+        "highlight": [
+          242,
+          239,
+          232,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light.reddish",
+      "band": "light",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          141,
+          89,
+          84,
+          255
+        ],
+        "deepest_shadow": [
+          184,
+          90,
+          81,
+          255
+        ],
+        "shadow": [
+          207,
+          118,
+          109,
+          255
+        ],
+        "base": [
+          225,
+          164,
+          157,
+          255
+        ],
+        "light": [
+          234,
+          203,
+          200,
+          255
+        ],
+        "highlight": [
+          242,
+          233,
+          232,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light_medium.cool",
+      "band": "light_medium",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          104,
+          84,
+          75,
+          255
+        ],
+        "deepest_shadow": [
+          139,
+          100,
+          80,
+          255
+        ],
+        "shadow": [
+          174,
+          122,
+          96,
+          255
+        ],
+        "base": [
+          198,
+          158,
+          139,
+          255
+        ],
+        "light": [
+          211,
+          188,
+          176,
+          255
+        ],
+        "highlight": [
+          221,
+          212,
+          207,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light_medium.neutral",
+      "band": "light_medium",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          107,
+          86,
+          71,
+          255
+        ],
+        "deepest_shadow": [
+          146,
+          104,
+          73,
+          255
+        ],
+        "shadow": [
+          183,
+          127,
+          87,
+          255
+        ],
+        "base": [
+          205,
+          162,
+          132,
+          255
+        ],
+        "light": [
+          215,
+          190,
+          172,
+          255
+        ],
+        "highlight": [
+          223,
+          213,
+          205,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light_medium.warm",
+      "band": "light_medium",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          111,
+          79,
+          68,
+          255
+        ],
+        "deepest_shadow": [
+          154,
+          89,
+          66,
+          255
+        ],
+        "shadow": [
+          192,
+          109,
+          78,
+          255
+        ],
+        "base": [
+          212,
+          148,
+          125,
+          255
+        ],
+        "light": [
+          220,
+          182,
+          168,
+          255
+        ],
+        "highlight": [
+          225,
+          209,
+          204,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light_medium.golden",
+      "band": "light_medium",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          114,
+          96,
+          65,
+          255
+        ],
+        "deepest_shadow": [
+          160,
+          123,
+          60,
+          255
+        ],
+        "shadow": [
+          200,
+          152,
+          70,
+          255
+        ],
+        "base": [
+          218,
+          181,
+          119,
+          255
+        ],
+        "light": [
+          223,
+          201,
+          164,
+          255
+        ],
+        "highlight": [
+          226,
+          217,
+          202,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.light_medium.reddish",
+      "band": "light_medium",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          112,
+          71,
+          67,
+          255
+        ],
+        "deepest_shadow": [
+          156,
+          72,
+          63,
+          255
+        ],
+        "shadow": [
+          195,
+          86,
+          75,
+          255
+        ],
+        "base": [
+          214,
+          131,
+          122,
+          255
+        ],
+        "light": [
+          221,
+          171,
+          167,
+          255
+        ],
+        "highlight": [
+          225,
+          205,
+          203,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium.cool",
+      "band": "medium",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          74,
+          60,
+          53,
+          255
+        ],
+        "deepest_shadow": [
+          107,
+          76,
+          61,
+          255
+        ],
+        "shadow": [
+          145,
+          98,
+          74,
+          255
+        ],
+        "base": [
+          181,
+          130,
+          105,
+          255
+        ],
+        "light": [
+          193,
+          160,
+          144,
+          255
+        ],
+        "highlight": [
+          200,
+          185,
+          177,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium.neutral",
+      "band": "medium",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          77,
+          62,
+          51,
+          255
+        ],
+        "deepest_shadow": [
+          112,
+          80,
+          56,
+          255
+        ],
+        "shadow": [
+          153,
+          103,
+          66,
+          255
+        ],
+        "base": [
+          190,
+          135,
+          96,
+          255
+        ],
+        "light": [
+          199,
+          163,
+          138,
+          255
+        ],
+        "highlight": [
+          203,
+          186,
+          174,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium.warm",
+      "band": "medium",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          79,
+          57,
+          48,
+          255
+        ],
+        "deepest_shadow": [
+          118,
+          69,
+          50,
+          255
+        ],
+        "shadow": [
+          162,
+          86,
+          58,
+          255
+        ],
+        "base": [
+          199,
+          117,
+          87,
+          255
+        ],
+        "light": [
+          205,
+          152,
+          132,
+          255
+        ],
+        "highlight": [
+          206,
+          181,
+          171,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium.golden",
+      "band": "medium",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          81,
+          68,
+          46,
+          255
+        ],
+        "deepest_shadow": [
+          123,
+          94,
+          46,
+          255
+        ],
+        "shadow": [
+          169,
+          125,
+          50,
+          255
+        ],
+        "base": [
+          207,
+          159,
+          79,
+          255
+        ],
+        "light": [
+          210,
+          179,
+          127,
+          255
+        ],
+        "highlight": [
+          208,
+          194,
+          169,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium.reddish",
+      "band": "medium",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          80,
+          50,
+          48,
+          255
+        ],
+        "deepest_shadow": [
+          120,
+          55,
+          48,
+          255
+        ],
+        "shadow": [
+          165,
+          64,
+          54,
+          255
+        ],
+        "base": [
+          202,
+          94,
+          83,
+          255
+        ],
+        "light": [
+          207,
+          137,
+          130,
+          255
+        ],
+        "highlight": [
+          207,
+          174,
+          170,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium_deep.cool",
+      "band": "medium_deep",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          44,
+          36,
+          32,
+          255
+        ],
+        "deepest_shadow": [
+          75,
+          53,
+          43,
+          255
+        ],
+        "shadow": [
+          111,
+          75,
+          57,
+          255
+        ],
+        "base": [
+          157,
+          104,
+          77,
+          255
+        ],
+        "light": [
+          175,
+          132,
+          111,
+          255
+        ],
+        "highlight": [
+          179,
+          158,
+          147,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium_deep.neutral",
+      "band": "medium_deep",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          46,
+          37,
+          31,
+          255
+        ],
+        "deepest_shadow": [
+          78,
+          55,
+          39,
+          255
+        ],
+        "shadow": [
+          118,
+          79,
+          51,
+          255
+        ],
+        "base": [
+          167,
+          109,
+          68,
+          255
+        ],
+        "light": [
+          182,
+          136,
+          103,
+          255
+        ],
+        "highlight": [
+          183,
+          160,
+          143,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium_deep.warm",
+      "band": "medium_deep",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          47,
+          34,
+          29,
+          255
+        ],
+        "deepest_shadow": [
+          82,
+          48,
+          35,
+          255
+        ],
+        "shadow": [
+          124,
+          66,
+          44,
+          255
+        ],
+        "base": [
+          176,
+          90,
+          59,
+          255
+        ],
+        "light": [
+          190,
+          121,
+          96,
+          255
+        ],
+        "highlight": [
+          187,
+          152,
+          139,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium_deep.golden",
+      "band": "medium_deep",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          49,
+          41,
+          28,
+          255
+        ],
+        "deepest_shadow": [
+          85,
+          66,
+          32,
+          255
+        ],
+        "shadow": [
+          130,
+          96,
+          39,
+          255
+        ],
+        "base": [
+          184,
+          135,
+          50,
+          255
+        ],
+        "light": [
+          197,
+          157,
+          89,
+          255
+        ],
+        "highlight": [
+          190,
+          170,
+          136,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.medium_deep.reddish",
+      "band": "medium_deep",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          48,
+          30,
+          29,
+          255
+        ],
+        "deepest_shadow": [
+          84,
+          38,
+          34,
+          255
+        ],
+        "shadow": [
+          127,
+          49,
+          42,
+          255
+        ],
+        "base": [
+          179,
+          66,
+          55,
+          255
+        ],
+        "light": [
+          193,
+          102,
+          93,
+          255
+        ],
+        "highlight": [
+          189,
+          142,
+          138,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.deep.cool",
+      "band": "deep",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          24,
+          19,
+          17,
+          255
+        ],
+        "deepest_shadow": [
+          42,
+          30,
+          24,
+          255
+        ],
+        "shadow": [
+          78,
+          52,
+          40,
+          255
+        ],
+        "base": [
+          123,
+          81,
+          61,
+          255
+        ],
+        "light": [
+          151,
+          106,
+          84,
+          255
+        ],
+        "highlight": [
+          158,
+          131,
+          117,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.deep.neutral",
+      "band": "deep",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          25,
+          20,
+          16,
+          255
+        ],
+        "deepest_shadow": [
+          44,
+          31,
+          22,
+          255
+        ],
+        "shadow": [
+          82,
+          55,
+          35,
+          255
+        ],
+        "base": [
+          130,
+          86,
+          53,
+          255
+        ],
+        "light": [
+          159,
+          111,
+          76,
+          255
+        ],
+        "highlight": [
+          163,
+          134,
+          112,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.deep.warm",
+      "band": "deep",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          25,
+          18,
+          16,
+          255
+        ],
+        "deepest_shadow": [
+          46,
+          27,
+          20,
+          255
+        ],
+        "shadow": [
+          87,
+          46,
+          31,
+          255
+        ],
+        "base": [
+          138,
+          71,
+          46,
+          255
+        ],
+        "light": [
+          167,
+          95,
+          68,
+          255
+        ],
+        "highlight": [
+          168,
+          124,
+          107,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.deep.golden",
+      "band": "deep",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          26,
+          22,
+          15,
+          255
+        ],
+        "deepest_shadow": [
+          48,
+          37,
+          18,
+          255
+        ],
+        "shadow": [
+          90,
+          67,
+          27,
+          255
+        ],
+        "base": [
+          144,
+          105,
+          39,
+          255
+        ],
+        "light": [
+          173,
+          132,
+          61,
+          255
+        ],
+        "highlight": [
+          172,
+          147,
+          103,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.deep.reddish",
+      "band": "deep",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          26,
+          16,
+          15,
+          255
+        ],
+        "deepest_shadow": [
+          47,
+          22,
+          19,
+          255
+        ],
+        "shadow": [
+          88,
+          34,
+          29,
+          255
+        ],
+        "base": [
+          140,
+          52,
+          43,
+          255
+        ],
+        "light": [
+          170,
+          74,
+          65,
+          255
+        ],
+        "highlight": [
+          170,
+          111,
+          105,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_deep.cool",
+      "band": "very_deep",
+      "undertone": "cool",
+      "ramp": {
+        "outline": [
+          24,
+          19,
+          17,
+          255
+        ],
+        "deepest_shadow": [
+          32,
+          23,
+          19,
+          255
+        ],
+        "shadow": [
+          47,
+          32,
+          24,
+          255
+        ],
+        "base": [
+          92,
+          61,
+          45,
+          255
+        ],
+        "light": [
+          121,
+          85,
+          67,
+          255
+        ],
+        "highlight": [
+          135,
+          108,
+          94,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_deep.neutral",
+      "band": "very_deep",
+      "undertone": "neutral",
+      "ramp": {
+        "outline": [
+          25,
+          20,
+          16,
+          255
+        ],
+        "deepest_shadow": [
+          34,
+          24,
+          17,
+          255
+        ],
+        "shadow": [
+          50,
+          33,
+          21,
+          255
+        ],
+        "base": [
+          98,
+          64,
+          40,
+          255
+        ],
+        "light": [
+          128,
+          89,
+          61,
+          255
+        ],
+        "highlight": [
+          140,
+          111,
+          90,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_deep.warm",
+      "band": "very_deep",
+      "undertone": "warm",
+      "ramp": {
+        "outline": [
+          25,
+          18,
+          16,
+          255
+        ],
+        "deepest_shadow": [
+          36,
+          21,
+          15,
+          255
+        ],
+        "shadow": [
+          53,
+          28,
+          19,
+          255
+        ],
+        "base": [
+          103,
+          53,
+          34,
+          255
+        ],
+        "light": [
+          134,
+          76,
+          55,
+          255
+        ],
+        "highlight": [
+          145,
+          101,
+          85,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_deep.golden",
+      "band": "very_deep",
+      "undertone": "golden",
+      "ramp": {
+        "outline": [
+          26,
+          22,
+          15,
+          255
+        ],
+        "deepest_shadow": [
+          37,
+          29,
+          14,
+          255
+        ],
+        "shadow": [
+          55,
+          41,
+          16,
+          255
+        ],
+        "base": [
+          108,
+          79,
+          30,
+          255
+        ],
+        "light": [
+          140,
+          106,
+          49,
+          255
+        ],
+        "highlight": [
+          149,
+          124,
+          81,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    },
+    {
+      "id": "skin.very_deep.reddish",
+      "band": "very_deep",
+      "undertone": "reddish",
+      "ramp": {
+        "outline": [
+          26,
+          16,
+          15,
+          255
+        ],
+        "deepest_shadow": [
+          36,
+          17,
+          15,
+          255
+        ],
+        "shadow": [
+          54,
+          21,
+          18,
+          255
+        ],
+        "base": [
+          105,
+          39,
+          32,
+          255
+        ],
+        "light": [
+          136,
+          60,
+          52,
+          255
+        ],
+        "highlight": [
+          146,
+          89,
+          83,
+          255
+        ]
+      },
+      "classification": [
+        "PALETTE"
+      ],
+      "owner": "BODY",
+      "heritability": "inherited",
+      "requires_authored_geometry": false
+    }
+  ],
+  "source_art": {
+    "path": "docs/visual-review/visual-proof-character-01/gameplay-scale/directions/proxies/visual-proof-character-01-front-right-3q-128px-proxy-v1.png",
+    "sha256": "7F880476EF8A923A88DBD7F616289BD9A500BFA9C53DDC82BD694F0641D1C4DF",
+    "alpha": "genuine"
+  },
+  "presentation_policy": {
+    "portrait": "six-entry richer ramp",
+    "full_body": "six-entry standard ramp",
+    "gameplay": "same identity with contrast-preserving compact resolution"
+  },
+  "state_seams": {
+    "uv": "baseline -> inherited response -> exposure -> current presentation; never mutates BODY baseline",
+    "temporary": "blush/exertion/temperature/injury are CURRENT_STATE/PRESENTATION modifiers",
+    "illumination": "aura/environment occurs after biological/current surface resolution and does not overwrite identity"
+  }
+}
