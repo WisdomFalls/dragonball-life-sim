@@ -13,7 +13,11 @@
     "brown_black",
     "blue_black"
   ],
-  "identities": [],
+  "identities": [
+    {"id":"01","name":"Compact Offset","approval_state":"review","support_sex":"male","morphology":{"silhouette":"compact asymmetric offset","coverage":"exposed close-cut side; layered upper grouping"},"hairline":"restrained forehead relationship","anchor":{"head_attachment":"crown","x":0,"y":0},"directions":{"canonical":"reference-angle","available":["canonical"],"missing":["front","back","left","right"]},"transformation_landmarks":["compact crown","offset side mass","irregular spike rhythm"],"provenance":{"reference":"concept-sheet-01","asset":"production/review/hair-01-compact-offset.png","sha256":"1DD2C12C4D54B3E6B74B0F9171DC58A82365B411FDDF204CC20620465E67F9FB"}},
+    {"id":"05","name":"Fragmented Upward","approval_state":"review","support_sex":"male","morphology":{"silhouette":"strong upward fragmented spike groups","coverage":"broad base; controlled asymmetry"},"hairline":"distinctive front grouping","anchor":{"head_attachment":"crown","x":0,"y":0},"directions":{"canonical":"reference-angle","available":["canonical"],"missing":["front","back","left","right"]},"transformation_landmarks":["fragmented crown","irregular height rhythm","broad base"],"provenance":{"reference":"concept-sheet-05","asset":"production/review/hair-05-fragmented-upward.png","sha256":"51E6FBFE1EDE0D01A668841B2646DC3FAFEEF26307847451AA049F4C4BB990"}},
+    {"id":"06","name":"Wide Layered","approval_state":"review","support_sex":"female","morphology":{"silhouette":"broad layered medium-long structure","coverage":"strong side breadth; rear volume"},"hairline":"distinct front framing","anchor":{"head_attachment":"crown","x":0,"y":0},"directions":{"canonical":"reference-angle","available":["canonical"],"missing":["front","back","left","right"]},"transformation_landmarks":["wide side masses","layered overlap","substantial rear volume"],"provenance":{"reference":"concept-sheet-06","asset":"production/review/hair-06-wide-layered.png","sha256":"17A31D681760149286E82354D66292F0C47EE6C771FCE615B6D0F77E82F550BF"}}
+  ],
   "required_fields": [
     "id",
     "approval_state",
