@@ -1,0 +1,694 @@
+{
+  "schema_version": "0.1.0",
+  "species": "u7_pure_blooded_saiyan",
+  "principles": [
+    "identity ownership is separate from presentation",
+    "pose substitution may not delete independently owned components",
+    "adult phenotype is a target expressed through developmental curves",
+    "palette resolution should not become duplicate geometry",
+    "laterality is preserved across direction families"
+  ],
+  "classification_values": [
+    "AUTHORED_GEOMETRY",
+    "PALETTE",
+    "SEMANTIC_OVERLAY",
+    "DERIVED_GEOMETRY",
+    "STATE_MODIFIER",
+    "DIRECTIONAL_COMPONENT",
+    "TRANSFORMATION_MODIFIER",
+    "AGE_MODIFIER",
+    "PRESENTATION_ONLY",
+    "NON_VISUAL_SIMULATION"
+  ],
+  "categories": [
+    {
+      "id": "01_sex_reproduction",
+      "name": "Sex and reproduction",
+      "traits": [
+        {
+          "id": "sex_linked_morphology",
+          "name": "sex-linked morphology",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "AGE_MODIFIER"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Biological morphology only; never personality."
+        },
+        {
+          "id": "reproductive_capability",
+          "name": "reproductive capability",
+          "classification": [
+            "NON_VISUAL_SIMULATION"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "02_height",
+      "name": "Height",
+      "traits": [
+        {
+          "id": "adult_height_target",
+          "name": "adult height target",
+          "classification": [
+            "DERIVED_GEOMETRY",
+            "AGE_MODIFIER"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Adult target expressed through developmental curve; not a whole-sprite scale shortcut."
+        }
+      ]
+    },
+    {
+      "id": "03_body_mass_density",
+      "name": "Body mass and density",
+      "traits": [
+        {
+          "id": "body_mass_density",
+          "name": "mass/density",
+          "classification": [
+            "STATE_MODIFIER",
+            "NON_VISUAL_SIMULATION"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "derived",
+          "presentation_tiers": [
+            "portrait",
+            "full_body"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Does not directly imply power or a gameplay raster family."
+        }
+      ]
+    },
+    {
+      "id": "04_structural_frame",
+      "name": "Structural frame",
+      "traits": [
+        {
+          "id": "structural_frame",
+          "name": "structural frame",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "DIRECTIONAL_COMPONENT"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": false,
+          "notes": "Skeletal structure only; separate from height, muscle, fat, power and personality."
+        }
+      ],
+      "values": [
+        "Narrow",
+        "Compact",
+        "Balanced",
+        "Broad",
+        "Tapered",
+        "Heavy",
+        "Massive"
+      ]
+    },
+    {
+      "id": "05_proportions",
+      "name": "Proportions",
+      "traits": [
+        {
+          "id": "proportion_targets",
+          "name": "5A\u20135L adult proportion targets",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "DERIVED_GEOMETRY",
+            "AGE_MODIFIER",
+            "DIRECTIONAL_COMPONENT"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": false,
+          "notes": "Adult phenotype target; development approaches target. #5A total leg share remains separate from #5B internal leg division."
+        }
+      ],
+      "subtraits": {
+        "5A_torso_leg_ratio": [
+          "Long Torso",
+          "Torso-Leaning",
+          "Balanced",
+          "Leg-Leaning",
+          "Long-Legged"
+        ],
+        "5B_internal_leg_proportion": [
+          "Femur-Dominant",
+          "Balanced",
+          "Lower-Leg-Dominant"
+        ],
+        "5C_total_arm_length": [
+          "Short",
+          "Average",
+          "Long"
+        ],
+        "5D_internal_arm_proportion": [
+          "Upper-Arm-Dominant",
+          "Balanced",
+          "Forearm-Dominant"
+        ],
+        "5E_clavicular_breadth": [
+          "Compact",
+          "Proportional",
+          "Extended"
+        ],
+        "5F_pelvic_breadth": [
+          "Narrow",
+          "Proportional",
+          "Broad"
+        ],
+        "5G_ribcage_depth": [
+          "Shallow",
+          "Proportional",
+          "Deep"
+        ],
+        "5H_neck_length": [
+          "Short",
+          "Proportional",
+          "Long"
+        ],
+        "5I_neck_build": [
+          "Light",
+          "Proportional",
+          "Robust"
+        ],
+        "5J_hand_scale": [
+          "Small",
+          "Proportional",
+          "Large"
+        ],
+        "5K_foot_scale": [
+          "Small",
+          "Proportional",
+          "Large"
+        ],
+        "5L_head_body_ratio": [
+          "Small",
+          "Proportional",
+          "Large"
+        ]
+      }
+    },
+    {
+      "id": "06_musculature_body_composition",
+      "name": "Musculature and body composition",
+      "traits": [
+        {
+          "id": "innate_muscle_potential",
+          "name": "innate potential",
+          "classification": [
+            "NON_VISUAL_SIMULATION",
+            "STATE_MODIFIER"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "current_muscularity",
+          "name": "current muscularity",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "STATE_MODIFIER"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "developmental",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Minimal through Extreme; not combat power."
+        },
+        {
+          "id": "body_fat",
+          "name": "body-fat state",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "STATE_MODIFIER"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "developmental",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "definition",
+          "name": "definition",
+          "classification": [
+            "DERIVED_GEOMETRY",
+            "STATE_MODIFIER"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "derived",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "07_head_face",
+      "name": "Head and face",
+      "traits": [
+        {
+          "id": "face_morphology",
+          "name": "head/face feature morphology",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "DIRECTIONAL_COMPONENT",
+            "AGE_MODIFIER"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": false,
+          "notes": "Head shape, feature placement, jaw, eyes, ears and facial-hair capability. Never personality."
+        },
+        {
+          "id": "facial_hair",
+          "name": "facial-hair presentation",
+          "classification": [
+            "SEMANTIC_OVERLAY",
+            "AGE_MODIFIER"
+          ],
+          "owner": "PRESENTATION",
+          "heritability": "developmental",
+          "presentation_tiers": [
+            "portrait",
+            "full_body"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "08_skin",
+      "name": "Skin, pigmentation and surface biology",
+      "traits": [
+        {
+          "id": "baseline_pigmentation",
+          "name": "baseline pigmentation and undertone",
+          "classification": [
+            "PALETTE"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "uv_tanning",
+          "name": "UV/tanning response",
+          "classification": [
+            "PALETTE",
+            "STATE_MODIFIER"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "derived",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "congenital_markings",
+          "name": "congenital markings",
+          "classification": [
+            "SEMANTIC_OVERLAY"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "aura_illumination",
+          "name": "aura illumination",
+          "classification": [
+            "PRESENTATION_ONLY",
+            "TRANSFORMATION_MODIFIER"
+          ],
+          "owner": "PRESENTATION",
+          "heritability": "derived",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Does not overwrite genetic pigmentation."
+        }
+      ]
+    },
+    {
+      "id": "09_natural_hair",
+      "name": "Natural hair biology",
+      "traits": [
+        {
+          "id": "hair_identity",
+          "name": "natural hair identity",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "DIRECTIONAL_COMPONENT",
+            "AGE_MODIFIER"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": true,
+          "notes": "Emergent morphology: volume, growth orientation, crown, spike tendencies, grouping, length, curvature, asymmetry, hairline and density."
+        },
+        {
+          "id": "haircut_style",
+          "name": "current haircut/style",
+          "classification": [
+            "SEMANTIC_OVERLAY",
+            "PRESENTATION_ONLY"
+          ],
+          "owner": "PRESENTATION",
+          "heritability": "nonheritable",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "transformation_hair",
+          "name": "transformation hair presentation",
+          "classification": [
+            "TRANSFORMATION_MODIFIER",
+            "AUTHORED_GEOMETRY",
+            "PALETTE"
+          ],
+          "owner": "TRANSFORMATION",
+          "heritability": "derived",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": false,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "10_tail",
+      "name": "Tail biology",
+      "traits": [
+        {
+          "id": "tail_identity",
+          "name": "tail morphology and pigmentation",
+          "classification": [
+            "AUTHORED_GEOMETRY",
+            "DIRECTIONAL_COMPONENT",
+            "AGE_MODIFIER"
+          ],
+          "owner": "BODY",
+          "heritability": "inherited",
+          "presentation_tiers": [
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": true,
+          "notes": "Independent biological component; may require tail_rear/tail_front depth roles."
+        },
+        {
+          "id": "tail_state",
+          "name": "injury, severance, regrowth, wrapping",
+          "classification": [
+            "STATE_MODIFIER",
+            "SEMANTIC_OVERLAY",
+            "TRANSFORMATION_MODIFIER"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "acquired",
+          "presentation_tiers": [
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": true,
+          "notes": ""
+        },
+        {
+          "id": "tail_control",
+          "name": "tail control/mastery",
+          "classification": [
+            "NON_VISUAL_SIMULATION",
+            "STATE_MODIFIER"
+          ],
+          "owner": "PERSON",
+          "heritability": "developmental",
+          "presentation_tiers": [],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "11_aging",
+      "name": "Aging and development",
+      "traits": [
+        {
+          "id": "developmental_expression",
+          "name": "developmental expression",
+          "classification": [
+            "AGE_MODIFIER",
+            "AUTHORED_GEOMETRY",
+            "DERIVED_GEOMETRY"
+          ],
+          "owner": "BODY",
+          "heritability": "developmental",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": "Children are not scaled-down adults; aging modifies identity expression, not identity."
+        }
+      ]
+    },
+    {
+      "id": "12_acquired_features",
+      "name": "Acquired features",
+      "traits": [
+        {
+          "id": "persistent_features",
+          "name": "scars, burns, missing anatomy, prosthetics, tattoos, dental/eye changes",
+          "classification": [
+            "SEMANTIC_OVERLAY",
+            "AUTHORED_GEOMETRY",
+            "DIRECTIONAL_COMPONENT"
+          ],
+          "owner": "BODY",
+          "heritability": "acquired",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": true,
+          "notes": ""
+        },
+        {
+          "id": "acute_injury",
+          "name": "acute injury/current condition",
+          "classification": [
+            "STATE_MODIFIER",
+            "PRESENTATION_ONLY"
+          ],
+          "owner": "CURRENT_STATE",
+          "heritability": "acquired",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": false,
+          "semantic_ownership": false,
+          "notes": ""
+        },
+        {
+          "id": "equipment",
+          "name": "removable equipment",
+          "classification": [
+            "SEMANTIC_OVERLAY",
+            "DIRECTIONAL_COMPONENT"
+          ],
+          "owner": "EQUIPMENT",
+          "heritability": "nonheritable",
+          "presentation_tiers": [
+            "portrait",
+            "full_body",
+            "gameplay"
+          ],
+          "direction_sensitive": true,
+          "semantic_ownership": true,
+          "notes": "Not a BODY-owned acquired feature."
+        }
+      ]
+    }
+  ],
+  "presentation_policy": {
+    "portrait": "identity-detail priority; subtle marks and facial structure may resolve",
+    "full_body": "morphology/silhouette priority; moderate detail",
+    "gameplay": "silhouette, frame, pose, major palettes and independent attachments only"
+  },
+  "direction_contract": {
+    "directions": [
+      "front",
+      "front_right_3q",
+      "right",
+      "back_right_3q",
+      "back",
+      "back_left_3q",
+      "left",
+      "front_left_3q"
+    ],
+    "mirror_policy": "Mirroring is opt-in only. Preserve anatomical laterality and sided injuries, equipment, scars, hair asymmetry, tail curvature and prosthetics.",
+    "direction_sensitive": [
+      "hair",
+      "face",
+      "body",
+      "tail",
+      "clothing",
+      "weapons",
+      "injuries",
+      "prosthetics",
+      "silhouette-critical attachments"
+    ]
+  },
+  "transformation_contract": {
+    "may_modify": [
+      "hair_pigmentation",
+      "hair_geometry",
+      "eyes",
+      "appropriate_body_morphology",
+      "aura",
+      "surface_presentation",
+      "alternate_rig"
+    ],
+    "preserves": [
+      "BODY identity",
+      "natural hair identity",
+      "acquired BODY history",
+      "tail identity unless form rules change presentation"
+    ],
+    "alternate_morphology": [
+      "great_ape_oozaru"
+    ]
+  },
+  "external_source_schema": {
+    "fields": [
+      "source",
+      "license",
+      "author",
+      "intended_use",
+      "classification",
+      "redistribution_permitted",
+      "modification_permitted",
+      "commercial_use_permitted",
+      "notes"
+    ],
+    "classifications": [
+      "INTEGRATE",
+      "ADAPT",
+      "REFERENCE",
+      "DISCARD"
+    ]
+  }
+}
