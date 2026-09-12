@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "specimen_id": "xv2-hum-015-resource-hair",
+  "source_type": "external_archive",
+  "source_project": "Xenoverse 2 Resource Hair",
+  "source_url": null,
+  "creator": "unknown",
+  "provenance_class": "license_unknown",
+  "original_format": "Xenoverse 2 EMD/EMB/EMM/DYT EMB",
+  "asset_kind": "3d_hair_model",
+  "character_race_applicability": "HUM human",
+  "available_directions": [],
+  "is_3d": true,
+  "is_animated": false,
+  "has_transformation_variants": false,
+  "license_or_usage_note": "unknown; supplied archive retained for inspection only",
+  "credit_note": "unknown",
+  "sha256": "e22deee9e759c977e4b704e381dbf91988f143edc0749652483c02ede314a414",
+  "ingestion_status": "inspected_quarantined",
+  "production_status": "reference_only",
+  "original_archive": "1536350038_Resource-Hair.zip",
+  "archive_size_bytes": 65281,
+  "files": [
+    {
+      "path": "docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/raw/xv2-hum-015-resource-hair/files/HUM_015_Hair.dyt.emb",
+      "size_bytes": 58112,
+      "sha256": "3562cb2577efdef5e42cdbd982edd83247be7e6f64b3ee65c926fe30f431825a"
+    },
+    {
+      "path": "docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/raw/xv2-hum-015-resource-hair/files/HUM_015_hair.emb",
+      "size_bytes": 786880,
+      "sha256": "411e04912c863a2f58a7ae432bf3f583446e51772e1a13d483dbca3fed9a2ae5"
+    },
+    {
+      "path": "docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/raw/xv2-hum-015-resource-hair/files/HUM_015_hair.emd",
+      "size_bytes": 66769,
+      "sha256": "9329a8efbf8cd1721b3cea038ea5060df6fbb353b3f9d4101ae791fa3b59bcf0"
+    },
+    {
+      "path": "docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/raw/xv2-hum-015-resource-hair/files/HUM_015_hair.emm",
+      "size_bytes": 1220,
+      "sha256": "9c20437644dbf0584ff80c0d5d4eb5d7ce4bd1dddfff357bac5fd3b6449759cf"
+    }
+  ],
+  "raw_inventory": [
+    "HUM_015_hair.emd",
+    "HUM_015_hair.emb",
+    "HUM_015_Hair.dyt.emb",
+    "HUM_015_hair.emm"
+  ],
+  "source_paths": [
+    "external-specimens/raw/xv2-hum-015-resource-hair/1536350038_Resource-Hair.zip",
+    "external-specimens/raw/xv2-hum-015-resource-hair/files/"
+  ],
+  "production_reference_path": "external-specimens/derived-reference/",
+  "findings": {
+    "emd": "geometry/model container; parser inspection not executed in this environment",
+    "emb": "texture container",
+    "dyt_emb": "dye/color texture container",
+    "emm": "material definitions",
+    "skeleton": "no ESK supplied; bone references cannot be confirmed",
+    "lods": "not discoverable without format parser",
+    "mesh_counts": "not discoverable without format parser",
+    "material_counts": "not discoverable without format parser",
+    "texture_references": "not discoverable without format parser"
+  }
+}
