@@ -1,0 +1,1 @@
+# Stage 03D.1B Report`n`nThis correction supersedes neither the immutable source nor the prior 03D.1/03D.1A experiments. It creates a separate conservative ownership mask for Compact Offset FRONT. Human review is required before semantic decomposition resumes.

@@ -1,0 +1,1 @@
+# Hair Ownership Semantics`n`nProjecting hair and scalp-surface hair are separated using source-derived spatial morphology. Support character, UI, and background are excluded. Uncertain boundary is limited to dark pixels inside the explicit face exclusion region. No hidden hair is reconstructed.

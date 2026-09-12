@@ -1,0 +1,11 @@
+{
+  "hair_identity_id": "mc-hair-01-compact-offset",
+  "direction": "front",
+  "ownership_classes": ["projecting_hair", "scalp_surface_hair", "support_character", "catalogue_ui_background", "uncertain_boundary"],
+  "counts": {"projecting_hair": 1, "scalp_surface_hair": 1, "uncertain_boundary": 1},
+  "method": "source-derived deterministic spatial morphology mask; explicit face exclusion; no generated pixels",
+  "hidden_content_generated": false,
+  "hair02_work": false,
+  "other_directions_work": false,
+  "source_reference": "docs/visual-review/stage-03d-directional-hair-consistency/source-reference/mc-hair-01-compact-offset/front.png"
+}
