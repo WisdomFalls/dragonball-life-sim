@@ -1,0 +1,256 @@
+{
+  "schema_version": "1.0",
+  "direction_convention": "character-anatomical",
+  "directions": [
+    "front",
+    "front-left-3q",
+    "left",
+    "back-left-3q",
+    "back",
+    "back-right-3q",
+    "right",
+    "front-right-3q"
+  ],
+  "records": [
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "front",
+      "source_filename": "front.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\front.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "front-left-3q",
+      "source_filename": "front-left-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\front-left-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "left",
+      "source_filename": "left.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\left.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "back-left-3q",
+      "source_filename": "back-left-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\back-left-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "back",
+      "source_filename": "back.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\back.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "back-right-3q",
+      "source_filename": "back-right-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\back-right-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "right",
+      "source_filename": "right.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\right.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-01-compact-offset",
+      "hair_identity_name": "Compact Offset",
+      "support_character_sex": "male",
+      "intended_anatomical_direction": "front-right-3q",
+      "source_filename": "front-right-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-01-compact-offset\\front-right-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "front",
+      "source_filename": "front.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\front.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "front-left-3q",
+      "source_filename": "front-left-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\front-left-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "left",
+      "source_filename": "left.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\left.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "back-left-3q",
+      "source_filename": "back-left-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\back-left-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "back",
+      "source_filename": "back.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\back.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "back-right-3q",
+      "source_filename": "back-right-3q.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\back-right-3q.png",
+        "status": "copied byte-for-byte"
+      }
+    },
+    {
+      "hair_identity_id": "mc-hair-02-side-biased-layered",
+      "hair_identity_name": "Side-Biased Layered",
+      "support_character_sex": "female",
+      "intended_anatomical_direction": "right",
+      "source_filename": "right.png",
+      "source_role": "directional visual reference",
+      "embedded_text_trusted": false,
+      "human_direction_metadata_trusted": true,
+      "undercut_side": "left",
+      "production_asset": false,
+      "provenance": {
+        "path": "docs\\visual-review\\stage-03d-directional-hair-consistency\\source-reference\\mc-hair-02-side-biased-layered\\right.png",
+        "status": "copied byte-for-byte"
+      }
+    }
+  ]
+}
