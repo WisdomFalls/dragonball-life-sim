@@ -1,0 +1,1 @@
+# Stage 03D.1B-H Report`n`nFour human-approved MC-HAIR-02 FRONT references were preserved byte-for-byte. Previous automated ownership experiments remain historical and superseded for ownership truth. Two-class recomposition is deterministic and does not mirror, warp, rotate, generate, or fabricate hidden hair.

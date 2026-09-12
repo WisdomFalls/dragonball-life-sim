@@ -1,0 +1,1 @@
+# Human-Approved Hair Ownership Contract`n`nMC-HAIR-02 FRONT uses two authoritative semantic classes: projecting_hair and scalp_surface_hair. The anatomical LEFT undercut is scalp-surface hair; the anatomical RIGHT is the full/bushy side. Human-reviewed ownership outranks automated chroma inference. No smaller decomposition is active.

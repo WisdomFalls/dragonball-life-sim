@@ -1,0 +1,55 @@
+{
+  "hair_identity_id": "MC-HAIR-02",
+  "human_approved_reference": true,
+  "full_bushy_side": "anatomical RIGHT",
+  "schema_version": "1.0",
+  "ownership": "BODY / Natural Hair Identity",
+  "automated_extraction_status": "superseded",
+  "undercut_side": "anatomical LEFT",
+  "hair_identity_name": "Side-Biased Layered",
+  "production_asset": false,
+  "reconstruction": {
+    "rotation": false,
+    "output": "reconstruction/mc-hair-02-front-two-class-reconstruction.png",
+    "generation": false,
+    "mirror": false,
+    "warp": false,
+    "hidden_hair_fabricated": false,
+    "method": "deterministic aligned recomposition of human-approved projecting and scalp references"
+  },
+  "direction": "front",
+  "records": [
+    {
+      "sampled_opaque": 26546,
+      "sampled_partial_alpha": 2278,
+      "file": "mc-hair-02-front-hair-extracted-reference.png",
+      "dimensions": "433x576",
+      "sampled_transparent": 35950,
+      "nontransparent_bbox": "4,14-430,560"
+    },
+    {
+      "sampled_opaque": 23398,
+      "sampled_partial_alpha": 2270,
+      "file": "mc-hair-02-front-ownership-classification-reference.png",
+      "dimensions": "422x591",
+      "sampled_transparent": 39058,
+      "nontransparent_bbox": "4,50-412,522"
+    },
+    {
+      "sampled_opaque": 24018,
+      "sampled_partial_alpha": 1891,
+      "file": "mc-hair-02-front-projecting-hair-reference.png",
+      "dimensions": "514x486",
+      "sampled_transparent": 38433,
+      "nontransparent_bbox": "22,18-496,480"
+    },
+    {
+      "sampled_opaque": 3481,
+      "sampled_partial_alpha": 369,
+      "file": "mc-hair-02-front-scalp-surface-hair-reference.png",
+      "dimensions": "515x484",
+      "sampled_transparent": 58955,
+      "nontransparent_bbox": "222,96-364,290"
+    }
+  ]
+}
