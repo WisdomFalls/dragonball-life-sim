@@ -1,0 +1,1 @@
+# Stage 03D.2A Report`n`nArchitecture-only spike. No donor was downloaded, no Blender assumptions were installed, and no rendering occurred. ExternalHairSpecimen is quarantined and distinct from NaturalHairIdentity. The first donor must supply provenance, format, directional/origin metadata, alpha/palette behavior, and licensing before toolchain selection.
