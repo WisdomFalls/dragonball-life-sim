@@ -261,7 +261,7 @@
     },
     "missing_direction": {
       "hair_identity_id": "mc-hair-02-side-biased-layered",
-      "intended_anatomical_direction": "front_right_3q",
+      "intended_anatomical_direction": "front-right-3q",
       "status": "pending_authoring",
       "reason": "previous generated attempts human-rejected and discarded",
       "action": "do not recover, recreate, infer, mirror, or fabricate"
