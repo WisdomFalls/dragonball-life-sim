@@ -1,0 +1,19 @@
+{
+  "hair_identity_id": "mc-hair-01-compact-offset",
+  "direction": "front",
+  "ownership_classes": [
+    "hair",
+    "support_character",
+    "catalogue_ui_background",
+    "uncertain_boundary"
+  ],
+  "method": "conservative spatial hair-region mask with dark warm-neutral chroma predicate; non-hair alpha cleared",
+  "counts": {
+    "uncertain_boundary": 117633,
+    "hair": 653073,
+    "catalogue_ui_background": 802524,
+    "support_character": "excluded by skin/face region and non-hair predicate"
+  },
+  "source_reference": "docs/visual-review/stage-03d-directional-hair-consistency/source-reference/mc-hair-01-compact-offset/front.png",
+  "status": "working extraction; human review required"
+}
