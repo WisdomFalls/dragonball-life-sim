@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+const m=JSON.parse(fs.readFileSync('docs/visual-review/stage-03d-human-approved-hair-modules/mc-hair-01/front/MODULE-MANIFEST.json','utf8'));
+test('03D.1C human-cleaned module contract',()=>{assert.equal(m.hair_identity_id,'mc-hair-01-compact-offset');assert.equal(m.direction,'front');assert.equal(m.modules.length,5);assert.equal(new Set(m.modules.map(x=>x.id)).size,5);assert.ok(m.modules.every(x=>x.hair_class));assert.equal(m.modules.find(x=>x.id==='undercut_scalp_surface').anatomical_side,'LEFT');assert.equal(m.human_cleaned,true);assert.equal(m.production_final,false);});

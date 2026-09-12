@@ -1,0 +1,47 @@
+{
+  "hair_identity_id": "mc-hair-01-compact-offset",
+  "direction": "front",
+  "ownership": "BODY / Natural Hair Identity",
+  "human_cleaned": true,
+  "prototype_approved": true,
+  "production_final": false,
+  "modules": [
+    {
+      "hair_class": "projecting_hair",
+      "id": "front_fringe",
+      "file": "source/Front_Fringe-removebg-preview.png"
+    },
+    {
+      "hair_class": "projecting_hair",
+      "id": "crown_top_mass",
+      "file": "source/Front_Crown_Top_Mass_-removebg-preview.png"
+    },
+    {
+      "hair_class": "scalp_surface_hair",
+      "id": "undercut_scalp_surface",
+      "anatomical_side": "LEFT",
+      "file": "source/Undercut_Front-removebg-preview.png"
+    },
+    {
+      "hair_class": "projecting_hair",
+      "id": "anatomical_left_side_mass",
+      "anatomical_side": "LEFT",
+      "file": "source/LEFT_Side_Mass_Front-removebg-preview.png"
+    },
+    {
+      "hair_class": "projecting_hair",
+      "id": "anatomical_right_side_mass",
+      "anatomical_side": "RIGHT",
+      "file": "source/RIGHT_Front_Side_Mass-removebg-preview.png"
+    }
+  ],
+  "references": [
+    "source/Front_Extraction_Only-removebg-preview.png",
+    "source/Front_Ownership-removebg-preview.png"
+  ],
+  "known_discrepancies": [
+    "front fringe smaller than ideal annotated region",
+    "crown/top mass smaller than ideal annotated region",
+    "side mass boundaries are approximate prototype partitions"
+  ]
+}

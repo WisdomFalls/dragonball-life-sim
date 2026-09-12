@@ -1,0 +1,1 @@
+# Stage 03D.1C Report`n`nFive human-cleaned Compact Offset FRONT prototype modules and two reference maps were preserved byte-for-byte. They are prototype-approved, non-final, and remain source-resolution. Manual snipping may change original coordinates; explicit alignment metadata is required before a faithful reconstruction.

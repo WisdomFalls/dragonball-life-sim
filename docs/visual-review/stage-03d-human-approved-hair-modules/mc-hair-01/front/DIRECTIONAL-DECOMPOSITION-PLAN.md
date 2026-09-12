@@ -1,0 +1,1 @@
+# Directional Decomposition Plan`n`nSemantic families are direction-specific authored representations of persistent hair structures. FRONT modules do not get reused unchanged across SIDE, BACK, or 3/4 views. Future evidence must author visible temple, crown slope, rear/nape flow, and depth/occlusion relationships per direction.
