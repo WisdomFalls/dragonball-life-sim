@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+const p='docs/visual-review/stage-03d-human-approved-hair-ownership/mc-hair-02/front/HUMAN-OWNERSHIP-MANIFEST.json';const m=JSON.parse(fs.readFileSync(p,'utf8'));
+test('human-approved Hair 02 ownership',()=>{assert.equal(m.hair_identity_id,'MC-HAIR-02');assert.equal(m.direction,'front');assert.equal(m.undercut_side,'anatomical LEFT');assert.equal(m.full_bushy_side,'anatomical RIGHT');assert.equal(m.records.length,5);assert.equal(m.human_approved_reference,true);assert.equal(m.production_asset,false);assert.equal(m.automated_extraction_status,'superseded');assert.equal(m.reconstruction.generation,false);assert.equal(m.reconstruction.mirror,false);});
