@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-04b0-external-head-recon');
+test('04B.0 external head reconnaissance contract',()=>{const c=JSON.parse(fs.readFileSync(path.join(d,'external-head-specimens.json')));assert.equal(c.length,5);assert.ok(c.some(x=>x.recon_decision==='REFERENCE'));const n=JSON.parse(fs.readFileSync(path.join(d,'head-normalization-contract.json')));assert.ok(n.anchors.includes('hairline'));assert.equal(n.coordinate_space.front,'-Y');for(const f of ['STAGE-04B0-EXTERNAL-HEAD-RECON-REPORT.md','head-face-external-mapping.md'])assert.ok(fs.existsSync(path.join(d,f)));});
