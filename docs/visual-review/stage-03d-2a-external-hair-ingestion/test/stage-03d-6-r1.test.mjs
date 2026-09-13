@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/derived-reference/stage-03d5-luceus-master');
+test('03D.6-R1 independent palette profiles',()=>{const m=JSON.parse(fs.readFileSync(path.join(d,'hair-palette-profiles.json')));const ps=Object.values(m.profiles);assert.equal(ps.length,5);for(const p of ps){assert.equal(p.roles.length,6);assert.ok(p.roles[0][0]<p.roles[5][0]||p.roles[0][1]<p.roles[5][1]);assert.ok(fs.existsSync(path.join(d,p.output)));}assert.ok(fs.existsSync(path.join(d,'luceus-palette-profile-comparison.png')));});
