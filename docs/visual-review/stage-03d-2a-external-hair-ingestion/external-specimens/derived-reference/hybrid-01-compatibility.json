@@ -1,0 +1,56 @@
+{
+  "donor_b": "xv2-xenodimension-black-sister-011",
+  "bounds_min": [
+    -0.20687586069107056,
+    -0.10957513749599457,
+    0.2946995198726654
+  ],
+  "bounds_max": [
+    0.20586015284061432,
+    0.13017424941062927,
+    0.5987460613250732
+  ],
+  "center": [
+    -0.0005078539252281189,
+    0.010299555957317352,
+    0.4467228055000305
+  ],
+  "axes": {
+    "up": "+Z",
+    "front": "-Y",
+    "anatomical_left": "-X",
+    "anatomical_right": "+X"
+  },
+  "meshes": [
+    {
+      "name": "HAIR_Top",
+      "vertices": 1747,
+      "polygons": 2477,
+      "transform": {
+        "scale": [
+          -1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ],
+  "swap": {
+    "selected_module": "HAIR_Top",
+    "role": "front_fringe",
+    "translation": [
+      0,
+      0,
+      0
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "uniform_scale": 1,
+    "nonuniform_scale": null,
+    "deformation": false,
+    "topology_edits": false
+  }
+}
