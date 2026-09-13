@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/derived-reference/stage-03d5-luceus-master');
+test('03D.5 clean Luceus master contract',()=>{const m=JSON.parse(fs.readFileSync(path.join(d,'stage-03d5-master-metadata.json')));assert.equal(m.height_px,128);assert.equal(m.alpha,'binary 0/255');assert.equal(m.palette_roles.length,6);for(const n of ['luceus-front-left-3q-master-128.png','luceus-front-left-3q-master-128-review4x.png','luceus-front-left-3q-master-checker4x.png','luceus-six-tone-role-palette.png','luceus-front-left-3q-master-comparison.png'])assert.ok(fs.existsSync(path.join(d,n)));});

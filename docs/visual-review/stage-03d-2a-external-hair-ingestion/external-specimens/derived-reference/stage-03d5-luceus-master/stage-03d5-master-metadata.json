@@ -1,0 +1,60 @@
+{
+  "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-front-left-3q.png",
+  "source_sha256": "828650d305765870d7e2e88d4cf0c693d28b8278ac3fbfee4c86cbefb07f3402",
+  "master": "luceus-front-left-3q-master-128.png",
+  "height_px": 128,
+  "palette_roles": [
+    {
+      "role": "outline_deepest",
+      "rgb": [
+        8,
+        10,
+        14
+      ]
+    },
+    {
+      "role": "deep_occlusion",
+      "rgb": [
+        24,
+        27,
+        36
+      ]
+    },
+    {
+      "role": "primary_shadow",
+      "rgb": [
+        48,
+        54,
+        68
+      ]
+    },
+    {
+      "role": "base_midtone",
+      "rgb": [
+        82,
+        90,
+        106
+      ]
+    },
+    {
+      "role": "primary_highlight",
+      "rgb": [
+        145,
+        151,
+        162
+      ]
+    },
+    {
+      "role": "accent_highlight",
+      "rgb": [
+        218,
+        220,
+        224
+      ]
+    }
+  ],
+  "contour": "restrained 1 native pixel outer contour",
+  "alpha": "binary 0/255",
+  "registration": "source crop box retained; canonical front-left-3q anchor preserved",
+  "geometry_authority": "luceus-eight-direction source"
+}
