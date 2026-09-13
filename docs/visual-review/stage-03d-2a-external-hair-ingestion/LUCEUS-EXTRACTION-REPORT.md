@@ -23,3 +23,7 @@ Fresh Luceus conversion independently measured HAIR_Top at 2610 vertices and 255
 
 PROJECTXIR_PORTABLE_BOOTSTRAP = GREEN; XV2_TO_BLEND_CONVERSION_SEAM = GREEN; semantic extraction remains READY_FOR_TEST and was not performed in this stage.
 
+
+## R3 topology result
+
+The cached scene was inspected without ProjectXIR: HAIR_Top is 2610 vertices / 2558 polygons, one material slot, 7674 UV loops, and 155 disconnected vertex-connectivity components. The many small islands are repeated strand/triangle fragments rather than clean semantic locks; component boundaries do not map reliably to frontal function. Analytical hair-only renders are preserved under xternal-specimens/derived-reference/luceus-topology/ (luceus-topology-components-front.png, luceus-topology-components-3q.png, luceus-semantic-candidate-front.png, luceus-semantic-candidate-3q.png). A front fringe cannot be defensibly identified without an arbitrary spatial cut, so the boundary remains UNSUPPORTED and the extraction verdict is genuine RED after successful topology inspection. Hybrid 02 was not created.

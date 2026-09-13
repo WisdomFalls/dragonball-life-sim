@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const b=path.resolve('docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/derived-reference/luceus-topology');
+test('03D.2G-R3 topology evidence',()=>{const r=JSON.parse(fs.readFileSync(path.join(path.dirname(b),'luceus-topology-report.json')));assert.equal(r.vertices,2610);assert.equal(r.polygons,2558);assert.equal(r.connected_components,155);assert.equal(r.semantic_boundary,'UNSUPPORTED');for(const n of ['luceus-topology-components-front.png','luceus-topology-components-3q.png','luceus-semantic-candidate-front.png','luceus-semantic-candidate-3q.png'])assert.ok(fs.existsSync(path.join(b,n)));});
