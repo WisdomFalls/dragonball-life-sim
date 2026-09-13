@@ -14,3 +14,12 @@ The successful 03D.2F run used Blender 2.92.0 with the derived ZIP `ProjectXIR-0
 Fresh headless reproduction was attempted with the portable executable and the same derived package. It failed before import: `addon_enable(module='Project XIR')` reported `ModuleNotFoundError: No module named 'Project XIR'`; `addon_install` reported `Failed to get add-ons path` because Blender's user add-ons path already exists as an inaccessible/conflicting file-system entry. Consequently the EMD operator was absent. This is a tooling/environment failure, not geometric evidence.
 
 No source archive or donor geometry was changed. No semantic extraction, hybrid, raster masking, or fabricated boundary was performed. A self-contained Luceus inspection scene could not be produced until a deterministic writable Blender user-scripts/add-ons location is established.
+
+## R2 bootstrap result
+
+A dedicated writable environment was created at C:\Users\Wisdom\Documents\Codex\Mortal Coil Tools\blender-user with config, scripts/addons, datafiles, and isolated APPDATA. The derived Project XIR package was copied unchanged into its scripts/addons directory. A bootstrap script loads the real package as importable module Project_XIR (filesystem/display name remains Project XIR), invokes its legitimate egister(), and verifies py.ops.xenoverse_ir.emd. Fresh Blender 2.92 reported the dedicated scripts/addons paths and operator availability.
+
+Fresh Luceus conversion independently measured HAIR_Top at 2610 vertices and 2558 polygons and saved xternal-specimens/derived-reference/tryzick-hum015-luceus-inspection.blend. A second fresh process reopened the cache and accessed the same mesh counts through ordinary bpy. The scene also retains an importer-registered operator because registration state is serialized with the scene; mesh access itself does not call ProjectXIR.
+
+PROJECTXIR_PORTABLE_BOOTSTRAP = GREEN; XV2_TO_BLEND_CONVERSION_SEAM = GREEN; semantic extraction remains READY_FOR_TEST and was not performed in this stage.
+

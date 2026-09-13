@@ -1,0 +1,5 @@
+import bpy,sys,os,json
+from pathlib import Path
+addon=Path(os.environ['BLENDER_USER_SCRIPTS'])/'addons';sys.path.insert(0,str(addon));import importlib.util
+p=addon/'Project XIR'/'__init__.py';sp=importlib.util.spec_from_file_location('Project_XIR',str(p),submodule_search_locations=[str(p.parent)]);m=importlib.util.module_from_spec(sp);sys.modules['Project_XIR']=m;sp.loader.exec_module(m);m.register()
+repo=Path(r'C:\Users\Wisdom\Documents\Codex\2026-09-08\github-plugin-github-openai-curated-remote-2\game'); base=repo/'docs/visual-review/stage-03d-2a-external-hair-ingestion'; p=base/'external-specimens/raw/tryzick-pack-9/Luceus/HUM_015_Hair.emd'; bpy.ops.xenoverse_ir.emd(filepath=str(p),files=[{'name':p.name}],esk_option=False,emm_option=False,emb_option=False); objs=[o for o in bpy.data.objects if o.type=='MESH']; stats=[{'name':o.name,'vertices':len(o.data.vertices),'polygons':len(o.data.polygons)} for o in objs]; out=base/'external-specimens/derived-reference/tryzick-hum015-luceus-inspection.blend';bpy.ops.wm.save_as_mainfile(filepath=str(out));print(json.dumps({'stats':stats,'saved':str(out)}))
