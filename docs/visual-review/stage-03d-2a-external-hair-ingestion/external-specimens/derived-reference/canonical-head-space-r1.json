@@ -1,0 +1,12 @@
+{
+  "axes": {"up": "+Z", "front": "-Y", "back": "+Y", "anatomical_left": "-X", "anatomical_right": "+X"},
+  "head_origin": [0, 0, 0.5],
+  "head_width": 0.5,
+  "head_height": 0.6,
+  "head_depth": 0.45,
+  "anchors": {"crown": [0,0,0.8], "hairline_front": [0,-0.22,0.58], "left_temple": [-0.25,0,0.55], "right_temple": [0.25,0,0.55], "rear_skull": [0,0.2,0.58], "nape": [0,0,0.2]},
+  "donors": {
+    "hum015": {"root_z_source": 0.605361, "translation": [0,0,-0.105361], "rotation_degrees": [0,0,0], "uniform_scale": 1},
+    "black_sister_011": {"root_z_source": 0.294700, "translation": [0,0,0.205300], "rotation_degrees": [0,0,0], "uniform_scale": 1}
+  }
+}
