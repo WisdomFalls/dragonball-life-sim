@@ -1,0 +1,8 @@
+{
+  "stage":"04A","proof_character":{"universe":"U7","species":"saiyan","sex":"male","frame":"balanced","proportion_baseline":"balanced/#5A","natural_hair":"tryzick-hum015-luceus","hair_mode":"COMPLETE","hair_palette":"natural_black","transformation":"none"},
+  "ownership":{"body_visual_identity":["head_morphology","jaw_chin_morphology","eye_anatomy","nose_anatomy","ear_anatomy","skin_phenotype","congenital_traits"],"current_state":["expression","blink","injury_swelling","temporary_marks"],"acquired_body_history":["scars","burns","missing_anatomy","prosthetics"],"presentation":["portrait","full_body","gameplay_sprite","lighting","pixel_compression"]},
+  "morphology_categories":{"head":"descriptive curated bucket linked to continuous phenotype","jaw":"descriptive width/taper bucket","chin":"projection/height bucket","brow":"projection/arch bucket","eyes":"shape/spacing/angle bucket","nose":"bridge/projection/tip bucket","mouth":"width/lip-plane bucket","ears":"size/angle/attachment bucket","face_proportion":"adult head-to-body and feature spacing"},
+  "directions":["front","front-left-3q","left","back-left-3q","back","back-right-3q","right","front-right-3q"],
+  "registration":{"head_origin":"future U7 head anchor","crown":"hair attachment","hairline":"frontal attachment","temples":"side attachment","rear_skull":"back hair envelope","ears":"anatomical bilateral markers","eye_line":"face placement","face_center":"portrait/full-body alignment","jaw_chin":"lower-face reference","neck_attachment":"body seam"},
+  "asset_status":"specification_complete_asset_incomplete"
+}

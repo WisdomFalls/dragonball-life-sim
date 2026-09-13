@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-04a-visual-proof-character-01');
+test('04A foundation contract',()=>{const c=JSON.parse(fs.readFileSync(path.join(d,'head-face-production-contract.json')));assert.equal(c.proof_character.natural_hair,'tryzick-hum015-luceus');assert.equal(c.proof_character.hair_mode,'COMPLETE');assert.ok(c.ownership.body_visual_identity.includes('jaw_chin_morphology'));assert.equal(c.directions.length,8);for(const f of ['STAGE-04A-HEAD-FACE-FOUNDATION-REPORT.md','PROOF-CHARACTER-01-FACE-SELECTION-SHEET.md','head-face-asset-inventory.json'])assert.ok(fs.existsSync(path.join(d,f)));});
