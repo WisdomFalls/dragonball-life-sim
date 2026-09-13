@@ -1,0 +1,78 @@
+{
+  "true_front": "-Y",
+  "up": "+Z",
+  "anatomical_left": "-X (after importer -X handedness)",
+  "anatomical_right": "+X",
+  "bounds_min": [
+    -0.2230978161096573,
+    -0.18491266667842865,
+    0.6053606867790222
+  ],
+  "bounds_max": [
+    0.20805233716964722,
+    0.32255053520202637,
+    1.077079176902771
+  ],
+  "center": [
+    -0.007522739470005035,
+    0.06881893426179886,
+    0.8412199020385742
+  ],
+  "orthographic_scale": 0.6597021818161011,
+  "modules": [
+    {
+      "module_id": "xv2-submesh-0",
+      "role": "crown_top_mass",
+      "vertices": 575,
+      "polygons": 508,
+      "transform": {
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          -1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "module_id": "xv2-submesh-1",
+      "role": "front_fringe",
+      "vertices": 914,
+      "polygons": 760,
+      "transform": {
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          -1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "module_id": "xv2-submesh-2",
+      "role": "rear_occipital_mass",
+      "vertices": 120,
+      "polygons": 103,
+      "transform": {
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          -1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ]
+}
