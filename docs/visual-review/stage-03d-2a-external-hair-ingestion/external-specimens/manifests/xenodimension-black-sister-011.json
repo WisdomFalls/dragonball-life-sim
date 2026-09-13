@@ -1,0 +1,17 @@
+{
+  "specimen_id": "xv2-xenodimension-black-sister-011",
+  "source_archive": "1598346495_XENODIMENSION-HAIR-PACK.rar",
+  "source_path": "HAIR PACK/Black Sister (Base ID - 011)/",
+  "provenance_class": "license_unknown",
+  "asset_kind": "3d_hair_model",
+  "character_race_applicability": "HUF human",
+  "selection_reason": "Long layered twin-tail silhouette with frontal fringe; structurally distinct from HUM_015 radial upright spikes.",
+  "files": {
+    "HUF_011_Hair.emd": {"size_bytes": 78045, "sha256": "774492cf7f6cb9dbc0d1ffd4836163b21324cce1afb7e6ec01135461f6a3e315"},
+    "HUF_011_Hair.emb": {"size_bytes": 262336, "sha256": "0e6f7f93d52eee867165eb8d86321f1c73b75089d779d0529150cdacf2bae3f8"},
+    "HUF_011_Hair.dyt.emb": {"size_bytes": 25024, "sha256": "200ef3e6183936f8c4f1d3b5072cef33781af8052402ebcbe07032dfa74ea739"},
+    "HUF_011_Hair.emm": {"size_bytes": 628, "sha256": "68b6c337289005f289014dd47e2b8095b64b307549cb88712cb37283019d8a3f"}
+  },
+  "ingestion_status": "quarantined_selected",
+  "production_status": "reference_only"
+}
