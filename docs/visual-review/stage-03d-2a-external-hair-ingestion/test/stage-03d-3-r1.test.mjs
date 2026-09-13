@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/derived-reference/luceus-eight-direction');
+test('03D.3-R1 presentation semantics',()=>{const m=JSON.parse(fs.readFileSync(path.join(d,'luceus-eight-direction-manifest.json')));const l=m.directions.find(x=>x.presentation_direction==='left'),r=m.directions.find(x=>x.presentation_direction==='right');assert.equal(l.camera_side,'right');assert.equal(r.camera_side,'left');assert.notEqual(l.camera_side,l.presentation_direction);assert.notEqual(r.camera_side,r.presentation_direction);});

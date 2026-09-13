@@ -1,66 +1,67 @@
 {
   "specimen_id": "tryzick-hum015-luceus",
-  "source_blend": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\tryzick-hum015-luceus-inspection.blend",
-  "source_sha256": "b79cbc154a1737ea2d60cffe95f13cb9d74ad048f078a8a81390c2528ee86b6e",
+  "source_blend": "tryzick-hum015-luceus-inspection.blend",
   "resolution": [
     384,
     384
   ],
   "projection": "orthographic",
   "canonical_head_origin": [
-    -0.0089765265583992,
-    -0.017030492424964905,
-    0.7902098894119263
+    0,
+    0,
+    0
   ],
-  "orthographic_scale": 0.5131418958306313,
+  "orthographic_scale": 0.5,
   "camera_elevation": 0,
+  "production_mode": "COMPLETE",
   "directions": [
     {
-      "id": "front",
+      "presentation_direction": "front",
+      "camera_side": "front",
       "yaw_degrees": 0,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-front.png"
+      "output": "luceus-front.png"
     },
     {
-      "id": "front-left-3q",
-      "yaw_degrees": 45,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-front-left-3q.png"
-    },
-    {
-      "id": "left",
-      "yaw_degrees": 90,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-left.png"
-    },
-    {
-      "id": "back-left-3q",
-      "yaw_degrees": 135,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-back-left-3q.png"
-    },
-    {
-      "id": "back",
-      "yaw_degrees": 180,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-back.png"
-    },
-    {
-      "id": "back-right-3q",
-      "yaw_degrees": 225,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-back-right-3q.png"
-    },
-    {
-      "id": "right",
-      "yaw_degrees": 270,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-right.png"
-    },
-    {
-      "id": "front-right-3q",
+      "presentation_direction": "front-left-3q",
+      "camera_side": "front-right-3q",
       "yaw_degrees": 315,
-      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-front-right-3q.png"
+      "output": "luceus-front-left-3q.png"
+    },
+    {
+      "presentation_direction": "left",
+      "camera_side": "right",
+      "yaw_degrees": 270,
+      "output": "luceus-left.png"
+    },
+    {
+      "presentation_direction": "back-left-3q",
+      "camera_side": "back-right-3q",
+      "yaw_degrees": 225,
+      "output": "luceus-back-left-3q.png"
+    },
+    {
+      "presentation_direction": "back",
+      "camera_side": "back",
+      "yaw_degrees": 180,
+      "output": "luceus-back.png"
+    },
+    {
+      "presentation_direction": "back-right-3q",
+      "camera_side": "back-left-3q",
+      "yaw_degrees": 135,
+      "output": "luceus-back-right-3q.png"
+    },
+    {
+      "presentation_direction": "right",
+      "camera_side": "left",
+      "yaw_degrees": 90,
+      "output": "luceus-right.png"
+    },
+    {
+      "presentation_direction": "front-right-3q",
+      "camera_side": "front-left-3q",
+      "yaw_degrees": 45,
+      "output": "luceus-front-right-3q.png"
     }
-  ],
-  "geometry": {
-    "object": "HAIR_Top",
-    "vertices": 2610,
-    "polygons": 2558
-  },
-  "production_mode": "COMPLETE",
-  "provenance": "fan_resource_permitted"
+  ]
 }

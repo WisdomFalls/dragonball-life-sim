@@ -11,3 +11,8 @@ Outputs and manifest are under `external-specimens/derived-reference/luceus-eigh
 Verdicts: `COMPLETE_HAIR_PRODUCTION_PATH=GREEN`; `EIGHT_DIRECTION_CAMERA_RIG=GREEN`; `DIRECTION_CONTRACT=GREEN`; `DIRECTIONAL_SCALE_CONSISTENCY=GREEN`; `ASYMMETRY_PRESERVATION=GREEN`; `DIRECTION_MANIFEST=GREEN`; `REUSABLE_DIRECTIONAL_RENDER_SEAM=GREEN`; `READY_FOR_PIXEL_CONVERSION_SPIKE=YES`.
 
 The set is source-reference material only. Pixelization, sprite-sheet generation, gameplay integration, and further modularity work remain out of scope.
+
+## R1 presentation semantics correction
+
+The physical camera views and pixels are unchanged. Presentation IDs now describe the direction the character visually faces, independently of camera side/anatomical side. The manifest records both fields. The corrected mapping is: yaw 0 front→front; 45 front-left camera→front-right-3q presentation; 90 left camera→right presentation; 135 back-left camera→back-right-3q presentation; 180 back→back; 225 back-right camera→back-left-3q presentation; 270 right camera→left presentation; 315 front-right camera→front-left-3q presentation. No image was mirrored.
+
