@@ -1,0 +1,4 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/derived-reference/stage-03d7-luceus-masters');
+const dirs=['front','left','back-left-3q','back','back-right-3q','right','front-right-3q'];
+test('03D.7 seven genuine direction masters',()=>{const m=JSON.parse(fs.readFileSync(path.join(d,'luceus-seven-masters-manifest.json')));assert.deepEqual(m.order,['front','front-left-3q','left','back-left-3q','back','back-right-3q','right','front-right-3q']);assert.equal(m.palette,'natural_black');for(const n of dirs)assert.ok(fs.existsSync(path.join(d,`luceus-${n}-master-128.png`)));assert.ok(fs.existsSync(path.join(d,'luceus-eight-direction-master-board.png')));assert.ok(fs.existsSync(path.join(d,'luceus-eight-direction-rotation-strip.png')));});

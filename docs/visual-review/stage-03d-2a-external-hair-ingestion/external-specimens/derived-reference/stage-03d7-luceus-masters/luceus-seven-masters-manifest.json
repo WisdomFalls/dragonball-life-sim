@@ -1,0 +1,153 @@
+{
+  "order": [
+    "front",
+    "front-left-3q",
+    "left",
+    "back-left-3q",
+    "back",
+    "back-right-3q",
+    "right",
+    "front-right-3q"
+  ],
+  "palette": "natural_black",
+  "roles": [
+    [
+      5,
+      7,
+      10
+    ],
+    [
+      14,
+      18,
+      24
+    ],
+    [
+      28,
+      34,
+      43
+    ],
+    [
+      48,
+      57,
+      68
+    ],
+    [
+      92,
+      103,
+      116
+    ],
+    [
+      157,
+      168,
+      180
+    ]
+  ],
+  "masters": [
+    {
+      "direction": "front",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-front.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-front-master-128.png",
+      "crop_box": [
+        68,
+        51,
+        316,
+        334
+      ],
+      "size": [
+        114,
+        130
+      ]
+    },
+    {
+      "direction": "left",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-left.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-left-master-128.png",
+      "crop_box": [
+        50,
+        51,
+        334,
+        333
+      ],
+      "size": [
+        131,
+        130
+      ]
+    },
+    {
+      "direction": "back-left-3q",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-back-left-3q.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-back-left-3q-master-128.png",
+      "crop_box": [
+        61,
+        51,
+        329,
+        333
+      ],
+      "size": [
+        124,
+        130
+      ]
+    },
+    {
+      "direction": "back",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-back.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-back-master-128.png",
+      "crop_box": [
+        68,
+        51,
+        316,
+        334
+      ],
+      "size": [
+        114,
+        130
+      ]
+    },
+    {
+      "direction": "back-right-3q",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-back-right-3q.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-back-right-3q-master-128.png",
+      "crop_box": [
+        54,
+        51,
+        314,
+        333
+      ],
+      "size": [
+        120,
+        130
+      ]
+    },
+    {
+      "direction": "right",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-right.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-right-master-128.png",
+      "crop_box": [
+        50,
+        51,
+        334,
+        333
+      ],
+      "size": [
+        131,
+        130
+      ]
+    },
+    {
+      "direction": "front-right-3q",
+      "source": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\luceus-eight-direction\\luceus-front-right-3q.png",
+      "output": "C:\\Users\\Wisdom\\Documents\\Codex\\2026-09-08\\github-plugin-github-openai-curated-remote-2\\game\\docs\\visual-review\\stage-03d-2a-external-hair-ingestion\\external-specimens\\derived-reference\\stage-03d7-luceus-masters\\luceus-front-right-3q-master-128.png",
+      "crop_box": [
+        55,
+        51,
+        323,
+        333
+      ],
+      "size": [
+        124,
+        130
+      ]
+    }
+  ],
+  "approved_reference": "stage-03d5-luceus-master/luceus-front-left-3q-master-128.png"
+}
