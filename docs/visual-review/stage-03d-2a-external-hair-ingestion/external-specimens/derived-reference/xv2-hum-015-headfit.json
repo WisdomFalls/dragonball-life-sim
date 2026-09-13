@@ -1,0 +1,11 @@
+{
+  "specimen_id": "xv2-hum-015-resource-hair",
+  "direction": "front",
+  "axes": {"up": "+Y", "front": "-Z", "anatomical_left": "-X", "anatomical_right": "+X"},
+  "head_origin": [0, 0.55, 0],
+  "hair_transform": {"translation": [0, 0, 0], "rotation_euler_degrees": [0, 180, 0], "scale": [-1, 1, 1]},
+  "proxy_head": {"type": "neutral_uv_skull", "scale": [0.32, 0.48, 0.30], "location": [0, 0.55, 0]},
+  "anchors": {"crown_anchor": [0, 1.0770788, 0], "forehead_anchor": [0, 0.70, -0.25], "left_temple_anchor": [-0.28, 0.55, -0.12], "right_temple_anchor": [0.28, 0.55, -0.12], "rear_skull_anchor": [0, 0.55, 0.25], "nape_anchor": [0, 0.08, 0]},
+  "camera": {"projection": "orthographic", "location": [0, 0.54, -3], "target": [0, 0.54, 0], "ortho_scale": 1.55, "resolution": [512, 512], "transparent": true},
+  "prepared_directions": ["front", "front-left-3q", "left", "back-left-3q", "back", "back-right-3q", "right", "front-right-3q"]
+}
