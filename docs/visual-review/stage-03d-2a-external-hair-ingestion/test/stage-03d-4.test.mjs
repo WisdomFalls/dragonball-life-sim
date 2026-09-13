@@ -1,0 +1,3 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs'; import path from 'node:path';
+const d=path.resolve('docs/visual-review/stage-03d-2a-external-hair-ingestion/external-specimens/derived-reference/pixel-conversion-front-left-3q');
+test('03D.4 pixel conversion artifacts and registration',()=>{const m=JSON.parse(fs.readFileSync(path.join(d,'pixel-conversion-metadata.json')));assert.deepEqual(m.targets,[96,128,160]);assert.equal(m.registration.includes('crop origin retained'),true);for(const n of ['board-resolution.png','board-treatment.png','board-source-material.png','board-palette-contour.png'])assert.ok(fs.existsSync(path.join(d,n)));});

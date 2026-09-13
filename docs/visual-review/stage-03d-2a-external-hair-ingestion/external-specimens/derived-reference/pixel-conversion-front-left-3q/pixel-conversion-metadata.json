@@ -1,0 +1,18 @@
+{
+  "targets": [
+    96,
+    128,
+    160
+  ],
+  "registration": "crop origin retained; nearest-neighbor review 4x",
+  "palettes": [
+    "4-tone",
+    "6-tone"
+  ],
+  "treatments": [
+    "baseline",
+    "structured",
+    "stylized"
+  ],
+  "source": "luceus-front-left-3q.png"
+}
