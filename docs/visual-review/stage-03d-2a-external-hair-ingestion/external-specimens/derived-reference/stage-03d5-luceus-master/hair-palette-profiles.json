@@ -1,0 +1,181 @@
+{
+  "master_source": "luceus-front-left-3q-master-128.png",
+  "profiles": {
+    "natural_black": {
+      "roles": [
+        [
+          8,
+          9,
+          12
+        ],
+        [
+          20,
+          22,
+          28
+        ],
+        [
+          36,
+          40,
+          48
+        ],
+        [
+          62,
+          68,
+          78
+        ],
+        [
+          112,
+          119,
+          130
+        ],
+        [
+          174,
+          181,
+          188
+        ]
+      ],
+      "output": "luceus-natural_black-128.png"
+    },
+    "dark_brown": {
+      "roles": [
+        [
+          12,
+          8,
+          9
+        ],
+        [
+          30,
+          18,
+          18
+        ],
+        [
+          57,
+          31,
+          28
+        ],
+        [
+          88,
+          50,
+          40
+        ],
+        [
+          133,
+          78,
+          57
+        ],
+        [
+          184,
+          119,
+          82
+        ]
+      ],
+      "output": "luceus-dark_brown-128.png"
+    },
+    "super_saiyan_gold": {
+      "roles": [
+        [
+          18,
+          12,
+          4
+        ],
+        [
+          54,
+          31,
+          5
+        ],
+        [
+          102,
+          65,
+          8
+        ],
+        [
+          164,
+          116,
+          18
+        ],
+        [
+          218,
+          173,
+          54
+        ],
+        [
+          255,
+          229,
+          139
+        ]
+      ],
+      "output": "luceus-super_saiyan_gold-128.png"
+    },
+    "super_saiyan_blue": {
+      "roles": [
+        [
+          5,
+          10,
+          24
+        ],
+        [
+          8,
+          24,
+          58
+        ],
+        [
+          12,
+          49,
+          108
+        ],
+        [
+          24,
+          88,
+          170
+        ],
+        [
+          74,
+          150,
+          231
+        ],
+        [
+          164,
+          220,
+          255
+        ]
+      ],
+      "output": "luceus-super_saiyan_blue-128.png"
+    },
+    "silver_white": {
+      "roles": [
+        [
+          18,
+          20,
+          26
+        ],
+        [
+          44,
+          48,
+          58
+        ],
+        [
+          78,
+          84,
+          96
+        ],
+        [
+          124,
+          132,
+          145
+        ],
+        [
+          190,
+          197,
+          207
+        ],
+        [
+          245,
+          248,
+          255
+        ]
+      ],
+      "output": "luceus-silver_white-128.png"
+    }
+  },
+  "mapping": "exact role-color substitution; alpha and coordinates preserved"
+}
