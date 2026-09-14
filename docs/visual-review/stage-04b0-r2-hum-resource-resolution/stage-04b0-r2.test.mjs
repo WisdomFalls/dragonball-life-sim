@@ -1,0 +1,1 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs"; test("R2 preserves read-only extraction boundary",()=>{const x=JSON.parse(fs.readFileSync("docs/visual-review/stage-04b0-r2-hum-resource-resolution/extraction-status.json")); assert.equal(x.extraction_performed,false); assert.equal(x.archives_inspected,25);});
