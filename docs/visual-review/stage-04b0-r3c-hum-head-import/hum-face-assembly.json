@@ -1,0 +1,1 @@
+{"primary_index":"000","components":{"FaceBase":"HUM_000_Face_base.emd","FaceForehead":"HUM_000_Face_forehead.emd","FaceEye":"HUM_000_Face_eye.emd","FaceNose":"HUM_000_Face_nose.emd","FaceEar":"HUM_000_Face_ear.emd"},"configuration":"HUM.bcs","skeleton":"HUM_000.esk","assembly_status":"UNRESOLVED","reason":"BCS not decoded; importer path for head components not established"}

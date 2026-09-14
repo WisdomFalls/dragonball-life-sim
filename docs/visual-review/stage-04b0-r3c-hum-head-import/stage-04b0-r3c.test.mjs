@@ -1,0 +1,1 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs"; test("R3C records extracted components and safe stop",()=>{const x=JSON.parse(fs.readFileSync("docs/visual-review/stage-04b0-r3c-hum-head-import/hum-face-assembly.json")); assert.equal(x.primary_index,"000"); assert.equal(x.assembly_status,"UNRESOLVED");});
