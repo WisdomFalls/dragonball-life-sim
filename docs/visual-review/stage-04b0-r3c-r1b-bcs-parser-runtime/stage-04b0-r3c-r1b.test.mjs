@@ -1,0 +1,1 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs"; test("R1B records build boundary without parser rewrite",()=>{const x=JSON.parse(fs.readFileSync("docs/visual-review/stage-04b0-r3c-r1b-bcs-parser-runtime/build-runtime-status.json")); assert.equal(x.parser_invoked,false); assert.equal(x.build,"failed");});
