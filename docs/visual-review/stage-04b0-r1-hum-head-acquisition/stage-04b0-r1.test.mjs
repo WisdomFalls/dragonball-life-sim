@@ -1,0 +1,1 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs"; test("records archive blocker",()=>{const i=JSON.parse(fs.readFileSync("docs/visual-review/stage-04b0-r1-hum-head-acquisition/hum-head-component-inventory.json")); assert.equal(i.status,"blocked_archive_extraction"); assert.equal(i.sample.length,0);});
