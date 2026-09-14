@@ -1,0 +1,1 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs"; test("R3C-R1 records safe BCS tooling boundary",()=>{const x=JSON.parse(fs.readFileSync("docs/visual-review/stage-04b0-r3c-r1-bcs-face-tooling/bcs-tooling-evaluation.json")); assert.equal(x.new_parser_written,false); assert.equal(x.xenokit_evaluated,false);});
