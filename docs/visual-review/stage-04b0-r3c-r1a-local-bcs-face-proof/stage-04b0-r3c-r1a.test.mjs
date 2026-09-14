@@ -1,0 +1,1 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs"; test("local BCS proof records supported stop",()=>{const x=JSON.parse(fs.readFileSync("docs/visual-review/stage-04b0-r3c-r1a-local-bcs-face-proof/hum-bcs-resolution.json")); assert.equal(x.partset_resolution,"not_executed");});
